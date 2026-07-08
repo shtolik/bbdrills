@@ -1,0 +1,16 @@
+.git_backup_singlecommit_*
+/node_modules
+/tools/ffmpeg
+/tools/yt-dlp.ext
+/tools/yt_meta.jsonffmpeg/
+node_modules/
+.idea/
+.idea
+yt*
+yt_*
+yt_dl*
+yt_meta*
+# Local tools (ffmpeg, yt-dlp)
+tools/
+/videos
+/test-results

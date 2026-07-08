@@ -1,0 +1,509 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Drills — Running & Training</title>
+  <style>
+    :root{
+      --gap:12px;
+      --bg:#f6f7f9;
+      --text:#111;
+      --card-bg:#fff;
+      --muted:#666;
+      --accent:#0b74de;
+      --success:#0bda6e;
+      --card-shadow: 0 1px 4px rgba(10,10,10,0.06);
+    }
+    @media (prefers-color-scheme: dark){
+      :root{
+        --bg:#0b0f14;
+        --text:#e6eef8;
+        --card-bg:#0f1720;
+        --muted:#9fb0c8;
+        --accent:#1d9bf0;
+        --success:#39d98a;
+        --card-shadow: 0 1px 6px rgba(0,0,0,0.6);
+      }
+    }
+    /* manual overrides */
+    [data-theme='dark']{
+      --bg:#0b0f14;
+      --text:#e6eef8;
+      --card-bg:#0f1720;
+      --muted:#9fb0c8;
+      --accent:#1d9bf0;
+      --success:#39d98a;
+      --card-shadow: 0 1px 6px rgba(0,0,0,0.6);
+    }
+    [data-theme='light']{
+      --bg:#f6f7f9;
+      --text:#111;
+      --card-bg:#fff;
+      --muted:#666;
+      --accent:#0b74de;
+      --success:#0bda6e;
+      --card-shadow: 0 1px 4px rgba(10,10,10,0.06);
+    }
+    body{font-family:Segoe UI,Arial,sans-serif;margin:12px;background:var(--bg);color:var(--text)}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .brand{font-weight:700}
+    .controls{display:flex;gap:8px}
+    button{background:var(--accent);color:#fff;border:none;padding:8px 10px;border-radius:6px}
+    .container{max-width:1100px;margin:12px auto}
+    /* responsive grid: 1-3 columns depending on width */
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:var(--gap)}
+    /* Card: make preview full-bleed to reduce visible surrounding background */
+    .card{background:transparent;padding:0;border-radius:8px;box-shadow:none;display:flex;flex-direction:column;gap:0;align-items:stretch}
+    .card > .meta{background:var(--card-bg);padding:12px;border-radius:0 0 8px 8px;box-shadow:var(--card-shadow)}
+    .card.done{opacity:0.85}
+    /* thumb is full-width preview; height adjusts by orientation */
+    .thumb{width:100%;background:transparent;border-radius:0;overflow:hidden;display:block;position:relative}
+    .thumb img,.thumb video,.thumb picture img{width:100%;height:100%;object-fit:cover;display:block}
+    .thumb.horizontal{height:220px}
+    .thumb.vertical{height:420px}
+    .meta{padding:12px}
+    .title{font-weight:600;margin-bottom:6px;color:var(--text)}
+    .details{color:var(--muted);font-size:14px}
+    .group-title{margin-top:18px;margin-bottom:8px;font-size:18px;color:var(--text)}
+    .card-actions{margin-top:8px;display:flex;gap:8px;align-items:center}
+    a{color:var(--accent)}
+    @media (max-width:1024px){ .thumb.horizontal{height:200px} .thumb.vertical{height:380px} }
+    @media (max-width:720px){
+      .grid{grid-template-columns:repeat(1,1fr)}
+      header{flex-direction:column;align-items:flex-start}
+    }
+    /* modal */
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:50}
+    .modal.open{display:flex}
+    .modal .box{background:#000;max-width:95vw;border-radius:6px;overflow:hidden; width: min(95vw, 1000px); height: min(90vh, 800px); display:flex; align-items:center; justify-content:center}
+    .modal iframe, .modal video{display:block;width:100%;height:auto;border:0}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">Basketball Off-Season Drills</div>
+      <div class="controls">
+        <button id="btn-en">English</button>
+        <button id="btn-fi">Suomi</button>
+        <button id="theme-btn" title="Theme: system">Theme</button>
+        <button id="filter-btn">Show: All</button>
+        <button id="clear-progress" title="Clear stored progress">Clear progress</button>
+      </div>
+    </header>
+
+    <main id="content">
+      <p>Loading drills…</p>
+    </main>
+
+    <div id="modal" class="modal" aria-hidden="true">
+      <div class="box" id="modal-box"></div>
+    </div>
+  </div>
+
+  <script>
+    const uiKey = 'bbdrills_ui_v1';
+    const langState = {lang:'en'}; // default english
+    const filterState = {mode:'all'}; // 'all' or 'incomplete'
+    const STORAGE_KEY = 'bbdrills_progress_v1';
+    const themeState = {mode:'system'}; // 'system' | 'dark' | 'light'
+
+    // Global error handlers to surface runtime errors directly in the page to help debugging
+    window.addEventListener('error', function(e){
+      try{
+        const content = document.getElementById('content');
+        if(content){ content.innerHTML = '<pre style="color:#900;white-space:pre-wrap">Runtime error: ' + (e && e.message ? e.message : String(e)) + '\n' + (e && e.error && e.error.stack ? e.error.stack : '') + '</pre>'; }
+      }catch(_){/* ignore */}
+      console.error('Captured error', e);
+    });
+    window.addEventListener('unhandledrejection', function(ev){
+      try{
+        const content = document.getElementById('content');
+        if(content){ content.innerHTML = '<pre style="color:#900;white-space:pre-wrap">Unhandled rejection: ' + (ev && ev.reason ? (ev.reason.message || String(ev.reason)) : String(ev)) + '\n' + (ev && ev.reason && ev.reason.stack ? ev.reason.stack : '') + '</pre>'; }
+      }catch(_){/* ignore */}
+      console.error('Unhandled rejection', ev);
+    });
+
+    function loadUI(){
+      try{
+        const raw = localStorage.getItem(uiKey);
+        if(raw){
+          const s = JSON.parse(raw);
+          if(s.lang) langState.lang = s.lang;
+          if(s.filter) filterState.mode = s.filter;
+          if(s.theme) themeState.mode = s.theme;
+        }
+      }catch(e){/* ignore */}
+    }
+    function saveUI(){
+      try{ localStorage.setItem(uiKey, JSON.stringify({lang:langState.lang,filter:filterState.mode,theme:themeState.mode})); }catch(e){}
+    }
+
+    document.getElementById('btn-en').addEventListener('click',()=>{langState.lang='en'; saveUI(); render(currentData)});
+    document.getElementById('btn-fi').addEventListener('click',()=>{langState.lang='fi'; saveUI(); render(currentData)});
+    document.getElementById('filter-btn').addEventListener('click',toggleFilter);
+    document.getElementById('clear-progress').addEventListener('click',clearProgress);
+    document.getElementById('theme-btn').addEventListener('click',cycleTheme);
+
+    let currentData = null;
+    let progress = loadProgress();
+
+    // apply theme to document
+    function applyTheme(){
+      const btn = document.getElementById('theme-btn');
+      const t = themeState.mode || 'system';
+      if(t==='system'){
+        document.documentElement.removeAttribute('data-theme');
+        btn.textContent = 'Theme: system';
+      } else {
+        document.documentElement.setAttribute('data-theme', t);
+        btn.textContent = 'Theme: ' + t;
+      }
+    }
+    function cycleTheme(){
+      const order = ['system','dark','light'];
+      const idx = order.indexOf(themeState.mode||'system');
+      themeState.mode = order[(idx+1)%order.length];
+      applyTheme(); saveUI();
+    }
+
+    // initialize UI
+    loadUI(); applyTheme();
+
+    // update filter button label to persisted state
+    function updateFilterLabel(){ document.getElementById('filter-btn').textContent = filterState.mode === 'all' ? 'Show: All' : 'Show: Incomplete'; }
+    updateFilterLabel();
+
+    async function load(){
+      try{
+        const res = await fetch('./default_drills_with_meta.json');
+        const data = await res.json();
+        currentData = data;
+        render(data);
+      }catch(e){
+        document.getElementById('content').innerHTML = '<p style="color:#900">Failed to load data</p>';
+        console.error(e);
+      }
+    }
+
+    function loadProgress(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : {};
+      }catch(e){return {}};
+    }
+    function saveProgress(){
+      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); }catch(e){console.warn('Failed to save progress',e)}
+    }
+    function toggleFilter(){
+      filterState.mode = filterState.mode === 'all' ? 'incomplete' : 'all';
+      document.getElementById('filter-btn').textContent = filterState.mode === 'all' ? 'Show: All' : 'Show: Incomplete';
+      render(currentData);
+    }
+    function clearProgress(){ if(confirm('Clear local progress?')){ progress = {}; saveProgress(); render(currentData); }}
+
+    function groupBy(data, key){
+      const map = new Map();
+      data.forEach(item=>{
+        const k = item[key]||'Other';
+        if(!map.has(k))map.set(k,[]);
+        map.get(k).push(item);
+      });
+      return map;
+    }
+
+    function resolveAsset(path){
+      if(!path) return null;
+      if(path.startsWith('http') || path.startsWith('/')) return path;
+      // Assets referenced in the manifest are stored relative to site/ — keep them as-is for the page served from site/
+      if(path.startsWith('site/')) return path.replace(/^site\//, '');
+      // Common folders already relative to site/
+      if(path.startsWith('gifs25fps/') || path.startsWith('previews/') || path.startsWith('gifs61/')) return path;
+      // otherwise assume path is relative to the site/ folder and return it unchanged
+      return path.replace(/^\/+/, '');
+    }
+    function youtubeIdFromUrl(url){
+      try{
+        const u = new URL(url);
+        if(u.hostname.includes('youtu.be')) return u.pathname.slice(1);
+        if(u.hostname.includes('youtube.com')) return u.searchParams.get('v');
+      }catch(e){
+        const m = url.match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{6,})/);
+        return m?m[1]:null;
+      }
+      return null;
+    }
+    function youtubeThumbnail(url){
+      const id = youtubeIdFromUrl(url);
+      return id ? 'https://img.youtube.com/vi/' + id + '/hqdefault.jpg' : '';
+    }
+
+    function render(data){
+      if(!data) return;
+      const groups = groupBy(data, 'group_en');
+      const container = document.getElementById('content');
+      container.innerHTML = '';
+      for(const [group, items] of groups){
+        const h = document.createElement('h2'); h.className='group-title'; h.textContent = (langState.lang==='fi'? (items[0].group_fi||group) : group);
+        container.appendChild(h);
+        const grid = document.createElement('div'); grid.className='grid';
+        items.forEach(it=>{
+          const completed = !!progress[it.id];
+          if(filterState.mode === 'incomplete' && completed) return;
+          const card = document.createElement('article'); card.className='card' + (completed? ' done':'');
+          const thumb = document.createElement('div'); thumb.className='thumb';
+          // prefer MP4 previews if available, then animated WebP/poster, then YouTube thumbnail
+          const previewWebp = it.preview_webp ? resolveAsset(it.preview_webp) : null;
+          const previewGif = it.gif ? resolveAsset(it.gif) : null;
+          const ytThumb = it.video_url ? youtubeThumbnail(it.video_url) : '';
+          if(it.preview_mp4) thumb.dataset.mp4 = resolveAsset(it.preview_mp4);
+
+          if(it.preview_mp4 || thumb.dataset.mp4){
+            // prefer video element when MP4 is available
+            const video = document.createElement('video');
+            video.dataset.src = resolveAsset(it.preview_mp4 || thumb.dataset.mp4);
+            video.autoplay = false; video.muted = true; video.loop = true; video.playsInline = true; video.preload = 'none'; video.className = 'lazy-video';
+            video.addEventListener('loadedmetadata',()=>{ const w = video.videoWidth, h = video.videoHeight; thumb.classList.toggle('vertical', h > w); thumb.classList.toggle('horizontal', w >= h); });
+            thumb.appendChild(video);
+          } else if(previewWebp){
+            const pic = document.createElement('picture');
+            const src = document.createElement('source'); src.type = 'image/webp'; src.dataset.srcset = previewWebp; src.className = 'lazy-source'; pic.appendChild(src);
+            const img = document.createElement('img'); img.dataset.src = previewGif || ytThumb || ''; img.alt = it.name_en + ' thumbnail'; img.loading = 'lazy'; img.className = 'lazy-img';
+            img.addEventListener('load',()=>{ if(img.naturalWidth && img.naturalHeight){ thumb.classList.toggle('vertical', img.naturalHeight > img.naturalWidth); thumb.classList.toggle('horizontal', img.naturalWidth >= img.naturalHeight); } });
+            pic.appendChild(img);
+            thumb.appendChild(pic);
+          } else {
+            const img = document.createElement('img');
+            img.dataset.src = previewGif || ytThumb || '';
+            img.alt = it.name_en + ' thumbnail'; img.loading = 'lazy'; img.className = 'lazy-img';
+            img.addEventListener('load',()=>{ if(img.naturalWidth && img.naturalHeight){ thumb.classList.toggle('vertical', img.naturalHeight > img.naturalWidth); thumb.classList.toggle('horizontal', img.naturalWidth >= img.naturalHeight); } });
+            thumb.appendChild(img);
+          }
+          thumb.addEventListener('click',()=>openVideo(it, true));
+
+          const meta = document.createElement('div'); meta.className='meta';
+          const title = document.createElement('div'); title.className='title'; title.textContent = langState.lang==='fi' ? (it.name_fi||it.name_en) : it.name_en;
+          const details = document.createElement('div'); details.className='details';
+const detailsText = langState.lang==='fi' ? (it.details || '') : (it.details || '');
+if(detailsText){
+  const txtNode = document.createTextNode(detailsText);
+  details.appendChild(txtNode);
+  details.appendChild(document.createElement('br'));
+}
+const sSets = document.createElement('strong'); sSets.textContent = 'Sets:'; details.appendChild(sSets);
+details.appendChild(document.createTextNode(' ' + (it.sets || '')));
+const sReps = document.createElement('strong'); sReps.textContent = ' Reps:'; details.appendChild(sReps);
+details.appendChild(document.createTextNode(' ' + (it.reps || '')));
+          const link = document.createElement('div'); link.style.marginTop='6px';
+          const viewBtn = document.createElement('button'); viewBtn.textContent = 'Open video'; viewBtn.addEventListener('click',()=>openVideo(it, true));
+          link.appendChild(viewBtn);
+          if(it.video_url){ const ext = document.createElement('a'); ext.href = it.video_url; ext.target = '_blank'; ext.rel = 'noopener noreferrer'; ext.setAttribute('referrerpolicy','no-referrer'); ext.style.marginLeft='8px'; ext.textContent = 'Open on YouTube'; link.appendChild(ext); }
+
+          const actions = document.createElement('div'); actions.className='card-actions';
+          const doneBtn = document.createElement('button'); doneBtn.textContent = completed ? 'Mark incomplete' : 'Mark done';
+          doneBtn.style.background = completed ? '#888' : '#0bda6e'; doneBtn.style.color = '#000'; doneBtn.addEventListener('click',()=>{ progress[it.id] = !progress[it.id]; if(!progress[it.id]) delete progress[it.id]; saveProgress(); render(currentData); });
+          actions.appendChild(doneBtn);
+
+          meta.appendChild(title); meta.appendChild(details); meta.appendChild(link); meta.appendChild(actions);
+          card.appendChild(thumb); card.appendChild(meta);
+          grid.appendChild(card);
+        });
+        container.appendChild(grid);
+      }
+    }
+
+    let lazyObserver = null;
+    function observeThumbs(){
+      if(lazyObserver) lazyObserver.disconnect();
+      const options = { root: null, rootMargin: '200px', threshold: 0.1 };
+      lazyObserver = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+          if(!entry.isIntersecting) return;
+          const thumb = entry.target;
+          if(thumb.dataset.loaded) { obs.unobserve(thumb); return; }
+          // load picture source if present
+          const srcEl = thumb.querySelector('source.lazy-source');
+          if(srcEl && srcEl.dataset.srcset){ srcEl.srcset = srcEl.dataset.srcset; }
+          const img = thumb.querySelector('img.lazy-img');
+          if(img && img.dataset.src){ img.src = img.dataset.src; }
+          const video = thumb.querySelector('video.lazy-video');
+          if(video && video.dataset.src){ video.src = video.dataset.src; try{ video.load(); video.play().catch(()=>{}); }catch(e){} }
+          thumb.dataset.loaded = '1';
+          obs.unobserve(thumb);
+        });
+      }, options);
+      document.querySelectorAll('.thumb').forEach(t => { if(!t.dataset.loaded) lazyObserver.observe(t); });
+    }
+
+    // YouTube IFrame API loader
+    window._bbdrills_yt_api_ready = false;
+    (function loadYtApi(){
+      if(window.YT && window.YT.Player){ window._bbdrills_yt_api_ready = true; return; }
+      const s = document.createElement('script'); s.src = 'https://www.youtube.com/iframe_api'; s.async = true; document.head.appendChild(s);
+      window.onYouTubeIframeAPIReady = function(){ window._bbdrills_yt_api_ready = true; };
+    })();
+
+    // modal navigation / swipe state
+    let modalVisibleItems = [];
+    let modalCurrentIndex = 0;
+
+    function showModalForIndex(idx){
+      if(!modalVisibleItems || idx < 0 || idx >= modalVisibleItems.length) return;
+      const item = modalVisibleItems[idx];
+      modalCurrentIndex = idx;
+      const modal = document.getElementById('modal');
+      const box = document.getElementById('modal-box');
+      box.innerHTML = '';
+
+      // prefer Youtube embed
+      if(item.video_url){
+            const id = youtubeIdFromUrl(item.video_url);
+            if(id && window._bbdrills_yt_api_ready){
+              const placeholder = document.createElement('div'); placeholder.id = 'yt-player-'+idx; placeholder.style.width = '100%'; placeholder.style.height = '100%'; box.appendChild(placeholder);
+              try{
+                const player = new YT.Player(placeholder.id, {
+                  height: '450', width: '800', videoId: id,
+                  playerVars: { autoplay: 1, origin: location.origin },
+                  events: {
+                    'onReady': (e) => { try{ e.target.playVideo(); }catch(err){} },
+                    'onError': (e) => {
+                      // Try alternate embed strategies before showing the fallback link
+                      try{
+                        box.innerHTML = '';
+                        const tryShorts = document.createElement('iframe');
+                        tryShorts.width='800'; tryShorts.height='450';
+                        tryShorts.setAttribute('allow','accelerometer; autoplay; encrypted-media; picture-in-picture');
+                        tryShorts.setAttribute('referrerpolicy','no-referrer');
+                        // attempt shorts embed path
+                        tryShorts.src = 'https://www.youtube.com/embed/shorts/' + id + '?autoplay=1';
+                        let triedShorts = false;
+                        const onShortsLoad = () => { triedShorts = true; };
+                        tryShorts.addEventListener('load', onShortsLoad);
+                        box.appendChild(tryShorts);
+                        // after short delay, if no success, try nocookie embed
+                        setTimeout(()=>{
+                          if(!triedShorts){
+                            box.innerHTML = '';
+                            const nocookie = document.createElement('iframe');
+                            nocookie.width='800'; nocookie.height='450';
+                            nocookie.setAttribute('allow','accelerometer; autoplay; encrypted-media; picture-in-picture');
+                            nocookie.setAttribute('referrerpolicy','no-referrer');
+                            nocookie.src = 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1';
+                            box.appendChild(nocookie);
+                            setTimeout(()=>{
+                              // still failing — show friendly fallback
+                              box.innerHTML = '';
+                              const msg = document.createElement('div'); msg.style.color='#fff'; msg.style.padding='12px'; msg.textContent = 'Embedded player is unavailable for this video.';
+                              const link = document.createElement('a'); link.href = item.video_url; link.target='_blank'; link.rel='noopener noreferrer'; link.textContent = 'Watch on YouTube'; link.style.display='inline-block'; link.style.marginTop='8px'; link.style.color='#fff'; link.style.background='#ff0000'; link.style.padding='6px 8px'; link.style.borderRadius='4px';
+                              box.appendChild(msg); box.appendChild(link);
+                            },1200);
+                          }
+                        },900);
+                      }catch(inner){
+                        box.innerHTML = '';
+                        const msg = document.createElement('div'); msg.style.color='#fff'; msg.style.padding='12px'; msg.textContent = 'Embedded player is unavailable for this video.';
+                        const link = document.createElement('a'); link.href = item.video_url; link.target='_blank'; link.rel='noopener noreferrer'; link.textContent = 'Watch on YouTube'; link.style.display='inline-block'; link.style.marginTop='8px'; link.style.color='#fff'; link.style.background='#ff0000'; link.style.padding='6px 8px'; link.style.borderRadius='4px';
+                        box.appendChild(msg); box.appendChild(link);
+                      }
+                    }
+                  }
+                });
+              }catch(e){
+                // if API failed, fallback to iframe + link
+                const iframe = document.createElement('iframe'); iframe.src = 'https://www.youtube.com/embed/' + id + '?autoplay=1'; iframe.width='800'; iframe.height='450'; iframe.setAttribute('allow','accelerometer; autoplay; encrypted-media; picture-in-picture'); iframe.setAttribute('referrerpolicy','no-referrer'); box.appendChild(iframe);
+                const link = document.createElement('a'); link.href = item.video_url; link.target='_blank'; link.rel='noopener noreferrer'; link.textContent='Watch on YouTube'; link.style.display='inline-block'; link.style.marginTop='8px'; link.style.color='#fff'; link.style.background='#ff0000'; link.style.padding='6px 8px'; link.style.borderRadius='4px'; box.appendChild(link);
+              }
+            } else if(id){
+              // API not ready yet: try iframe, and also add link
+              const iframe = document.createElement('iframe'); iframe.src = 'https://www.youtube.com/embed/' + id + '?autoplay=1'; iframe.width='800'; iframe.height='450'; iframe.setAttribute('allow','accelerometer; autoplay; encrypted-media; picture-in-picture'); iframe.setAttribute('referrerpolicy','no-referrer'); box.appendChild(iframe);
+              const link = document.createElement('a'); link.href = item.video_url; link.target='_blank'; link.rel='noopener noreferrer'; link.textContent='Watch on YouTube'; link.style.display='inline-block'; link.style.marginTop='8px'; link.style.color='#fff'; link.style.background='#ff0000'; link.style.padding='6px 8px'; link.style.borderRadius='4px'; box.appendChild(link);
+            } else {
+              // no youtube id, open new tab
+              const w = window.open(item.video_url, '_blank'); if(w){ try{ w.opener = null }catch(e){} }
+              return;
+            }
+      } else if(item.preview_mp4){
+            const video = document.createElement('video'); video.controls=true; video.autoplay=true; video.muted=false; video.playsInline=true; video.loop=false; video.src = resolveAsset(item.preview_mp4); video.style.maxWidth='90vw'; box.appendChild(video);
+      } else if(item.local_video){
+            const w = window.open(item.local_video, '_blank'); if(w){ try{ w.opener = null }catch(e){} }
+            return;
+      }
+
+      modal.classList.add('open'); modal.setAttribute('aria-hidden','false');
+    }
+
+    function openVideo(item, embed=false){
+      // prepare modalVisibleItems as the currently visible list of items in the UI (respecting filter)
+      const visible = Array.from(document.querySelectorAll('.card')).map((c,idx)=>{
+            // each card corresponds to an item in currentData in rendering order — find by title
+            const titleEl = c.querySelector('.title');
+            const title = titleEl ? titleEl.textContent.trim() : null;
+            return {card: c, title};
+      });
+      modalVisibleItems = [];
+      // build mapping id->item for quick lookup
+      const idMap = new Map();
+      currentData.forEach(it => idMap.set(it.id, it));
+      visible.forEach(v => {
+            if(v.title){
+              const it = currentData.find(x => ((langState.lang==='fi'? (x.name_fi||x.name_en) : x.name_en) === v.title));
+              if(it) modalVisibleItems.push(it);
+            }
+      });
+      // find index of requested item in modalVisibleItems
+      const idx = modalVisibleItems.findIndex(it => it.id === item.id);
+      if(idx === -1){
+            // fallback: just show this item alone
+            modalVisibleItems = [item]; modalCurrentIndex = 0; showModalForIndex(0); return;
+      }
+      showModalForIndex(idx);
+    }
+
+    // swipe / gesture handling for modal navigation
+    (function setupModalGestures(){
+      const modal = document.getElementById('modal');
+      let startX=0, startY=0, isTouch=false;
+      modal.addEventListener('touchstart', e => { isTouch=true; startX = e.touches[0].clientX; startY = e.touches[0].clientY; });
+      modal.addEventListener('touchmove', e => { if(!isTouch) return; });
+      modal.addEventListener('touchend', e => {
+            if(!isTouch) return; const dx = (e.changedTouches[0].clientX - startX); const dy = (e.changedTouches[0].clientY - startY);
+            if(Math.abs(dy) > 100 && Math.abs(dy) > Math.abs(dx)){
+              // vertical swipe -> close
+              document.getElementById('modal').classList.remove('open'); document.getElementById('modal').setAttribute('aria-hidden','true'); document.getElementById('modal-box').innerHTML='';
+            } else if(Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy)){
+              // horizontal swipe -> navigate
+              if(dx < 0){ // swipe left -> next
+                const next = Math.min(modalCurrentIndex + 1, modalVisibleItems.length - 1); if(next !== modalCurrentIndex){ showModalForIndex(next); }
+              } else { // swipe right -> prev
+                const prev = Math.max(modalCurrentIndex - 1, 0); if(prev !== modalCurrentIndex){ showModalForIndex(prev); }
+              }
+            }
+            isTouch=false;
+      });
+      // desktop drag using mouse
+      let mouseDown=false; let mx=0,my=0;
+      modal.addEventListener('mousedown', e => { mouseDown=true; mx=e.clientX; my=e.clientY; });
+      modal.addEventListener('mouseup', e => { if(!mouseDown) return; const dx = e.clientX - mx; const dy = e.clientY - my; mouseDown=false;
+            if(Math.abs(dy) > 120 && Math.abs(dy) > Math.abs(dx)){ document.getElementById('modal').classList.remove('open'); document.getElementById('modal').setAttribute('aria-hidden','true'); document.getElementById('modal-box').innerHTML=''; }
+            else if(Math.abs(dx) > 100 && Math.abs(dx) > Math.abs(dy)){
+              if(dx < 0){ const next = Math.min(modalCurrentIndex + 1, modalVisibleItems.length - 1); if(next !== modalCurrentIndex){ showModalForIndex(next); } }
+              else { const prev = Math.max(modalCurrentIndex - 1, 0); if(prev !== modalCurrentIndex){ showModalForIndex(prev); } }
+            }
+      });
+    })();
+
+    document.getElementById('modal').addEventListener('click',(e)=>{ if(e.target.id==='modal'){ const box = document.getElementById('modal-box'); const v = box.querySelector('video'); if(v) v.pause(); box.innerHTML=''; document.getElementById('modal').classList.remove('open'); document.getElementById('modal').setAttribute('aria-hidden','true'); }});
+
+    // after initial render, start observing thumbs for lazy-loading
+    const origRender = render;
+    render = function(data){ origRender(data); observeThumbs(); };
+
+    load();
+
+    document.getElementById('modal').addEventListener('click',(e)=>{ if(e.target.id==='modal'){ const box = document.getElementById('modal-box'); const v = box.querySelector('video'); if(v) v.pause(); box.innerHTML=''; document.getElementById('modal').classList.remove('open'); document.getElementById('modal').setAttribute('aria-hidden','true'); }});
+  </script>
+</body>
+</html></body>
+</html>

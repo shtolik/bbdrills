@@ -1,0 +1,2 @@
+site/previews/** filter=lfs diff=lfs merge=lfs -text
+site/gifs25fps/** filter=lfs diff=lfs merge=lfs -text
