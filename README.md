@@ -3,9 +3,11 @@
 This repository contains the static website for BBDrills: a small, data-driven site that lists short basketball training drills with a compact preview, a link to the original YouTube video, and simple progress tracking.
 
 ## What this repo contains
+\n## Contributing
+- .github/CODEOWNERS assigns likely reviewers. Enforcement (requiring approvals from code owners) depends on branch-protection settings; the file alone does not enforce reviews.
 - site/ — the built static site published to GitHub Pages
 - site/previews/ — small MP4 previews and poster WebP images (kept compact)
-- default_drills_with_meta.json / drills.md — canonical drill manifest and human-editable table
+- site/default_drills_with_meta.json and drills.md — canonical drill manifest and human-editable table
 
 ## Copyright & permissions
 - Drill instructions originate from a PDF shared by the LePy coaching staff. Video links point to public YouTube videos. If you are a content owner and want material removed or changed, please open an issue or contact @shtolik.
@@ -18,4 +20,5 @@ This repository contains the static website for BBDrills: a small, data-driven s
 
 Contact
 - Open an issue or mention @shtolik on GitHub for removals, corrections, or questions.
+
 
