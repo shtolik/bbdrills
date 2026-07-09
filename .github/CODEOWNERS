@@ -1,2 +1,2 @@
-# Code owners for all paths (enforcement depends on branch-protection settings)
+# Code owners for all changes (enforcement requires branch protection “Require review from Code Owners”)
 * @shtolik
