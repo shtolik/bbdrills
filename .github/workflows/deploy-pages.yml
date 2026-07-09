@@ -8,12 +8,19 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+    env:
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Configure Pages
         uses: actions/configure-pages@v3
+        with:
+          enablement: true
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
