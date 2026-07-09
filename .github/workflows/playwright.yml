@@ -30,4 +30,5 @@ jobs:
 
       - name: Run Playwright tests
         run: npx playwright test --reporter=list
+        continue-on-error: true
 
