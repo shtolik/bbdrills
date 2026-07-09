@@ -1,2 +1,2 @@
-# Require review from repository owner for all changes
+# Code owners for all paths (enforcement depends on branch-protection settings)
 * @shtolik
