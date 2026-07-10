@@ -425,7 +425,7 @@ infoRow.appendChild(setsWrap);
 
           // show Done badge if fully completed
           if((target>0) && (day.setsCompleted >= target)){
-            const badge = document.createElement('span'); badge.className='done-badge'; badge.textContent='Done'; title.appendChild(badge);
+            const badge = document.createElement('span'); badge.className='done-badge'; badge.textContent='Done'; setsWrap.appendChild(badge);
           }
 
           meta.appendChild(title);
@@ -561,21 +561,12 @@ infoRow.appendChild(setsWrap);
 
     function openVideo(item, embed=false){
       // prepare modalVisibleItems as the currently visible list of items in the UI (respecting filter)
-      const visible = Array.from(document.querySelectorAll('.card')).map((c,idx)=>{
-            // each card corresponds to an item in currentData in rendering order — find by title
-            const titleEl = c.querySelector('.title');
-            const title = titleEl ? titleEl.textContent.trim() : null;
-            return {card: c, title};
-      });
-      modalVisibleItems = [];
-      // build mapping id->item for quick lookup
       const idMap = new Map();
       currentData.forEach(it => idMap.set(it.id, it));
-      visible.forEach(v => {
-            if(v.title){
-              const it = currentData.find(x => ((langState.lang==='fi'? (x.name_fi||x.name_en) : x.name_en) === v.title));
-              if(it) modalVisibleItems.push(it);
-            }
+      modalVisibleItems = [];
+      Array.from(document.querySelectorAll('.card')).forEach(c => {
+            const id = c.dataset.id;
+            if(id){ const it = idMap.get(id); if(it) modalVisibleItems.push(it); }
       });
       // find index of requested item in modalVisibleItems
       const idx = modalVisibleItems.findIndex(it => it.id === item.id);
@@ -619,8 +610,6 @@ infoRow.appendChild(setsWrap);
       });
     })();
 
-    document.getElementById('modal').addEventListener('click',(e)=>{ if(e.target.id==='modal'){ const box = document.getElementById('modal-box'); const v = box.querySelector('video'); if(v) v.pause(); box.innerHTML=''; document.getElementById('modal').classList.remove('open'); document.getElementById('modal').setAttribute('aria-hidden','true'); }});
-
     // partial update helper: update a single card after progress change
     function updateCardById(drillId, item){
       const card = document.querySelector('.card[data-id="' + drillId + '"]');
@@ -634,8 +623,8 @@ infoRow.appendChild(setsWrap);
         card.classList.add('done');
         // add done badge if missing
         if(!card.querySelector('.done-badge')){
-          const title = card.querySelector('.title');
-          if(title){ const badge = document.createElement('span'); badge.className='done-badge'; badge.textContent='Done'; title.appendChild(badge); }
+          const setsWrap = setsEl ? setsEl.parentElement : null;
+          if(setsWrap){ const badge = document.createElement('span'); badge.className='done-badge'; badge.textContent='Done'; setsWrap.appendChild(badge); }
         }
         // replace thumb with static poster
         const thumb = card.querySelector('.thumb');

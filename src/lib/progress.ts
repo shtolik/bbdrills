@@ -108,7 +108,6 @@ export function migrateLegacyIfNeeded(): boolean {
     if (!rawLegacy) return false;
     // Don't clobber existing v3 progress; only migrate when v3 doesn't exist yet.
     if (storage.getItem(STORAGE_KEY)) {
-        storage.removeItem(LEGACY_KEY);
         return false;
     }
     const parsed = JSON.parse(rawLegacy);
