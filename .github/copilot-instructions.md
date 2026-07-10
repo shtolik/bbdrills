@@ -122,9 +122,10 @@ High-level architecture
   - npx playwright test  # runs Playwright e2e locally (optionally use PERF_TESTS=1 locally for perf checks)
   - Fix any failing tests locally before pushing. CI will also run unit tests before Playwright, but local verification avoids noisy failures and repeated pushes.
 - CI note: GitHub Actions should run Playwright using the repo-installed CLI (after npm ci) so the installed version from package-lock.json is used. Use commands like:
-  - npx playwright install chromium --with-deps
-  - npx playwright test --reporter=list
+  - ./node_modules/.bin/playwright install chromium --with-deps
+  - ./node_modules/.bin/playwright test --reporter=list
 - If CI still encounters a runner mismatch, verify package-lock.json and that @playwright/test is listed in devDependencies. Avoid using `npx -p @playwright/test` in CI since it may fetch a different runtime version from the network at execution time.
+- For absolute determinism, calling the explicit bin path (./node_modules/.bin/playwright) prevents npx from resolving or fetching an alternate binary.
 Other notes:
 - Git LFS: To keep the main Git history small, track large media with Git LFS. Steps a maintainer can run locally:
   1. Install Git LFS (https://git-lfs.github.com/)

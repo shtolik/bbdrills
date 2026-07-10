@@ -46,9 +46,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Playwright browsers and dependencies (use repo-installed CLI)
-        run: npx playwright install chromium --with-deps
+      - name: Install Playwright browsers and dependencies (explicit repo-installed CLI)
+        run: ./node_modules/.bin/playwright install chromium --with-deps
 
-      - name: Run Playwright tests (use repo-installed CLI)
-        run: npx playwright test --reporter=list
+      - name: Run Playwright tests (explicit repo-installed CLI)
+        run: ./node_modules/.bin/playwright test --reporter=list
 
