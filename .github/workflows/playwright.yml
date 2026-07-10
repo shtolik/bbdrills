@@ -7,9 +7,27 @@ on:
     branches: [ main, master ]
 
 jobs:
-  test:
-    name: test
+  unit-tests:
+    name: Unit tests
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (with LFS)
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run unit tests (vitest)
+        run: npm run test:unit
+
+  test:
+    name: Playwright tests
+    runs-on: ubuntu-latest
+    needs: unit-tests
     steps:
       - name: Checkout (with LFS)
         uses: actions/checkout@v4
