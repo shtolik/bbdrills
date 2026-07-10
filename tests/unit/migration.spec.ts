@@ -3,7 +3,7 @@ import { migrateLegacyPayload } from '../../src/lib/progress';
 
 describe('migration helper', () => {
   it('migrates boolean map to today sessions', () => {
-    const legacy = { 'drillA': true, 'drillB': false };
+    const legacy = { drillA: true, drillB: false };
     const out = migrateLegacyPayload(legacy);
     const keys = Object.keys(out.byDate || {});
     expect(keys.length).toBe(1);
@@ -12,7 +12,7 @@ describe('migration helper', () => {
     expect(day['drillB']).toBeUndefined();
   });
   it('migrates numeric map to sessions', () => {
-    const legacy = { 'drillX': 3 };
+    const legacy = { drillX: 3 };
     const out = migrateLegacyPayload(legacy);
     const keys = Object.keys(out.byDate || {});
     const day = out.byDate![keys[0]];

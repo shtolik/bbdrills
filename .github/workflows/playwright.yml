@@ -2,9 +2,9 @@ name: Playwright tests
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
 
 jobs:
   unit-tests:
@@ -62,4 +62,3 @@ jobs:
 
       - name: Run Playwright tests (explicit repo-installed CLI)
         run: ./node_modules/.bin/playwright test --reporter=list
-

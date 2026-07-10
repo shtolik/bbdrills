@@ -13,8 +13,8 @@ const config: PlaywrightTestConfig = {
     command: 'npx http-server ./ -p 8000',
     port: 8000,
     reuseExistingServer: process.env.CI ? false : true,
-    timeout: 120_000
-  }
+    timeout: 120_000,
+  },
 };
 
 export default config;

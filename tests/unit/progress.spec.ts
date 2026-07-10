@@ -4,8 +4,12 @@ function makeStorage() {
   const store: Record<string, string> = {};
   return {
     getItem: (k: string) => (k in store ? store[k] : null),
-    setItem: (k: string, v: string) => { store[k] = v; },
-    removeItem: (k: string) => { delete store[k]; },
+    setItem: (k: string, v: string) => {
+      store[k] = v;
+    },
+    removeItem: (k: string) => {
+      delete store[k];
+    },
   } as any;
 }
 
@@ -39,7 +43,11 @@ describe('progress storage helpers (v3)', () => {
 
   it('addTargetSets adjusts the targetSets but does not reduce setsCompleted', () => {
     const { persistDayForTest, addTargetSets, getDay } = mod;
-    persistDayForTest('d2', { targetSets: 2, sessions: [{ timestamp: new Date().toISOString(), sets: 1 }], setsCompleted: 1 });
+    persistDayForTest('d2', {
+      targetSets: 2,
+      sessions: [{ timestamp: new Date().toISOString(), sets: 1 }],
+      setsCompleted: 1,
+    });
     const after = addTargetSets('d2', 1);
     expect(after.targetSets).toBe(3);
     expect(after.setsCompleted).toBe(1);
@@ -53,8 +61,24 @@ describe('progress storage helpers (v3)', () => {
     const { persistDayForTest, getWeeklySummary } = mod;
     const today = new Date(2026, 6, 10);
     // Day -2 full, Day -1 partial, today none
-    persistDayForTest('drillA', { targetSets: 2, sessions: [{ timestamp: '2026-07-08T09:00:00Z', sets: 2 }], setsCompleted: 2 }, new Date(2026, 6, 8));
-    persistDayForTest('drillA', { targetSets: 2, sessions: [{ timestamp: '2026-07-09T09:00:00Z', sets: 1 }], setsCompleted: 1 }, new Date(2026, 6, 9));
+    persistDayForTest(
+      'drillA',
+      {
+        targetSets: 2,
+        sessions: [{ timestamp: '2026-07-08T09:00:00Z', sets: 2 }],
+        setsCompleted: 2,
+      },
+      new Date(2026, 6, 8)
+    );
+    persistDayForTest(
+      'drillA',
+      {
+        targetSets: 2,
+        sessions: [{ timestamp: '2026-07-09T09:00:00Z', sets: 1 }],
+        setsCompleted: 1,
+      },
+      new Date(2026, 6, 9)
+    );
     persistDayForTest('drillA', { targetSets: 2, sessions: [], setsCompleted: 0 }, today);
     const weekly = getWeeklySummary('drillA', 7, today);
     expect(weekly.length).toBe(7);
