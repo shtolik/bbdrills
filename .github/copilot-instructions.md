@@ -51,8 +51,16 @@ High-level architecture
   - Site defaults to English. UI state (language, theme, filter) is persisted in localStorage key: bbdrills_ui_v1. Progress is saved in bbdrills_progress_v1.
   - Theme button cycles system → dark → light and can be overridden; the site honors prefers-color-scheme when theme is 'system'.
 
-- Testing guidance (Playwright):
+- Testing guidance (Playwright) (updated 2026-07-10):
   - Playwright tests should verify: site loads, manifest fetch succeeds, number of cards equals manifest length, all thumbnails have non-empty src, no console errors, theme/lang/filter buttons function and state is persisted across reloads, clicking "Open video" opens the modal.
+  - Best practices developed from recent fixes in this repo:
+    - Keep performance/timing tests focused and env-gated. Use an explicit check for PERF_TESTS === '1' to enable perf tests locally; do not enable by default in CI.
+    - Prefer focused checks (e.g., first N previews) over global "all ready" timing assertions to reduce flakiness.
+    - When a UI element may be absent in some environments (e.g., "Open video"), explicitly mark the test as skipped using test.info().skip() so CI/test reports show the skip instead of silently passing.
+    - Avoid swallowing wait failures. Waits that check modal hide/visibility should assert the change (no empty catch blocks). If fallback behavior is needed, implement a reliable action (click backdrop at safe coords) and then assert the modal is hidden.
+    - Tests that change persistent UI state (localStorage progress/theme) should ensure the final asserted state is explicit (do not toggle done→incomplete by accident). If controls to reach the desired state are missing, fail the test so the issue is visible.
+    - For webServer reuse, prefer reusing an existing server only in local/dev runs. In CI, start a fresh server (use process.env.CI to differentiate).
+    - Document playbook commands in README when adding or changing env-gated tests (include both shell and PowerShell variants).
 
 Other notes:
 - Git LFS: To keep the main Git history small, track large media with Git LFS. Steps a maintainer can run locally:
