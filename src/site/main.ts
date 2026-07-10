@@ -266,14 +266,40 @@ function showModalForIndex(idx: number){
       placeholder.style.height = '100%';
       box.appendChild(placeholder);
       try{
-        // Minimal player creation with only onReady handler; on error fallback to iframe
+        // Minimal player creation with onReady and onError handlers; on error show friendly message and fallback link
         new (window as any).YT.Player(placeholder.id, {
           height: '450',
           width: '800',
           videoId: id,
           playerVars: { autoplay: 1, origin: location.origin },
           events: {
-            onReady: (e: any) => { try{ e.target.playVideo(); }catch(_){}}
+            onReady: (e: any) => { try{ e.target.playVideo(); }catch(_){} },
+            onError: (e: any) => {
+              try {
+                // Replace modal content with a helpful fallback so users can still access the video
+                box.innerHTML = '';
+                const msg = document.createElement('div');
+                msg.style.color = '#fff';
+                msg.style.padding = '16px';
+                msg.style.textAlign = 'center';
+                msg.innerHTML = '<p style="color:#fff;font-size:18px">This video cannot be embedded (age-restricted or blocked). You can open it on YouTube instead.</p>';
+                const a = document.createElement('a');
+                a.href = 'https://www.youtube.com/watch?v=' + id;
+                a.target = '_blank'; a.rel = 'noopener noreferrer';
+                a.textContent = 'Open on YouTube';
+                a.style.display = 'inline-block';
+                a.style.marginTop = '8px';
+                a.style.padding = '8px 12px';
+                a.style.background = '#fff';
+                a.style.color = '#000';
+                a.style.borderRadius = '6px';
+                msg.appendChild(a);
+                box.appendChild(msg);
+              } catch (err) {
+                // final fallback: open new tab
+                try { window.open('https://www.youtube.com/watch?v=' + id, '_blank') } catch (_) {}
+              }
+            }
           }
         });
       }catch(_){
