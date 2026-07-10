@@ -20,7 +20,14 @@ window.addEventListener('error', (e) => {
   try {
     const content = document.getElementById('content');
     if (content) {
-      content.innerHTML = `<pre style="color:#900;white-space:pre-wrap">Runtime error: ${e && (e as Error).message ? (e as Error).message : String(e)}\n${(e as Error).stack || ''}</pre>`;
+        const evt = e as ErrorEvent;
+        const message = evt?.message || (evt?.error instanceof Error ? evt.error.message : String(e));
+        const stack = evt?.error instanceof Error ? evt.error.stack : '';
+        const pre = document.createElement('pre');
+        pre.style.color = '#900';
+        pre.style.whiteSpace = 'pre-wrap';
+        pre.textContent = `Runtime error: ${message}\n${stack || ''}`;
+        content.replaceChildren(pre);
     }
   } catch (_) {}
   console.error('Captured error', e);
@@ -29,8 +36,14 @@ window.addEventListener('unhandledrejection', (ev) => {
   try {
     const content = document.getElementById('content');
     if (content) {
-      const reason = (ev as PromiseRejectionEvent).reason;
-      content.innerHTML = `<pre style="color:#900;white-space:pre-wrap">Unhandled rejection: ${reason && reason.message ? reason.message : String(reason)}\n${reason && reason.stack ? reason.stack : ''}</pre>`;
+        const reason = (ev as PromiseRejectionEvent).reason;
+        const message = reason instanceof Error ? reason.message : String(reason);
+        const stack = reason instanceof Error ? reason.stack : '';
+        const pre = document.createElement('pre');
+        pre.style.color = '#900';
+        pre.style.whiteSpace = 'pre-wrap';
+        pre.textContent = `Unhandled rejection: ${message}\n${stack || ''}`;
+        content.replaceChildren(pre);
     }
   } catch (_) {}
   console.error('Unhandled rejection', ev);
@@ -40,10 +53,10 @@ function loadUI() {
   try {
     const raw = localStorage.getItem(UI_KEY);
     if (raw) {
-      const s = JSON.parse(raw);
-      if (s.lang) langState.lang = s.lang;
-      if (s.filter) filterState.mode = s.filter;
-      if (s.theme) themeState.mode = s.theme;
+        const s = JSON.parse(raw);
+        if (s.lang === 'en' || s.lang === 'fi') langState.lang = s.lang;
+        if (s.filter === 'all' || s.filter === 'incomplete') filterState.mode = s.filter;
+        if (s.theme === 'system' || s.theme === 'dark' || s.theme === 'light') themeState.mode = s.theme;
     }
   } catch (e) {}
 }
@@ -276,12 +289,13 @@ function showModalForIndex(idx: number){
             onReady: (e: any) => { try{ e.target.playVideo(); }catch(_){} },
             onError: (e: any) => {
               try {
+                // Replace modal content with a helpful fallback so users can still access the video
                 box.innerHTML = '';
                 const msg = document.createElement('div');
                 msg.style.color = '#fff';
                 msg.style.padding = '16px';
                 msg.style.textAlign = 'center';
-                msg.innerHTML = '<p style="color:#fff;font-size:18px">This video cannot be embedded. Open it on YouTube instead.</p>';
+                msg.innerHTML = '<p style="color:#fff;font-size:18px">This video cannot be embedded (age-restricted or blocked). You can open it on YouTube instead.</p>';
                 const a = document.createElement('a');
                 a.href = 'https://www.youtube.com/watch?v=' + id;
                 a.target = '_blank'; a.rel = 'noopener noreferrer';
@@ -295,6 +309,7 @@ function showModalForIndex(idx: number){
                 msg.appendChild(a);
                 box.appendChild(msg);
               } catch (err) {
+                // final fallback: open new tab
                 try { window.open('https://www.youtube.com/watch?v=' + id, '_blank') } catch (_) {}
               }
             }
@@ -332,7 +347,7 @@ function showModalForIndex(idx: number){
   modal.setAttribute('aria-hidden','false');
 }
 
-function openVideo(item: any, embed = false){ const idMap = new Map<string, any>(); currentData.forEach(it => idMap.set(it.id, it)); modalVisibleItems = []; Array.from(document.querySelectorAll('.card')).forEach(c => { const id = (c as HTMLElement).dataset.id; if(id){ const it = idMap.get(id); if(it) modalVisibleItems.push(it); }}); const idx = modalVisibleItems.findIndex(it => it.id === item.id); if(idx === -1){ modalVisibleItems = [item]; modalCurrentIndex = 0; showModalForIndex(0); return; } showModalForIndex(idx); }
+function openVideo(item: any, _embed = false){ const idMap = new Map<string, any>(); currentData.forEach(it => idMap.set(it.id, it)); modalVisibleItems = []; Array.from(document.querySelectorAll('.card')).forEach(c => { const id = (c as HTMLElement).dataset.id; if(id){ const it = idMap.get(id); if(it) modalVisibleItems.push(it); }}); const idx = modalVisibleItems.findIndex(it => it.id === item.id); if(idx === -1){ modalVisibleItems = [item]; modalCurrentIndex = 0; showModalForIndex(0); return; } showModalForIndex(idx); }
 
 // modal gestures (touch + mouse) kept as-is
 (function setupModalGestures(){ const modal = document.getElementById('modal')!; let startX=0, startY=0, isTouch=false; modal.addEventListener('touchstart', e => { isTouch=true; startX = e.touches[0].clientX; startY = e.touches[0].clientY; }); modal.addEventListener('touchmove', e => { if(!isTouch) return; }); modal.addEventListener('touchend', e => { if(!isTouch) return; const dx = (e.changedTouches[0].clientX - startX); const dy = (e.changedTouches[0].clientY - startY); if(Math.abs(dy) > 100 && Math.abs(dy) > Math.abs(dx)){ document.getElementById('modal')!.classList.remove('open'); document.getElementById('modal')!.setAttribute('aria-hidden','true'); document.getElementById('modal-box')!.innerHTML=''; } else if(Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy)){ if(dx < 0){ const next = Math.min(modalCurrentIndex + 1, modalVisibleItems.length - 1); if(next !== modalCurrentIndex){ showModalForIndex(next); } } else { const prev = Math.max(modalCurrentIndex - 1, 0); if(prev !== modalCurrentIndex){ showModalForIndex(prev); } } } isTouch=false; }); let mouseDown=false; let mx=0,my=0; modal.addEventListener('mousedown', e => { mouseDown=true; mx=e.clientX; my=e.clientY; }); modal.addEventListener('mouseup', e => { if(!mouseDown) return; const dx = e.clientX - mx; const dy = e.clientY - my; mouseDown=false; if(Math.abs(dy) > 120 && Math.abs(dy) > Math.abs(dx)){ document.getElementById('modal')!.classList.remove('open'); document.getElementById('modal')!.setAttribute('aria-hidden','true'); document.getElementById('modal-box')!.innerHTML=''; } else if(Math.abs(dx) > 100 && Math.abs(dx) > Math.abs(dy)){ if(dx < 0){ const next = Math.min(modalCurrentIndex + 1, modalVisibleItems.length - 1); if(next !== modalCurrentIndex){ showModalForIndex(next); } } else { const prev = Math.max(modalCurrentIndex - 1, 0); if(prev !== modalCurrentIndex){ showModalForIndex(prev); } } } }); })();
