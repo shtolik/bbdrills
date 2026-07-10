@@ -4,9 +4,11 @@ const BASE = 'http://127.0.0.1:8000/site/';
 const URL = BASE + 'index.html';
 
 // Helper: collect console errors
-async function collectConsoleErrors(page){
+async function collectConsoleErrors(page) {
   const errors: string[] = [];
-  page.on('console', msg => { if(msg.type() === 'error') errors.push(msg.text()); });
+  page.on('console', msg => {
+    if (msg.type() === 'error') errors.push(msg.text());
+  });
   return errors;
 }
 
@@ -24,22 +26,33 @@ test('site loads, no console errors, and cards match manifest', async ({ page })
   expect(cards.length).toBe(manifest.length);
 
   // ensure each card has either a video, picture/webp or img and that declared preview source exists (dataset.src or resolved src)
-  for (const c of cards){
-    const hasVideo = await c.$('video') !== null;
-    const hasImg = await c.$('img') !== null;
-    const hasWebp = await c.$('picture source[type="image/webp"]') !== null;
+  for (const c of cards) {
+    const hasVideo = (await c.$('video')) !== null;
+    const hasImg = (await c.$('img')) !== null;
+    const hasWebp = (await c.$('picture source[type="image/webp"]')) !== null;
     expect(hasVideo || hasImg || hasWebp).toBeTruthy();
 
-    if(hasImg){
+    if (hasImg) {
       const img = await c.$('img');
-      const info = await img!.evaluate(node => ({ src: (node as HTMLImageElement).getAttribute('src'), dataset: (node as HTMLImageElement).dataset && (node as HTMLImageElement).dataset.src, current: (node as HTMLImageElement).currentSrc }));
-      const ok = (info.src && info.src.length>0) || (info.dataset && info.dataset.length>0) || (info.current && info.current.length>0);
+      const info = await img!.evaluate(node => ({
+        src: (node as HTMLImageElement).getAttribute('src'),
+        dataset: (node as HTMLImageElement).dataset && (node as HTMLImageElement).dataset.src,
+        current: (node as HTMLImageElement).currentSrc,
+      }));
+      const ok =
+        (info.src && info.src.length > 0) ||
+        (info.dataset && info.dataset.length > 0) ||
+        (info.current && info.current.length > 0);
       expect(ok).toBeTruthy();
     }
-    if(hasVideo){
+    if (hasVideo) {
       const v = await c.$('video');
-      const info = await v!.evaluate(node => ({ dataset: (node as HTMLVideoElement).dataset && (node as HTMLVideoElement).dataset.src, current: (node as HTMLVideoElement).currentSrc || (node as HTMLVideoElement).src }));
-      const ok = (info.dataset && info.dataset.length>0) || (info.current && info.current.length>0);
+      const info = await v!.evaluate(node => ({
+        dataset: (node as HTMLVideoElement).dataset && (node as HTMLVideoElement).dataset.src,
+        current: (node as HTMLVideoElement).currentSrc || (node as HTMLVideoElement).src,
+      }));
+      const ok =
+        (info.dataset && info.dataset.length > 0) || (info.current && info.current.length > 0);
       expect(ok).toBeTruthy();
     }
   }
@@ -74,7 +87,7 @@ test('theme, language and progress persist across reloads and assets exist', asy
   // mark first card by clicking the '+1 done' button several times and verify numeric progress persists
   const firstCard = page.locator('.card').first();
   const markBtn = firstCard.locator('button.btn-mark');
-  if(await markBtn.count() === 0){
+  if ((await markBtn.count()) === 0) {
     // no mark button present; fail early so the test surface is explicit
     throw new Error('Cannot find a "+1 done" button in the first card');
   }
@@ -82,12 +95,12 @@ test('theme, language and progress persist across reloads and assets exist', asy
   const setsEl = await firstCard.locator('.sets-display');
   const txtBefore = await setsEl.textContent();
   const mBefore = (txtBefore || '').match(/(\d+)\s*\/\s*(\d+|\-)/);
-  const initialDone = mBefore ? parseInt(mBefore[1],10) : 0;
+  const initialDone = mBefore ? parseInt(mBefore[1], 10) : 0;
 
   // click mark a few times (bounded) to ensure change, but avoid long loops for large targets
   let attempts = 0;
   const clicks = 3;
-  while(attempts < clicks){
+  while (attempts < clicks) {
     await markBtn.click();
     attempts++;
     await page.waitForTimeout(200);
@@ -99,17 +112,17 @@ test('theme, language and progress persist across reloads and assets exist', asy
   const setsElAfter = await page.locator('.card').first().locator('.sets-display');
   const txtAfter = await setsElAfter.textContent();
   const mAfter = (txtAfter || '').match(/(\d+)\s*\/\s*(\d+|\-)/);
-  const afterDone = mAfter ? parseInt(mAfter[1],10) : 0;
+  const afterDone = mAfter ? parseInt(mAfter[1], 10) : 0;
   expect(afterDone).toBeGreaterThan(initialDone);
 
   // verify that for manifest entries, at least one preview (webp or mp4) is served by the site
   const sampleLimit = 10;
   let checked = 0;
-  for(const it of manifest){
-    if(checked >= sampleLimit) break;
+  for (const it of manifest) {
+    if (checked >= sampleLimit) break;
     const candidate = it.preview_mp4 || it.preview_webp;
-    if(candidate){
-      const url = BASE + candidate.replace(/^site\//,'');
+    if (candidate) {
+      const url = BASE + candidate.replace(/^site\//, '');
       const r = await page.request.get(url);
       expect(r.ok(), 'Missing preview for ' + it.id).toBeTruthy();
       checked++;
@@ -117,7 +130,9 @@ test('theme, language and progress persist across reloads and assets exist', asy
   }
 });
 
-test('buttons: card buttons present and mark done persists after reload (separate from modal)', async ({ page }) => {
+test('buttons: card buttons present and mark done persists after reload (separate from modal)', async ({
+  page,
+}) => {
   await page.goto(URL);
   await page.waitForSelector('.card');
 
@@ -128,20 +143,20 @@ test('buttons: card buttons present and mark done persists after reload (separat
 
   // if Open video exists, ensure it's enabled but do not open modal here
   const openBtn = firstCard.locator('button', { hasText: 'Open video' });
-  if (await openBtn.count() > 0) {
+  if ((await openBtn.count()) > 0) {
     expect(await openBtn.isEnabled()).toBeTruthy();
   }
 
   // mark first card by clicking the mark button a few times and verify numeric progress persists after reload
   const markBtn = firstCard.locator('button.btn-mark');
-  if(await markBtn.count() === 0) throw new Error('No mark button in first card');
+  if ((await markBtn.count()) === 0) throw new Error('No mark button in first card');
   const setsEl = await firstCard.locator('.sets-display');
   const txtBefore = await setsEl.textContent();
   const mBefore = (txtBefore || '').match(/(\d+)\s*\/\s*(\d+|\-)/);
-  const initialDone = mBefore ? parseInt(mBefore[1],10) : 0;
+  const initialDone = mBefore ? parseInt(mBefore[1], 10) : 0;
 
   const clicks = 3;
-  for(let i=0;i<clicks;i++){
+  for (let i = 0; i < clicks; i++) {
     await markBtn.click();
     await page.waitForTimeout(200);
   }
@@ -152,7 +167,7 @@ test('buttons: card buttons present and mark done persists after reload (separat
   const setsElAfter = await page.locator('.card').first().locator('.sets-display');
   const txtAfter = await setsElAfter.textContent();
   const mAfter = (txtAfter || '').match(/(\d+)\s*\/\s*(\d+|\-)/);
-  const afterDone = mAfter ? parseInt(mAfter[1],10) : 0;
+  const afterDone = mAfter ? parseInt(mAfter[1], 10) : 0;
   expect(afterDone).toBeGreaterThan(initialDone);
 });
 
@@ -162,7 +177,7 @@ test('modal opens and closes when Open video clicked (if present)', async ({ pag
 
   const firstCard = page.locator('.card').first();
   const viewBtn = firstCard.locator('button', { hasText: 'Open video' });
-  if(await viewBtn.count() === 0){
+  if ((await viewBtn.count()) === 0) {
     // no Open video button in this environment; mark test as skipped so it's visible in test reports
     test.info().skip('Open video button not present in this environment');
     return;
@@ -176,8 +191,10 @@ test('modal opens and closes when Open video clicked (if present)', async ({ pag
   });
 
   // try to close modal via close button/backdrop
-  const closeBtn = page.locator('#modal .close, #modal .btn-close, #modal button[aria-label="Close"]');
-  if(await closeBtn.count() > 0) {
+  const closeBtn = page.locator(
+    '#modal .close, #modal .btn-close, #modal button[aria-label="Close"]'
+  );
+  if ((await closeBtn.count()) > 0) {
     await closeBtn.first().click();
     await expect(page.locator('#modal')).toBeHidden({ timeout: 5000 });
   } else {
@@ -196,17 +213,26 @@ perfTest('performance: first two thumbnails load quickly (WebP/GIF/MP4)', async 
   const start = Date.now();
 
   const checks = 2; // only verify first N previews to keep test fast and reliable
-  await page.waitForFunction((checks) => {
-    const cards = Array.from(document.querySelectorAll('.card')).slice(0, checks);
-    if(cards.length === 0) return false;
-    return cards.every(c => {
-      const img = c.querySelector('img');
-      const video = c.querySelector('video');
-      if(img) return (img as HTMLImageElement).complete && ((img as HTMLImageElement).naturalWidth || (img as HTMLImageElement).src.indexOf('data:')===0);
-      if(video) return (video as HTMLVideoElement).readyState >= 2;
-      return false;
-    });
-  }, checks, { timeout: 20000 });
+  await page.waitForFunction(
+    checks => {
+      const cards = Array.from(document.querySelectorAll('.card')).slice(0, checks);
+      if (cards.length === 0) return false;
+      return cards.every(c => {
+        const img = c.querySelector('img');
+        const video = c.querySelector('video');
+        if (img)
+          return (
+            (img as HTMLImageElement).complete &&
+            ((img as HTMLImageElement).naturalWidth ||
+              (img as HTMLImageElement).src.indexOf('data:') === 0)
+          );
+        if (video) return (video as HTMLVideoElement).readyState >= 2;
+        return false;
+      });
+    },
+    checks,
+    { timeout: 20000 }
+  );
 
   const duration = Date.now() - start;
   expect(duration).toBeLessThan(20000);
@@ -219,17 +245,16 @@ test('server serves declared previews (webp/mp4)', async ({ page }) => {
   const manifest = await manifestResp.json();
   const sampleLimit = 20;
   let checked = 0;
-  for(const it of manifest){
-    if(checked >= sampleLimit) break;
-    for(const key of ['preview_webp','preview_mp4']){
-      if(it[key]){
-        const url = BASE + it[key].replace(/^site\//,'');
+  for (const it of manifest) {
+    if (checked >= sampleLimit) break;
+    for (const key of ['preview_webp', 'preview_mp4']) {
+      if (it[key]) {
+        const url = BASE + it[key].replace(/^site\//, '');
         const r = await page.request.get(url);
         expect(r.ok(), `${key} missing for ${it.id}`).toBeTruthy();
         checked++;
-        if(checked >= sampleLimit) break;
+        if (checked >= sampleLimit) break;
       }
     }
   }
 });
-

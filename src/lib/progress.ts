@@ -16,9 +16,15 @@ const STORAGE_KEY = 'bbdrills_progress_v3';
 const fallbackStorage = (() => {
   let store: Record<string, string> = {};
   return {
-    getItem(key: string) { return store[key] ?? null; },
-    setItem(key: string, value: string) { store[key] = value; },
-    removeItem(key: string) { delete store[key]; },
+    getItem(key: string) {
+      return store[key] ?? null;
+    },
+    setItem(key: string, value: string) {
+      store[key] = value;
+    },
+    removeItem(key: string) {
+      delete store[key];
+    },
   };
 })();
 
@@ -28,7 +34,8 @@ type StorageLike = {
   removeItem(key: string): void;
 };
 
-const storage: StorageLike = (typeof localStorage !== 'undefined') ? (localStorage as unknown as StorageLike) : fallbackStorage;
+const storage: StorageLike =
+  typeof localStorage !== 'undefined' ? (localStorage as unknown as StorageLike) : fallbackStorage;
 
 function todayKey(date = new Date()): string {
   const y = date.getFullYear();
@@ -37,7 +44,10 @@ function todayKey(date = new Date()): string {
   return `${y}-${m}-${d}`;
 }
 
-type RawStore = { meta?: { version: number; createdAt?: string }; byDate?: Record<string, Record<string, DrillDay>> };
+type RawStore = {
+  meta?: { version: number; createdAt?: string };
+  byDate?: Record<string, Record<string, DrillDay>>;
+};
 
 const LEGACY_KEY = 'bbdrills_progress_v1';
 
@@ -72,15 +82,31 @@ export function migrateLegacyPayload(legacy: any): RawStore {
     const v = legacy[drillId];
     if (v === false || v == null) return; // skip
     if (v === true) {
-      result.byDate![key][drillId] = { targetSets: 1, sessions: [{ timestamp: now, sets: 1 }], setsCompleted: 1, lastUpdated: now };
+      result.byDate![key][drillId] = {
+        targetSets: 1,
+        sessions: [{ timestamp: now, sets: 1 }],
+        setsCompleted: 1,
+        lastUpdated: now,
+      };
     } else if (typeof v === 'number') {
       const setsDone = Math.max(0, Math.floor(v));
-      result.byDate![key][drillId] = { targetSets: setsDone || 1, sessions: setsDone ? [{ timestamp: now, sets: setsDone }] : [], setsCompleted: setsDone, lastUpdated: now };
+      result.byDate![key][drillId] = {
+        targetSets: setsDone || 1,
+        sessions: setsDone ? [{ timestamp: now, sets: setsDone }] : [],
+        setsCompleted: setsDone,
+        lastUpdated: now,
+      };
     } else if (typeof v === 'object') {
       const setsDone = Math.max(0, Math.floor(Number(v.setsDone ?? v.done ?? 0)));
       const setsTotal = Math.max(0, Math.floor(Number(v.setsTotal ?? v.total ?? setsDone ?? 0)));
       const sessions = setsDone ? [{ timestamp: now, sets: setsDone }] : [];
-      result.byDate![key][drillId] = { targetSets: setsTotal, repsPerSet: v.reps || undefined, sessions, setsCompleted: setsDone, lastUpdated: now };
+      result.byDate![key][drillId] = {
+        targetSets: setsTotal,
+        repsPerSet: v.reps || undefined,
+        sessions,
+        setsCompleted: setsDone,
+        lastUpdated: now,
+      };
     }
   });
   return result;
@@ -92,7 +118,7 @@ export function migrateLegacyIfNeeded(): boolean {
     if (!rawLegacy) return false;
     // Don't clobber existing v3 progress; only migrate when v3 doesn't exist yet.
     if (storage.getItem(STORAGE_KEY)) {
-        return false;
+      return false;
     }
     const parsed = JSON.parse(rawLegacy);
     const migrated = migrateLegacyPayload(parsed);
@@ -109,7 +135,11 @@ export function getDay(drillId: string, date = new Date()): DrillDay {
   const key = todayKey(date);
   const all = readAll();
   const byDate = all.byDate || {};
-  const day = (byDate[key] && byDate[key][drillId]) || { targetSets: 0, sessions: [], setsCompleted: 0 };
+  const day = (byDate[key] && byDate[key][drillId]) || {
+    targetSets: 0,
+    sessions: [],
+    setsCompleted: 0,
+  };
   return day;
 }
 
@@ -122,13 +152,18 @@ export function persistDayForTest(drillId: string, day: DrillDay, date = new Dat
   writeAll(all);
 }
 
-export function markSetComplete(drillId: string, date = new Date(), opts: { sets?: number; reps?: number; note?: string } = {}) : DrillDay {
+export function markSetComplete(
+  drillId: string,
+  date = new Date(),
+  opts: { sets?: number; reps?: number; note?: string } = {}
+): DrillDay {
   const key = todayKey(date);
   const all = readAll();
   all.byDate = all.byDate || {};
   all.byDate[key] = all.byDate[key] || {};
   const nowIso = new Date().toISOString();
-  const day = all.byDate[key][drillId] || { targetSets: 0, sessions: [], setsCompleted: 0 } as DrillDay;
+  const day =
+    all.byDate[key][drillId] || ({ targetSets: 0, sessions: [], setsCompleted: 0 } as DrillDay);
   const sets = Math.max(1, Math.floor(opts.sets ?? 1));
   day.sessions = day.sessions || [];
   day.sessions.push({ timestamp: nowIso, sets, reps: opts.reps, note: opts.note });
@@ -146,7 +181,8 @@ export function addTargetSets(drillId: string, amount = 1, date = new Date()): D
   all.byDate = all.byDate || {};
   all.byDate[key] = all.byDate[key] || {};
   const nowIso = new Date().toISOString();
-  const day = all.byDate[key][drillId] || { targetSets: 0, sessions: [], setsCompleted: 0 } as DrillDay;
+  const day =
+    all.byDate[key][drillId] || ({ targetSets: 0, sessions: [], setsCompleted: 0 } as DrillDay);
   day.targetSets = Math.max(0, (day.targetSets || 0) + amount);
   day.lastUpdated = nowIso;
   all.byDate[key][drillId] = day;
@@ -171,14 +207,26 @@ export function undoLastSession(drillId: string, date = new Date()): DrillDay | 
 
 export function getWeeklySummary(drillId: string, days = 7, reference = new Date()) {
   const all = readAll();
-  const results: Array<{ date: string; setsCompleted: number; targetSets: number; completedFull: boolean; }> = [];
+  const results: Array<{
+    date: string;
+    setsCompleted: number;
+    targetSets: number;
+    completedFull: boolean;
+  }> = [];
   for (let i = days - 1; i >= 0; i--) {
     const d = new Date(reference);
     d.setDate(reference.getDate() - i);
     const key = todayKey(d);
-    const day = (all.byDate && all.byDate[key] && all.byDate[key][drillId]) || { targetSets: 0, sessions: [], setsCompleted: 0 } as DrillDay;
-    const completedFull = (day.targetSets > 0) && (day.setsCompleted >= day.targetSets);
-    results.push({ date: key, setsCompleted: day.setsCompleted || 0, targetSets: day.targetSets || 0, completedFull });
+    const day =
+      (all.byDate && all.byDate[key] && all.byDate[key][drillId]) ||
+      ({ targetSets: 0, sessions: [], setsCompleted: 0 } as DrillDay);
+    const completedFull = day.targetSets > 0 && day.setsCompleted >= day.targetSets;
+    results.push({
+      date: key,
+      setsCompleted: day.setsCompleted || 0,
+      targetSets: day.targetSets || 0,
+      completedFull,
+    });
   }
   return results;
 }
@@ -187,5 +235,6 @@ export function clearAllForTest() {
   storage.removeItem(STORAGE_KEY);
 }
 
-export function readRaw() { return readAll(); }
-
+export function readRaw() {
+  return readAll();
+}
