@@ -11,7 +11,7 @@ const config: PlaywrightTestConfig = {
     // Use a Node-based static server so Playwright can start it without Python dependency
     command: 'npx http-server ./ -p 8000',
     port: 8000,
-    reuseExistingServer: false,
+    reuseExistingServer: process.env.CI ? false : true,
     timeout: 120_000
   }
 };

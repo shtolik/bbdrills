@@ -22,4 +22,10 @@ This repository contains the static website for BBDrills: a small, data-driven s
 ## Contact
 - Open an issue or mention @shtolik on GitHub for removals, corrections, or questions.
 
+## Running tests
+- Run full Playwright suite: npm test
+- Run only the focused performance test (skipped by default). Enable it with PERF_TESTS=1:
+  Shell (bash/zsh): PERF_TESTS=1 npx playwright test -g "performance: first two"
+  PowerShell: $env:PERF_TESTS='1'; npx playwright test -g "performance: first two"
+
 
