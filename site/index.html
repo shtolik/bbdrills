@@ -225,7 +225,7 @@
             // attempt to migrate legacy v1 data if present
             try{
               const leg = localStorage.getItem('bbdrills_progress_v1');
-              if(leg){ const parsed = JSON.parse(leg); const migrated = migrateLegacy(parsed); saveRaw(migrated); return migrated; }
+              if(leg){ const parsed = JSON.parse(leg); const migrated = migrateLegacy(parsed); saveRaw(migrated); try{ localStorage.removeItem('bbdrills_progress_v1'); }catch(e){} return migrated; }
             }catch(e){}
             return { meta:{version:3, createdAt: new Date().toISOString()}, byDate: {} };
           }catch(e){ return { byDate: {} }; }
@@ -295,7 +295,6 @@
       document.getElementById('filter-btn').textContent = filterState.mode === 'all' ? 'Show: All' : 'Show: Incomplete';
       render(currentData);
     }
-    function clearProgress(){ if(confirm('Clear local progress?')){ progress = {}; saveProgress(); render(currentData); }}
 
     function groupBy(data, key){
       const map = new Map();
@@ -656,5 +655,4 @@ infoRow.appendChild(setsWrap);
     document.getElementById('modal').addEventListener('click',(e)=>{ if(e.target.id==='modal'){ const box = document.getElementById('modal-box'); const v = box.querySelector('video'); if(v) v.pause(); box.innerHTML=''; document.getElementById('modal').classList.remove('open'); document.getElementById('modal').setAttribute('aria-hidden','true'); }});
   </script>
 </body>
-</html></body>
 </html>
