@@ -68,6 +68,44 @@ High-level architecture
   - Prefer concise subject lines and a short paragraph body. If multiple paragraphs are needed, separate them with an empty line (a real blank line), not literal backslash-n characters.
   - If you want the assistant to include a longer multi-paragraph body, provide it as plain text; the assistant will format it with real newlines and Markdown.
 
+- PR review reply workflow (owner preference):
+  - When addressing GitHub PR review comments, follow this flow:
+    1. For each review comment being fixed, create a focused commit that contains only that change. Use a clear commit message referencing the comment (e.g., "fix(review): address comment about X - update Y").
+    2. For each fixed comment, post a reply to that specific review comment explaining what was changed. Use Markdown and real newlines; do not include literal "\\n" sequences.
+    3. Repeat steps 1–2 for each review comment being addressed. Do not push interim commits to the PR branch until all related review replies and commits for the current review batch are ready.
+    4. When all comment fixes and corresponding replies are prepared locally, push all commits at once and then post the replies on GitHub (or push then post replies, but ensure replies reference the commits pushed).
+  - Rationale: batching pushes and posting replies together avoids noisy repeated review notifications and keeps the PR timeline tidy. Posting a reply per comment makes it clear which comments were addressed and how.
+  - Formatting rules for replies:
+    - Use Markdown, include code snippets if relevant, and reference the commit SHA or branch tip when appropriate.
+    - Keep replies short and actionable: one sentence describing the fix and a short note if any follow-up is needed.
+  - When not to follow this flow:
+    - For urgent/security fixes that must be pushed immediately, push and comment inline explaining urgency.
+    - For trivial whitespace or doc fixes that don't require a reply, group them into a single commit and note them in PR summary.
+
+  - Example workflow commands (Windows PowerShell):
+    # Make a focused change for comment A
+    git checkout feature/branch
+    # edit files
+    git add <files>
+    git commit -m "fix(review): address comment A - improve X"
+
+    # Make focused change for comment B
+    # edit files
+    git add <files>
+    git commit -m "fix(review): address comment B - update Y"
+
+    # push all fixes together
+    git push origin feature/branch
+
+    # reply to each GitHub review comment with a short Markdown note referencing the commit
+
+  - Ask the repo owner if they prefer a single aggregated comment summarizing all fixes instead of per-comment replies; default to per-comment replies.
+
+  - Assistant behavior enforced by memory:
+    - Do not post PR or review replies containing literal "\\n" sequences; always format using real newlines and Markdown.
+    - When asked to address review comments, the assistant will prepare separate commits per comment and prepare replies for each, then push all commits together and post the replies.
+    - If the assistant cannot post replies automatically (no gh/permissions), it will list the exact replies and the commit SHAs so the user can post them.
+
 Other notes:
 - Git LFS: To keep the main Git history small, track large media with Git LFS. Steps a maintainer can run locally:
   1. Install Git LFS (https://git-lfs.github.com/)
