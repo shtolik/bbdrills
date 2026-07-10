@@ -103,7 +103,7 @@ test('theme, language and progress persist across reloads and assets exist', asy
   }
 });
 
-test('buttons: card buttons present and mark done toggles (separate from modal)', async ({ page }) => {
+test('buttons: card buttons present and mark done persists after reload (separate from modal)', async ({ page }) => {
   await page.goto(URL);
   await page.waitForSelector('.card');
 
@@ -172,9 +172,9 @@ test('modal opens and closes when Open video clicked (if present)', async ({ pag
 
 const perfTest = process.env.PERF_TESTS === '1' ? test : test.skip;
 perfTest('performance: first two thumbnails load quickly (WebP/GIF/MP4)', async ({ page }) => {
-  const start = Date.now();
   await page.goto(URL);
   await page.waitForSelector('.card');
+  const start = Date.now();
 
   const checks = 2; // only verify first N previews to keep test fast and reliable
   await page.waitForFunction((checks) => {
