@@ -93,8 +93,8 @@ export function migrateLegacyPayload(legacy: any): RawStore {
       const setsDone = Math.max(0, Math.floor(v));
       result.byDate![key][drillId] = { targetSets: setsDone || 1, sessions: setsDone ? [{ timestamp: now, sets: setsDone }] : [], setsCompleted: setsDone, lastUpdated: now };
     } else if (typeof v === 'object') {
-      const setsDone = (v.setsDone || v.done || 0);
-      const setsTotal = (v.setsTotal || v.total || setsDone || 0);
+      const setsDone = Math.max(0, Math.floor(Number(v.setsDone ?? v.done ?? 0)));
+      const setsTotal = Math.max(0, Math.floor(Number(v.setsTotal ?? v.total ?? setsDone ?? 0)));
       const sessions = setsDone ? [{ timestamp: now, sets: setsDone }] : [];
       result.byDate![key][drillId] = { targetSets: setsTotal, repsPerSet: v.reps || undefined, sessions, setsCompleted: setsDone, lastUpdated: now };
     }
@@ -106,6 +106,11 @@ export function migrateLegacyIfNeeded(): boolean {
   try {
     const rawLegacy = storage.getItem(LEGACY_KEY);
     if (!rawLegacy) return false;
+    // Don't clobber existing v3 progress; only migrate when v3 doesn't exist yet.
+    if (storage.getItem(STORAGE_KEY)) {
+        storage.removeItem(LEGACY_KEY);
+        return false;
+    }
     const parsed = JSON.parse(rawLegacy);
     const migrated = migrateLegacyPayload(parsed);
     writeAll(migrated);
@@ -141,7 +146,7 @@ export function markSetComplete(drillId: string, date = new Date(), opts: { sets
   all.byDate[key] = all.byDate[key] || {};
   const nowIso = new Date().toISOString();
   const day = all.byDate[key][drillId] || { targetSets: 0, sessions: [], setsCompleted: 0 } as DrillDay;
-  const sets = opts.sets ?? 1;
+  const sets = Math.max(1, Math.floor(opts.sets ?? 1));
   day.sessions = day.sessions || [];
   day.sessions.push({ timestamp: nowIso, sets, reps: opts.reps, note: opts.note });
   day.setsCompleted = (day.setsCompleted || 0) + sets;

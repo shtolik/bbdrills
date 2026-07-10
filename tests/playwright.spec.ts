@@ -100,14 +100,14 @@ test('theme, language and progress persist across reloads and assets exist', asy
   const txtAfter = await setsElAfter.textContent();
   const mAfter = (txtAfter || '').match(/(\d+)\s*\/\s*(\d+|\-)/);
   const afterDone = mAfter ? parseInt(mAfter[1],10) : 0;
-  expect(afterDone).toBeGreaterThanOrEqual(initialDone);
+  expect(afterDone).toBeGreaterThan(initialDone);
 
   // verify that for manifest entries, at least one preview (webp or mp4) is served by the site
   const sampleLimit = 10;
   let checked = 0;
   for(const it of manifest){
     if(checked >= sampleLimit) break;
-    const candidate = it.preview_mp4 || it.preview_webp || it.preview_webp || it.preview_mp4;
+    const candidate = it.preview_mp4 || it.preview_webp;
     if(candidate){
       const url = BASE + candidate.replace(/^site\//,'');
       const r = await page.request.get(url);
@@ -153,7 +153,7 @@ test('buttons: card buttons present and mark done persists after reload (separat
   const txtAfter = await setsElAfter.textContent();
   const mAfter = (txtAfter || '').match(/(\d+)\s*\/\s*(\d+|\-)/);
   const afterDone = mAfter ? parseInt(mAfter[1],10) : 0;
-  expect(afterDone).toBeGreaterThanOrEqual(initialDone);
+  expect(afterDone).toBeGreaterThan(initialDone);
 });
 
 test('modal opens and closes when Open video clicked (if present)', async ({ page }) => {

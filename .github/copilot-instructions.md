@@ -48,7 +48,7 @@ High-level architecture
   - Prefer storing preview media under site/gifs25fps/ so GitHub Pages serves them directly. For large files, use Git LFS — see .gitattributes added to repo and instructions below.
 
 - Theme & UI persistence (new):
-  - Site defaults to English. UI state (language, theme, filter) is persisted in localStorage key: bbdrills_ui_v1. Progress is saved in bbdrills_progress_v1.
+  - Site defaults to English. UI state (language, theme, filter) is persisted in localStorage key: bbdrills_ui_v1. Progress is saved in bbdrills_progress_v3.
   - Theme button cycles system → dark → light and can be overridden; the site honors prefers-color-scheme when theme is 'system'.
 
 - Testing guidance (Playwright) (updated 2026-07-10):

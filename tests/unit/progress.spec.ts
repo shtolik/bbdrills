@@ -1,4 +1,4 @@
-import { beforeEach, describe, it, expect } from 'vitest';
+import { beforeEach, describe, it, expect, vi } from 'vitest';
 
 function makeStorage() {
   const store: Record<string, string> = {};
@@ -15,7 +15,8 @@ beforeEach(async () => {
   // Ensure module picks up a browser-like localStorage
   (globalThis as any).localStorage = makeStorage();
   // import fresh module each test to pick up storage binding
-  mod = await import('../../src/lib/progress');
+  vi.resetModules();
+  mod = await import('../../src/lib/progress?test=' + Date.now());
   mod.clearAllForTest();
 });
 
@@ -52,9 +53,9 @@ describe('progress storage helpers (v3)', () => {
     const { persistDayForTest, getWeeklySummary } = mod;
     const today = new Date('2026-07-10T00:00:00Z');
     // Day -2 full, Day -1 partial, today none
-    persistDayForTest('drillA', { targetSets: 2, sessions: [{ timestamp: '2026-07-08T09:00:00Z', sets: 2 }], setsCompleted: 2 }, new Date('2026-07-08T00:00:00Z'));
-    persistDayForTest('drillA', { targetSets: 2, sessions: [{ timestamp: '2026-07-09T09:00:00Z', sets: 1 }], setsCompleted: 1 }, new Date('2026-07-09T00:00:00Z'));
-    persistDayForTest('drillA', { targetSets: 2, sessions: [], setsCompleted: 0 }, new Date('2026-07-10T00:00:00Z'));
+    persistDayForTest('drillA', { targetSets: 2, sessions: [{ timestamp: '2026-07-08T09:00:00Z', sets: 2 }], setsCompleted: 2 }, new Date(2026, 6, 8));
+    persistDayForTest('drillA', { targetSets: 2, sessions: [{ timestamp: '2026-07-09T09:00:00Z', sets: 1 }], setsCompleted: 1 }, new Date(2026, 6, 9));
+    persistDayForTest('drillA', { targetSets: 2, sessions: [], setsCompleted: 0 }, today);
     const weekly = getWeeklySummary('drillA', 7, today);
     expect(weekly.length).toBe(7);
     const found = weekly.find((r: any) => r.date === '2026-07-08');

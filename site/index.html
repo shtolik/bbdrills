@@ -343,7 +343,9 @@
         const grid = document.createElement('div'); grid.className='grid';
         items.forEach(it=>{
         const day = getDay(it.id);
-        const completed = (day.targetSets > 0) && (day.setsCompleted >= day.targetSets);
+        const completed = (day.targetSets && day.targetSets > 0)
+           ? (day.setsCompleted >= day.targetSets)
+           : (it.sets ? (day.setsCompleted >= it.sets) : false);
         if(filterState.mode === 'incomplete' && completed) return;
         const card = document.createElement('article'); card.className='card' + (completed ? ' done' : ''); card.dataset.id = it.id;
         const thumb = document.createElement('div'); thumb.className='thumb';
@@ -639,7 +641,7 @@ infoRow.appendChild(setsWrap);
         const thumb = card.querySelector('.thumb');
         if(thumb){
           thumb.innerHTML = '';
-          const poster = item.preview_webp || item.gif || (item.video_url ? youtubeThumbnail(item.video_url) : '');
+          const poster = resolveAsset(item.preview_webp) || resolveAsset(item.gif) || (item.video_url ? youtubeThumbnail(item.video_url) : '');
           if(poster){ const img = document.createElement('img'); img.src = poster; img.alt = item.name_en + ' thumbnail'; img.className='lazy-img'; thumb.appendChild(img); }
           thumb.style.pointerEvents = 'none';
         }
