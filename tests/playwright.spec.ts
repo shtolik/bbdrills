@@ -52,6 +52,11 @@ test('theme, language and progress persist across reloads and assets exist', asy
   await page.goto(URL);
   await page.waitForSelector('.card');
 
+  // fetch manifest for later asset checks
+  const manifestResp = await page.request.get(BASE + 'default_drills_with_meta.json');
+  expect(manifestResp.ok()).toBeTruthy();
+  const manifest = await manifestResp.json();
+
   // cycle theme twice
   await page.click('#theme-btn');
   await page.click('#theme-btn');
