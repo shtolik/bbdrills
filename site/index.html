@@ -55,8 +55,16 @@
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:var(--gap)}
     /* Card: make preview full-bleed to reduce visible surrounding background */
     .card{background:transparent;padding:0;border-radius:8px;box-shadow:none;display:flex;flex-direction:column;gap:0;align-items:stretch}
-    .card > .meta{background:var(--card-bg);padding:12px;border-radius:0 0 8px 8px;box-shadow:var(--card-shadow)}
-    .card.done{opacity:0.85}
+    .card > .meta{background:var(--card-bg);padding:12px;border-radius:0 0 8px 8px;box-shadow:var(--card-shadow);display:flex;flex-direction:column}
+    .card.done{opacity:0.9;filter:grayscale(60%);background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));}
+        .card.done .thumb{filter:grayscale(60%);opacity:0.85}
+        .card .done-badge{display:inline-block;background:var(--muted);color:#fff;padding:4px 8px;border-radius:999px;font-size:12px;margin-left:8px}
+        .card .sets-display{font-size:24px;font-weight:800;margin-right:8px}
+    .card-actions{margin-top:8px;display:flex;gap:8px;align-items:center}
+    button{background:var(--accent);color:#fff;border:none;padding:8px 10px;border-radius:6px}
+    .btn-mark{background:var(--success);color:#000;padding:10px 14px;font-size:16px;border-radius:8px;font-weight:700}
+    .info-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    @media(max-width:480px){ .info-row{flex-direction:row;gap:8px} .card .sets-display{font-size:20px} .btn-mark{padding:8px 10px;font-size:14px} }
     /* thumb is full-width preview; height adjusts by orientation */
     .thumb{width:100%;background:transparent;border-radius:0;overflow:hidden;display:block;position:relative}
     .thumb img,.thumb video,.thumb picture img{width:100%;height:100%;object-fit:cover;display:block}
@@ -107,7 +115,7 @@
     const uiKey = 'bbdrills_ui_v1';
     const langState = {lang:'en'}; // default english
     const filterState = {mode:'all'}; // 'all' or 'incomplete'
-    const STORAGE_KEY = 'bbdrills_progress_v1';
+    const STORAGE_KEY = 'bbdrills_progress_v3';
     const themeState = {mode:'system'}; // 'system' | 'dark' | 'light'
 
     // Global error handlers to surface runtime errors directly in the page to help debugging
@@ -148,7 +156,6 @@
     document.getElementById('theme-btn').addEventListener('click',cycleTheme);
 
     let currentData = null;
-    let progress = loadProgress();
 
     // apply theme to document
     function applyTheme(){
@@ -188,21 +195,106 @@
       }
     }
 
-    function loadProgress(){
-      try{
-        const raw = localStorage.getItem(STORAGE_KEY);
-        return raw ? JSON.parse(raw) : {};
-      }catch(e){return {}};
+    function todayKey(date = new Date()){
+          const y = date.getFullYear();
+          const m = String(date.getMonth() + 1).padStart(2,'0');
+          const d = String(date.getDate()).padStart(2,'0');
+          return `${y}-${m}-${d}`;
     }
-    function saveProgress(){
-      try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); }catch(e){console.warn('Failed to save progress',e)}
-    }
+
+        function migrateLegacy(legacyRaw){
+          const now = new Date().toISOString();
+          const out = { meta: { version: 3, createdAt: now }, byDate: {} };
+          const key = todayKey(); out.byDate[key] = {};
+          if(!legacyRaw || typeof legacyRaw !== 'object') return out;
+          Object.keys(legacyRaw).forEach(k => {
+            const v = legacyRaw[k];
+            if(v === false || v == null) return;
+            if(v === true){ out.byDate[key][k] = { targetSets:1, sessions:[{ timestamp: now, sets:1 }], setsCompleted:1, lastUpdated: now }; }
+            else if(typeof v === 'number'){ const sets = Math.max(0, Math.floor(v)); out.byDate[key][k] = { targetSets: sets || 1, sessions: sets ? [{ timestamp: now, sets }] : [], setsCompleted: sets, lastUpdated: now }; }
+            else if(typeof v === 'object'){ const setsDone = Math.max(0, Math.floor(Number(v.setsDone ?? v.done ?? 0))); const setsTotal = Math.max(0, Math.floor(Number(v.setsTotal ?? v.total ?? setsDone ?? 0))); out.byDate[key][k] = { targetSets: setsTotal, repsPerSet: v.reps || undefined, sessions: setsDone ? [{ timestamp: now, sets: setsDone }] : [], setsCompleted: setsDone, lastUpdated: now }; }
+          });
+          try{ localStorage.removeItem('bbdrills_progress_v1'); }catch(e){}
+          return out;
+        }
+
+        function readRaw(){
+          try{
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if(raw) return JSON.parse(raw);
+            // attempt to migrate legacy v1 data if present
+            try{
+              const leg = localStorage.getItem('bbdrills_progress_v1');
+              if(leg){ const parsed = JSON.parse(leg); const migrated = migrateLegacy(parsed); saveRaw(migrated); try{ localStorage.removeItem('bbdrills_progress_v1'); }catch(e){} return migrated; }
+            }catch(e){}
+            return { meta:{version:3, createdAt: new Date().toISOString()}, byDate: {} };
+          }catch(e){ return { byDate: {} }; }
+        }
+        function saveRaw(data){
+          try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){ console.warn('Failed to save progress', e); }
+        }
+
+        function getDay(drillId, date = new Date()){
+          const key = todayKey(date);
+          const all = readRaw();
+          if(!all.byDate) all.byDate = {};
+          const day = (all.byDate[key] && all.byDate[key][drillId]) || { targetSets: 0, sessions: [], setsCompleted: 0 };
+          return day;
+        }
+
+        function markSetComplete(drillId, date = new Date(), sets = 1){
+          const key = todayKey(date);
+          const all = readRaw();
+          all.byDate = all.byDate || {};
+          all.byDate[key] = all.byDate[key] || {};
+          const now = new Date().toISOString();
+          const day = all.byDate[key][drillId] || { targetSets: 0, sessions: [], setsCompleted: 0 };
+          day.sessions = day.sessions || [];
+          day.sessions.push({ timestamp: now, sets });
+          day.setsCompleted = (day.setsCompleted || 0) + sets;
+          day.lastUpdated = now;
+          all.byDate[key][drillId] = day;
+          if(!all.meta) all.meta = { version: 3, createdAt: new Date().toISOString() };
+          saveRaw(all);
+          return day;
+        }
+
+            /* addTargetSets kept for compatibility but not used in UI by default */
+            function addTargetSets(drillId, amount = 1, date = new Date()){
+          const key = todayKey(date);
+          const all = readRaw();
+          all.byDate = all.byDate || {};
+          all.byDate[key] = all.byDate[key] || {};
+          const now = new Date().toISOString();
+          const day = all.byDate[key][drillId] || { targetSets: 0, sessions: [], setsCompleted: 0 };
+          day.targetSets = Math.max(0, (day.targetSets || 0) + amount);
+          day.lastUpdated = now;
+          all.byDate[key][drillId] = day;
+          if(!all.meta) all.meta = { version: 3, createdAt: new Date().toISOString() };
+          saveRaw(all);
+          return day;
+        }
+
+        function getWeeklySummary(drillId, days = 7, reference = new Date()){
+          const all = readRaw();
+          const results = [];
+          for(let i = days - 1; i >= 0; i--){
+            const d = new Date(reference);
+            d.setDate(reference.getDate() - i);
+            const key = todayKey(d);
+            const day = (all.byDate && all.byDate[key] && all.byDate[key][drillId]) || { targetSets: 0, sessions: [], setsCompleted: 0 };
+            const completedFull = (day.targetSets > 0) && (day.setsCompleted >= day.targetSets);
+            results.push({ date: key, setsCompleted: day.setsCompleted || 0, targetSets: day.targetSets || 0, completedFull });
+          }
+          return results;
+        }
+
+        function clearProgress(){ if(confirm('Clear local progress?')){ try{ localStorage.removeItem(STORAGE_KEY); }catch(e){} render(currentData); }}
     function toggleFilter(){
       filterState.mode = filterState.mode === 'all' ? 'incomplete' : 'all';
       document.getElementById('filter-btn').textContent = filterState.mode === 'all' ? 'Show: All' : 'Show: Incomplete';
       render(currentData);
     }
-    function clearProgress(){ if(confirm('Clear local progress?')){ progress = {}; saveProgress(); render(currentData); }}
 
     function groupBy(data, key){
       const map = new Map();
@@ -250,38 +342,54 @@
         container.appendChild(h);
         const grid = document.createElement('div'); grid.className='grid';
         items.forEach(it=>{
-          const completed = !!progress[it.id];
-          if(filterState.mode === 'incomplete' && completed) return;
-          const card = document.createElement('article'); card.className='card' + (completed? ' done':'');
-          const thumb = document.createElement('div'); thumb.className='thumb';
+        const day = getDay(it.id);
+        const completed = (day.targetSets && day.targetSets > 0)
+           ? (day.setsCompleted >= day.targetSets)
+           : (it.sets ? (day.setsCompleted >= it.sets) : false);
+        if(filterState.mode === 'incomplete' && completed) return;
+        const card = document.createElement('article'); card.className='card' + (completed ? ' done' : ''); card.dataset.id = it.id;
+        const thumb = document.createElement('div'); thumb.className='thumb';
           // prefer MP4 previews if available, then animated WebP/poster, then YouTube thumbnail
           const previewWebp = it.preview_webp ? resolveAsset(it.preview_webp) : null;
           const previewGif = it.gif ? resolveAsset(it.gif) : null;
           const ytThumb = it.video_url ? youtubeThumbnail(it.video_url) : '';
-          if(it.preview_mp4) thumb.dataset.mp4 = resolveAsset(it.preview_mp4);
+          const poster = previewWebp || previewGif || ytThumb || '';
 
-          if(it.preview_mp4 || thumb.dataset.mp4){
-            // prefer video element when MP4 is available
-            const video = document.createElement('video');
-            video.dataset.src = resolveAsset(it.preview_mp4 || thumb.dataset.mp4);
-            video.autoplay = false; video.muted = true; video.loop = true; video.playsInline = true; video.preload = 'none'; video.className = 'lazy-video';
-            video.addEventListener('loadedmetadata',()=>{ const w = video.videoWidth, h = video.videoHeight; thumb.classList.toggle('vertical', h > w); thumb.classList.toggle('horizontal', w >= h); });
-            thumb.appendChild(video);
-          } else if(previewWebp){
-            const pic = document.createElement('picture');
-            const src = document.createElement('source'); src.type = 'image/webp'; src.dataset.srcset = previewWebp; src.className = 'lazy-source'; pic.appendChild(src);
-            const img = document.createElement('img'); img.dataset.src = previewGif || ytThumb || ''; img.alt = it.name_en + ' thumbnail'; img.loading = 'lazy'; img.className = 'lazy-img';
-            img.addEventListener('load',()=>{ if(img.naturalWidth && img.naturalHeight){ thumb.classList.toggle('vertical', img.naturalHeight > img.naturalWidth); thumb.classList.toggle('horizontal', img.naturalWidth >= img.naturalHeight); } });
-            pic.appendChild(img);
-            thumb.appendChild(pic);
+          if(completed){
+            // show static poster image for completed drills (no autoplay)
+            if(poster){
+              const img = document.createElement('img');
+              img.src = poster; img.alt = it.name_en + ' thumbnail'; img.loading = 'lazy'; img.className = 'lazy-img';
+              img.addEventListener('load',()=>{ if(img.naturalWidth && img.naturalHeight){ thumb.classList.toggle('vertical', img.naturalHeight > img.naturalWidth); thumb.classList.toggle('horizontal', img.naturalWidth >= img.naturalHeight); } });
+              thumb.appendChild(img);
+            } else {
+              const placeholder = document.createElement('div'); placeholder.style.height='140px'; placeholder.style.background='rgba(0,0,0,0.06)'; thumb.appendChild(placeholder);
+            }
           } else {
-            const img = document.createElement('img');
-            img.dataset.src = previewGif || ytThumb || '';
-            img.alt = it.name_en + ' thumbnail'; img.loading = 'lazy'; img.className = 'lazy-img';
-            img.addEventListener('load',()=>{ if(img.naturalWidth && img.naturalHeight){ thumb.classList.toggle('vertical', img.naturalHeight > img.naturalWidth); thumb.classList.toggle('horizontal', img.naturalWidth >= img.naturalHeight); } });
-            thumb.appendChild(img);
+            if(it.preview_mp4) thumb.dataset.mp4 = resolveAsset(it.preview_mp4);
+            if(it.preview_mp4 || thumb.dataset.mp4){
+              // prefer video element when MP4 is available
+              const video = document.createElement('video');
+              video.dataset.src = resolveAsset(it.preview_mp4 || thumb.dataset.mp4);
+              video.autoplay = false; video.muted = true; video.loop = true; video.playsInline = true; video.preload = 'none'; video.className = 'lazy-video';
+              video.addEventListener('loadedmetadata',()=>{ const w = video.videoWidth, h = video.videoHeight; thumb.classList.toggle('vertical', h > w); thumb.classList.toggle('horizontal', w >= h); });
+              thumb.appendChild(video);
+            } else if(previewWebp){
+              const pic = document.createElement('picture');
+              const src = document.createElement('source'); src.type = 'image/webp'; src.dataset.srcset = previewWebp; src.className = 'lazy-source'; pic.appendChild(src);
+              const img = document.createElement('img'); img.dataset.src = previewGif || ytThumb || ''; img.alt = it.name_en + ' thumbnail'; img.loading = 'lazy'; img.className = 'lazy-img';
+              img.addEventListener('load',()=>{ if(img.naturalWidth && img.naturalHeight){ thumb.classList.toggle('vertical', img.naturalHeight > img.naturalWidth); thumb.classList.toggle('horizontal', img.naturalWidth >= img.naturalHeight); } });
+              pic.appendChild(img);
+              thumb.appendChild(pic);
+            } else {
+              const img = document.createElement('img');
+              img.dataset.src = previewGif || ytThumb || '';
+              img.alt = it.name_en + ' thumbnail'; img.loading = 'lazy'; img.className = 'lazy-img';
+              img.addEventListener('load',()=>{ if(img.naturalWidth && img.naturalHeight){ thumb.classList.toggle('vertical', img.naturalHeight > img.naturalWidth); thumb.classList.toggle('horizontal', img.naturalWidth >= img.naturalHeight); } });
+              thumb.appendChild(img);
+            }
           }
-          thumb.addEventListener('click',()=>openVideo(it, true));
+          if(!completed) thumb.addEventListener('click',()=>openVideo(it, true));
 
           const meta = document.createElement('div'); meta.className='meta';
           const title = document.createElement('div'); title.className='title'; title.textContent = langState.lang==='fi' ? (it.name_fi||it.name_en) : it.name_en;
@@ -292,21 +400,38 @@ if(detailsText){
   details.appendChild(txtNode);
   details.appendChild(document.createElement('br'));
 }
-const sSets = document.createElement('strong'); sSets.textContent = 'Sets:'; details.appendChild(sSets);
-details.appendChild(document.createTextNode(' ' + (it.sets || '')));
-const sReps = document.createElement('strong'); sReps.textContent = ' Reps:'; details.appendChild(sReps);
-details.appendChild(document.createTextNode(' ' + (it.reps || '')));
+// Reps first (compact)
+const sReps = document.createElement('strong'); sReps.textContent = 'Reps:'; details.appendChild(sReps);
+details.appendChild(document.createTextNode(' ' + (it.reps || '') + (it.reps && it.reps_unit ? ' ' + it.reps_unit : '')));
+
+// Info row: details + sets display + mark button (compact and mobile-friendly)
+const infoRow = document.createElement('div'); infoRow.className = 'info-row';
+infoRow.appendChild(details);
+const setsWrap = document.createElement('div'); setsWrap.style.display='flex'; setsWrap.style.alignItems='center'; setsWrap.style.gap='8px';
+const sSets = document.createElement('div'); sSets.textContent = 'Sets:'; sSets.style.fontWeight='600';
+const target = (day.targetSets && day.targetSets > 0) ? day.targetSets : (it.sets || 0);
+const big = document.createElement('div'); big.className='sets-display'; big.textContent = (day.setsCompleted||0) + '/' + (target || '-');
+setsWrap.appendChild(sSets); setsWrap.appendChild(big);
+const markBtn = document.createElement('button'); markBtn.textContent = '+1 done'; markBtn.className = 'btn-mark'; markBtn.addEventListener('click', ()=>{ markSetComplete(it.id); updateCardById(it.id, it); });
+setsWrap.appendChild(markBtn);
+infoRow.appendChild(setsWrap);
+
           const link = document.createElement('div'); link.style.marginTop='6px';
           const viewBtn = document.createElement('button'); viewBtn.textContent = 'Open video'; viewBtn.addEventListener('click',()=>openVideo(it, true));
           link.appendChild(viewBtn);
           if(it.video_url){ const ext = document.createElement('a'); ext.href = it.video_url; ext.target = '_blank'; ext.rel = 'noopener noreferrer'; ext.setAttribute('referrerpolicy','no-referrer'); ext.style.marginLeft='8px'; ext.textContent = 'Open on YouTube'; link.appendChild(ext); }
 
           const actions = document.createElement('div'); actions.className='card-actions';
-          const doneBtn = document.createElement('button'); doneBtn.textContent = completed ? 'Mark incomplete' : 'Mark done';
-          doneBtn.style.background = completed ? '#888' : '#0bda6e'; doneBtn.style.color = '#000'; doneBtn.addEventListener('click',()=>{ progress[it.id] = !progress[it.id]; if(!progress[it.id]) delete progress[it.id]; saveProgress(); render(currentData); });
-          actions.appendChild(doneBtn);
 
-          meta.appendChild(title); meta.appendChild(details); meta.appendChild(link); meta.appendChild(actions);
+          // show Done badge if fully completed
+          if((target>0) && (day.setsCompleted >= target)){
+            const badge = document.createElement('span'); badge.className='done-badge'; badge.textContent='Done'; setsWrap.appendChild(badge);
+          }
+
+          meta.appendChild(title);
+          meta.appendChild(infoRow);
+          meta.appendChild(link);
+          meta.appendChild(actions);
           card.appendChild(thumb); card.appendChild(meta);
           grid.appendChild(card);
         });
@@ -436,21 +561,12 @@ details.appendChild(document.createTextNode(' ' + (it.reps || '')));
 
     function openVideo(item, embed=false){
       // prepare modalVisibleItems as the currently visible list of items in the UI (respecting filter)
-      const visible = Array.from(document.querySelectorAll('.card')).map((c,idx)=>{
-            // each card corresponds to an item in currentData in rendering order — find by title
-            const titleEl = c.querySelector('.title');
-            const title = titleEl ? titleEl.textContent.trim() : null;
-            return {card: c, title};
-      });
-      modalVisibleItems = [];
-      // build mapping id->item for quick lookup
       const idMap = new Map();
       currentData.forEach(it => idMap.set(it.id, it));
-      visible.forEach(v => {
-            if(v.title){
-              const it = currentData.find(x => ((langState.lang==='fi'? (x.name_fi||x.name_en) : x.name_en) === v.title));
-              if(it) modalVisibleItems.push(it);
-            }
+      modalVisibleItems = [];
+      Array.from(document.querySelectorAll('.card')).forEach(c => {
+            const id = c.dataset.id;
+            if(id){ const it = idMap.get(id); if(it) modalVisibleItems.push(it); }
       });
       // find index of requested item in modalVisibleItems
       const idx = modalVisibleItems.findIndex(it => it.id === item.id);
@@ -494,7 +610,32 @@ details.appendChild(document.createTextNode(' ' + (it.reps || '')));
       });
     })();
 
-    document.getElementById('modal').addEventListener('click',(e)=>{ if(e.target.id==='modal'){ const box = document.getElementById('modal-box'); const v = box.querySelector('video'); if(v) v.pause(); box.innerHTML=''; document.getElementById('modal').classList.remove('open'); document.getElementById('modal').setAttribute('aria-hidden','true'); }});
+    // partial update helper: update a single card after progress change
+    function updateCardById(drillId, item){
+      const card = document.querySelector('.card[data-id="' + drillId + '"]');
+      if(!card) return;
+      const day = getDay(drillId);
+      const target = (day.targetSets && day.targetSets > 0) ? day.targetSets : (item.sets || 0);
+      const setsEl = card.querySelector('.sets-display');
+      if(setsEl) setsEl.textContent = (day.setsCompleted||0) + '/' + (target || '-');
+      // if reached target, update visuals
+      if(target > 0 && (day.setsCompleted >= target)){
+        card.classList.add('done');
+        // add done badge if missing
+        if(!card.querySelector('.done-badge')){
+          const setsWrap = setsEl ? setsEl.parentElement : null;
+          if(setsWrap){ const badge = document.createElement('span'); badge.className='done-badge'; badge.textContent='Done'; setsWrap.appendChild(badge); }
+        }
+        // replace thumb with static poster
+        const thumb = card.querySelector('.thumb');
+        if(thumb){
+          thumb.innerHTML = '';
+          const poster = resolveAsset(item.preview_webp) || resolveAsset(item.gif) || (item.video_url ? youtubeThumbnail(item.video_url) : '');
+          if(poster){ const img = document.createElement('img'); img.src = poster; img.alt = item.name_en + ' thumbnail'; img.className='lazy-img'; thumb.appendChild(img); }
+          thumb.style.pointerEvents = 'none';
+        }
+      }
+    }
 
     // after initial render, start observing thumbs for lazy-loading
     const origRender = render;
@@ -505,5 +646,4 @@ details.appendChild(document.createTextNode(' ' + (it.reps || '')));
     document.getElementById('modal').addEventListener('click',(e)=>{ if(e.target.id==='modal'){ const box = document.getElementById('modal-box'); const v = box.querySelector('video'); if(v) v.pause(); box.innerHTML=''; document.getElementById('modal').classList.remove('open'); document.getElementById('modal').setAttribute('aria-hidden','true'); }});
   </script>
 </body>
-</html></body>
 </html>

@@ -48,12 +48,84 @@ High-level architecture
   - Prefer storing preview media under site/gifs25fps/ so GitHub Pages serves them directly. For large files, use Git LFS — see .gitattributes added to repo and instructions below.
 
 - Theme & UI persistence (new):
-  - Site defaults to English. UI state (language, theme, filter) is persisted in localStorage key: bbdrills_ui_v1. Progress is saved in bbdrills_progress_v1.
+  - Site defaults to English. UI state (language, theme, filter) is persisted in localStorage key: bbdrills_ui_v1. Progress is saved in bbdrills_progress_v3.
   - Theme button cycles system → dark → light and can be overridden; the site honors prefers-color-scheme when theme is 'system'.
 
-- Testing guidance (Playwright):
+- Testing guidance (Playwright) (updated 2026-07-10):
   - Playwright tests should verify: site loads, manifest fetch succeeds, number of cards equals manifest length, all thumbnails have non-empty src, no console errors, theme/lang/filter buttons function and state is persisted across reloads, clicking "Open video" opens the modal.
+  - Best practices developed from recent fixes in this repo:
+    - Keep performance/timing tests focused and env-gated. Use an explicit check for PERF_TESTS === '1' to enable perf tests locally; do not enable by default in CI.
+    - Prefer focused checks (e.g., first N previews) over global "all ready" timing assertions to reduce flakiness.
+    - When a UI element may be absent in some environments (e.g., "Open video"), explicitly mark the test as skipped using test.info().skip() so CI/test reports show the skip instead of silently passing.
+    - Avoid swallowing wait failures. Waits that check modal hide/visibility should assert the change (no empty catch blocks). If fallback behavior is needed, implement a reliable action (click backdrop at safe coords) and then assert the modal is hidden.
+    - Tests that change persistent UI state (localStorage progress/theme) should ensure the final asserted state is explicit (do not toggle done→incomplete by accident). If controls to reach the desired state are missing, fail the test so the issue is visible.
+    - For webServer reuse, prefer reusing an existing server only in local/dev runs. In CI, start a fresh server (use process.env.CI to differentiate).
+    - Document playbook commands in README when adding or changing env-gated tests (include both shell and PowerShell variants).
 
+- Commit/PR formatting guidance:
+  - Use Markdown for PR bodies and commit messages where helpful (headings, code blocks, lists). This improves readability on GitHub.
+  - Always use real newlines rather than literal escape sequences like "\\n\\n". Escaped sequences appear verbatim in messages and break formatting. If automation or a shell produces literal backslash-n sequences, convert them to real newlines before sending. Recommended helper (PowerShell): `.\ .github\gh-comment.ps1` — it normalizes literal "\\n" into real newlines and posts via `gh pr comment`.
+
+    Examples:
+    - Use a file or pipe: `Get-Content comment.md | .\ .github\gh-comment.ps1 -PR 4` (preferred for long bodies)
+    - Pass a string with literal escapes: `.\ .github\gh-comment.ps1 -PR 4 -Body "Line1\\n\\nLine2"` (the helper will convert `\\n` to real line breaks)
+    - In bash, prefer `$'line1\n\nline2'` or a here-doc to emit real newlines: `gh pr comment 4 --body $'line1\n\nline2'`.
+  - Prefer concise subject lines and a short paragraph body. If multiple paragraphs are needed, separate them with an empty line (a real blank line), not literal backslash-n characters.
+  - If you want the assistant to include a longer multi-paragraph body, provide it as plain text; the assistant will format it with real newlines and Markdown.
+
+- PR review reply workflow (owner preference):
+  - When addressing GitHub PR review comments, follow this flow:
+    1. For each review comment being fixed, create a focused commit that contains only that change. Use a clear commit message referencing the comment (e.g., "fix(review): address comment about X - update Y").
+    2. For each fixed comment, post a reply to that specific review comment explaining what was changed. Use Markdown and real newlines; do not include literal "\\n" sequences.
+    3. Repeat steps 1–2 for each review comment being addressed. Do not push interim commits to the PR branch until all related review replies and commits for the current review batch are ready.
+    4. When all comment fixes and corresponding replies are prepared locally, push all commits at once and then post the replies on GitHub (or push then post replies, but ensure replies reference the commits pushed).
+  - Rationale: batching pushes and posting replies together avoids noisy repeated review notifications and keeps the PR timeline tidy. Posting a reply per comment makes it clear which comments were addressed and how.
+  - Formatting rules for replies:
+    - Use Markdown, include code snippets if relevant, and reference the commit SHA or branch tip when appropriate.
+    - Keep replies short and actionable: one sentence describing the fix and a short note if any follow-up is needed.
+  - When not to follow this flow:
+    - For urgent/security fixes that must be pushed immediately, push and comment inline explaining urgency.
+    - For trivial whitespace or doc fixes that don't require a reply, group them into a single commit and note them in PR summary.
+
+  - Example workflow commands (Windows PowerShell):
+    # Make a focused change for comment A
+    git checkout feature/branch
+    # edit files
+    git add <files>
+    git commit -m "fix(review): address comment A - improve X"
+
+    # Make focused change for comment B
+    # edit files
+    git add <files>
+    git commit -m "fix(review): address comment B - update Y"
+
+    # push all fixes together
+    git push origin feature/branch
+
+    # reply to each GitHub review comment with a short Markdown note referencing the commit
+
+  - Ask the repo owner if they prefer a single aggregated comment summarizing all fixes instead of per-comment replies; default to per-comment replies.
+
+  - Assistant behavior enforced by memory:
+    - Do not post PR or review replies containing literal "\\n" sequences; always format using real newlines and Markdown.
+    - When asked to address review comments, the assistant will prepare separate commits per comment and prepare replies for each, then push all commits together and post the replies.
+    - If the assistant cannot post replies automatically (no gh/permissions), it will list the exact replies and the commit SHAs so the user can post them.
+
+- Posting review replies (owner preference):
+  - Post replies as a Pull Request review (use the Reviews API or `gh pr review`) so replies are attached to the PR's review timeline and, when possible, to the specific review threads. Do not post them as general issue comments.
+  - If replying to a specific inline review thread, attach your reply to that thread (use `gh api` to POST a review comment tied to the file path and position) so the reply is visible inline.
+  - When automation posts review replies, prefer a short per-comment reply (one sentence) explaining the change and referencing the commit SHA.
+
+- Pre-push test checklist (required):
+  - Before pushing any branch that changes behavior, run unit tests and Playwright checks locally:
+    - npm run test:unit   # runs vitest unit tests
+  - npx playwright test  # runs Playwright e2e locally (optionally use PERF_TESTS=1 locally for perf checks)
+  - Fix any failing tests locally before pushing. CI will also run unit tests before Playwright, but local verification avoids noisy failures and repeated pushes.
+- CI note: GitHub Actions should run Playwright using the repo-installed CLI (after npm ci) so the installed version from package-lock.json is used. Use commands like:
+  - ./node_modules/.bin/playwright install chromium --with-deps
+  - ./node_modules/.bin/playwright test --reporter=list
+- If CI still encounters a runner mismatch, verify package-lock.json and that @playwright/test is listed in devDependencies. Avoid using `npx -p @playwright/test` in CI since it may fetch a different runtime version from the network at execution time.
+- For absolute determinism, calling the explicit bin path (./node_modules/.bin/playwright) prevents npx from resolving or fetching an alternate binary.
 Other notes:
 - Git LFS: To keep the main Git history small, track large media with Git LFS. Steps a maintainer can run locally:
   1. Install Git LFS (https://git-lfs.github.com/)

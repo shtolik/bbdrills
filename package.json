@@ -3,9 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "test": "npx playwright test"
+    "test": "npx playwright test",
+    "test:unit": "vitest run tests/unit"
   },
   "devDependencies": {
-    "@playwright/test": "^1.40.0"
+    "@playwright/test": "^1.40.0",
+    "vitest": "^1.1.0"
   }
 }

@@ -52,6 +52,11 @@ test('theme, language and progress persist across reloads and assets exist', asy
   await page.goto(URL);
   await page.waitForSelector('.card');
 
+  // fetch manifest for later asset checks
+  const manifestResp = await page.request.get(BASE + 'default_drills_with_meta.json');
+  expect(manifestResp.ok()).toBeTruthy();
+  const manifest = await manifestResp.json();
+
   // cycle theme twice
   await page.click('#theme-btn');
   await page.click('#theme-btn');
@@ -66,34 +71,43 @@ test('theme, language and progress persist across reloads and assets exist', asy
   const ui = JSON.parse(uiRaw || '{}');
   expect(ui.lang).toBe('en');
 
-  // mark first card done (find 'Mark done' button inside first card)
+  // mark first card by clicking the '+1 done' button several times and verify numeric progress persists
   const firstCard = page.locator('.card').first();
-  // Ensure the card ends in the done state. If it's already done (has 'Mark incomplete'), leave as-is.
-  const inc = firstCard.locator('button', { hasText: 'Mark incomplete' });
-  const doneBtn = firstCard.locator('button', { hasText: 'Mark done' });
-  if(await inc.count() > 0) {
-    // already done; nothing to do
-  } else if(await doneBtn.count() > 0) {
-    await doneBtn.click();
-  } else {
-    // cannot reliably mark done; fail early so the test surface is explicit
-    throw new Error('Cannot find a button to mark the first card done or incomplete');
+  const markBtn = firstCard.locator('button.btn-mark');
+  if(await markBtn.count() === 0){
+    // no mark button present; fail early so the test surface is explicit
+    throw new Error('Cannot find a "+1 done" button in the first card');
+  }
+  // read initial done count from the card's sets display (format like "X/Y")
+  const setsEl = await firstCard.locator('.sets-display');
+  const txtBefore = await setsEl.textContent();
+  const mBefore = (txtBefore || '').match(/(\d+)\s*\/\s*(\d+|\-)/);
+  const initialDone = mBefore ? parseInt(mBefore[1],10) : 0;
+
+  // click mark a few times (bounded) to ensure change, but avoid long loops for large targets
+  let attempts = 0;
+  const clicks = 3;
+  while(attempts < clicks){
+    await markBtn.click();
+    attempts++;
+    await page.waitForTimeout(200);
   }
 
-  // reload and check the first card still has done class
+  // reload and check that numeric done count persisted (increased by at least 1 if possible)
   await page.reload();
   await page.waitForSelector('.card');
-  const doneClass = await page.locator('.card').first().getAttribute('class');
-  expect(doneClass).toContain('done');
+  const setsElAfter = await page.locator('.card').first().locator('.sets-display');
+  const txtAfter = await setsElAfter.textContent();
+  const mAfter = (txtAfter || '').match(/(\d+)\s*\/\s*(\d+|\-)/);
+  const afterDone = mAfter ? parseInt(mAfter[1],10) : 0;
+  expect(afterDone).toBeGreaterThan(initialDone);
 
   // verify that for manifest entries, at least one preview (webp or mp4) is served by the site
-  const manifestResp = await page.request.get(BASE + 'default_drills_with_meta.json');
-  const manifest = await manifestResp.json();
   const sampleLimit = 10;
   let checked = 0;
   for(const it of manifest){
     if(checked >= sampleLimit) break;
-    const candidate = it.preview_mp4 || it.preview_webp || it.preview_webp || it.preview_mp4;
+    const candidate = it.preview_mp4 || it.preview_webp;
     if(candidate){
       const url = BASE + candidate.replace(/^site\//,'');
       const r = await page.request.get(url);
@@ -118,23 +132,28 @@ test('buttons: card buttons present and mark done persists after reload (separat
     expect(await openBtn.isEnabled()).toBeTruthy();
   }
 
-  // Ensure the card ends in the done state. If it's already done (has 'Mark incomplete'), leave as-is.
-  const inc = firstCard.locator('button', { hasText: 'Mark incomplete' });
-  const doneBtn = firstCard.locator('button', { hasText: 'Mark done' });
-  if(await inc.count() > 0) {
-    // already done; nothing to do
-  } else if(await doneBtn.count() > 0) {
-    await doneBtn.click();
-  } else {
-    // cannot reliably mark done; fail early so the test surface is explicit
-    throw new Error('Cannot find a button to mark the first card done or incomplete');
+  // mark first card by clicking the mark button a few times and verify numeric progress persists after reload
+  const markBtn = firstCard.locator('button.btn-mark');
+  if(await markBtn.count() === 0) throw new Error('No mark button in first card');
+  const setsEl = await firstCard.locator('.sets-display');
+  const txtBefore = await setsEl.textContent();
+  const mBefore = (txtBefore || '').match(/(\d+)\s*\/\s*(\d+|\-)/);
+  const initialDone = mBefore ? parseInt(mBefore[1],10) : 0;
+
+  const clicks = 3;
+  for(let i=0;i<clicks;i++){
+    await markBtn.click();
+    await page.waitForTimeout(200);
   }
 
-  // reload and check the first card still has done class
+  // reload and check that numeric done count persisted (strictly increased)
   await page.reload();
   await page.waitForSelector('.card');
-  const doneClass = await page.locator('.card').first().getAttribute('class');
-  expect(doneClass).toContain('done');
+  const setsElAfter = await page.locator('.card').first().locator('.sets-display');
+  const txtAfter = await setsElAfter.textContent();
+  const mAfter = (txtAfter || '').match(/(\d+)\s*\/\s*(\d+|\-)/);
+  const afterDone = mAfter ? parseInt(mAfter[1],10) : 0;
+  expect(afterDone).toBeGreaterThan(initialDone);
 });
 
 test('modal opens and closes when Open video clicked (if present)', async ({ page }) => {
