@@ -68,17 +68,16 @@ test('theme, language and progress persist across reloads and assets exist', asy
 
   // mark first card done (find 'Mark done' button inside first card)
   const firstCard = page.locator('.card').first();
+  // Ensure the card ends in the done state. If it's already done (has 'Mark incomplete'), leave as-is.
+  const inc = firstCard.locator('button', { hasText: 'Mark incomplete' });
   const doneBtn = firstCard.locator('button', { hasText: 'Mark done' });
-  if(await doneBtn.count() === 0){
-    // maybe already marked, try 'Mark incomplete'
-    const inc = firstCard.locator('button', { hasText: 'Mark incomplete' });
-    if(await inc.count() > 0) await inc.click();
-    else {
-      // fallback: click last button in card
-      await firstCard.locator('button').last().click();
-    }
-  } else {
+  if(await inc.count() > 0) {
+    // already done; nothing to do
+  } else if(await doneBtn.count() > 0) {
     await doneBtn.click();
+  } else {
+    // cannot reliably mark done; fail early so the test surface is explicit
+    throw new Error('Cannot find a button to mark the first card done or incomplete');
   }
 
   // reload and check the first card still has done class
@@ -119,14 +118,16 @@ test('buttons: card buttons present and mark done toggles (separate from modal)'
     expect(await openBtn.isEnabled()).toBeTruthy();
   }
 
-  // mark/unmark done safely
+  // Ensure the card ends in the done state. If it's already done (has 'Mark incomplete'), leave as-is.
+  const inc = firstCard.locator('button', { hasText: 'Mark incomplete' });
   const doneBtn = firstCard.locator('button', { hasText: 'Mark done' });
-  if(await doneBtn.count() === 0){
-    const inc = firstCard.locator('button', { hasText: 'Mark incomplete' });
-    if(await inc.count() > 0) await inc.click();
-    else await firstCard.locator('button').last().click();
-  } else {
+  if(await inc.count() > 0) {
+    // already done; nothing to do
+  } else if(await doneBtn.count() > 0) {
     await doneBtn.click();
+  } else {
+    // cannot reliably mark done; fail early so the test surface is explicit
+    throw new Error('Cannot find a button to mark the first card done or incomplete');
   }
 
   // reload and check the first card still has done class
@@ -143,7 +144,8 @@ test('modal opens and closes when Open video clicked (if present)', async ({ pag
   const firstCard = page.locator('.card').first();
   const viewBtn = firstCard.locator('button', { hasText: 'Open video' });
   if(await viewBtn.count() === 0){
-    // no Open video button in this environment; skip gracefully
+    // no Open video button in this environment; mark test as skipped so it's visible in test reports
+    test.info().skip('Open video button not present in this environment');
     return;
   }
 
@@ -156,13 +158,19 @@ test('modal opens and closes when Open video clicked (if present)', async ({ pag
 
   // try to close modal via close button/backdrop
   const closeBtn = page.locator('#modal .close, #modal .btn-close, #modal button[aria-label="Close"]');
-  if(await closeBtn.count() > 0) await closeBtn.first().click();
-  else await page.click('#modal');
-
-  await page.waitForSelector('#modal', { state: 'hidden', timeout: 5000 }).catch(()=>{});
+  if(await closeBtn.count() > 0) {
+    await closeBtn.first().click();
+    await page.waitForSelector('#modal', { state: 'hidden', timeout: 5000 });
+  } else {
+    // click a safe position on the backdrop (top-left) to trigger backdrop close
+    const modalLocator = page.locator('#modal');
+    await modalLocator.click({ position: { x: 10, y: 10 } });
+    // assert modal becomes hidden
+    await page.waitForSelector('#modal', { state: 'hidden', timeout: 5000 });
+  }
 });
 
-const perfTest = process.env.PERF_TESTS ? test : test.skip;
+const perfTest = process.env.PERF_TESTS === '1' ? test : test.skip;
 perfTest('performance: first two thumbnails load quickly (WebP/GIF/MP4)', async ({ page }) => {
   const start = Date.now();
   await page.goto(URL);
