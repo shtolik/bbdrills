@@ -285,6 +285,10 @@
       </div>
     </div>
 
-    <script src="./site.bundle.js" defer onerror="(function(){try{const c=document.getElementById('content'); if(c){c.innerHTML='<p style=\"color:#900\">site.bundle.js not found — the site JavaScript is missing. Build the site (or commit the built bundle) before publishing. See README or PR notes.</p>';} console.warn('site.bundle.js not found — build the site or commit the bundle.');}catch(e){} })()"></script>
-</body>
+    <script
+      src="./site.bundle.js"
+      defer
+      onerror="(function(){try{const c=document.getElementById('content'); if(c){c.textContent='site.bundle.js not found — the site JavaScript is missing. Build the site (or commit the built bundle) before publishing. See README or PR notes.';} console.warn('site.bundle.js not found — build the site or commit the bundle.');}catch(e){} })()"
+    ></script>
+  </body>
 </html>
