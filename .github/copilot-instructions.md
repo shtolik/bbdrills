@@ -106,6 +106,17 @@ High-level architecture
     - When asked to address review comments, the assistant will prepare separate commits per comment and prepare replies for each, then push all commits together and post the replies.
     - If the assistant cannot post replies automatically (no gh/permissions), it will list the exact replies and the commit SHAs so the user can post them.
 
+- Posting review replies (owner preference):
+  - Post replies as a Pull Request review (use the Reviews API or `gh pr review`) so replies are attached to the PR's review timeline and, when possible, to the specific review threads. Do not post them as general issue comments.
+  - If replying to a specific inline review thread, attach your reply to that thread (use `gh api` to POST a review comment tied to the file path and position) so the reply is visible inline.
+  - When automation posts review replies, prefer a short per-comment reply (one sentence) explaining the change and referencing the commit SHA.
+
+- Pre-push test checklist (required):
+  - Before pushing any branch that changes behavior, run unit tests and Playwright checks locally:
+    - npm run test:unit   # runs vitest unit tests
+    - npx playwright test  # runs Playwright e2e (optionally use PERF_TESTS=1 locally for perf checks)
+  - Fix any failing tests locally before pushing. CI will also run unit tests before Playwright, but local verification avoids noisy failures and repeated pushes.
+
 Other notes:
 - Git LFS: To keep the main Git history small, track large media with Git LFS. Steps a maintainer can run locally:
   1. Install Git LFS (https://git-lfs.github.com/)
