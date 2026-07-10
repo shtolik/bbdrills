@@ -46,6 +46,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Diagnose Playwright installation
+        run: |
+          echo "--- resolve @playwright/test version and path ---"
+          node -e "const p=require('@playwright/test/package.json'); console.log('version:',p.version); console.log('path:', require.resolve('@playwright/test'))"
+          echo "--- npm ls tree for @playwright/test ---"
+          npm ls @playwright/test --all || true
+
       - name: Install Playwright browsers and dependencies (explicit repo-installed CLI)
         run: ./node_modules/.bin/playwright install chromium --with-deps
 
