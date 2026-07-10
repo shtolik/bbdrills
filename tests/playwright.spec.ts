@@ -66,18 +66,31 @@ test('theme, language and progress persist across reloads and assets exist', asy
   const ui = JSON.parse(uiRaw || '{}');
   expect(ui.lang).toBe('en');
 
-  // mark first card done (find 'Mark done' button inside first card)
+  // mark first card done by clicking the '+1 done' button until the card reaches its target
   const firstCard = page.locator('.card').first();
-  // Ensure the card ends in the done state. If it's already done (has 'Mark incomplete'), leave as-is.
-  const inc = firstCard.locator('button', { hasText: 'Mark incomplete' });
-  const doneBtn = firstCard.locator('button', { hasText: 'Mark done' });
-  if(await inc.count() > 0) {
-    // already done; nothing to do
-  } else if(await doneBtn.count() > 0) {
-    await doneBtn.click();
-  } else {
-    // cannot reliably mark done; fail early so the test surface is explicit
-    throw new Error('Cannot find a button to mark the first card done or incomplete');
+  const markBtn = firstCard.locator('button.btn-mark');
+  if(await markBtn.count() === 0){
+    // no mark button present; fail early so the test surface is explicit
+    throw new Error('Cannot find a "+1 done" button in the first card');
+  }
+  // read target from the card's sets display (format like "X/Y") or from the manifest
+  const setsEl = await firstCard.locator('.sets-display');
+  const manifestResp = await page.request.get(BASE + 'default_drills_with_meta.json');
+  const manifest = await manifestResp.json();
+  const firstId = manifest[0].id;
+  let attempts = 0;
+  while(attempts < 10){
+    const txt = await setsEl.textContent();
+    const m = (txt || '').match(/(\d+)\s*\/\s*(\d+|\-)/);
+    if(m){
+      const done = parseInt(m[1], 10);
+      const target = m[2] === '-' ? manifest[0].sets || 1 : parseInt(m[2],10);
+      if(done >= target) break;
+    }
+    await markBtn.click();
+    attempts++;
+    // small wait for DOM update
+    await page.waitForTimeout(200);
   }
 
   // reload and check the first card still has done class
@@ -118,16 +131,17 @@ test('buttons: card buttons present and mark done persists after reload (separat
     expect(await openBtn.isEnabled()).toBeTruthy();
   }
 
-  // Ensure the card ends in the done state. If it's already done (has 'Mark incomplete'), leave as-is.
-  const inc = firstCard.locator('button', { hasText: 'Mark incomplete' });
-  const doneBtn = firstCard.locator('button', { hasText: 'Mark done' });
-  if(await inc.count() > 0) {
-    // already done; nothing to do
-  } else if(await doneBtn.count() > 0) {
-    await doneBtn.click();
-  } else {
-    // cannot reliably mark done; fail early so the test surface is explicit
-    throw new Error('Cannot find a button to mark the first card done or incomplete');
+  // mark first card by clicking '+1 done' until it reaches target
+  const markBtn = firstCard.locator('button.btn-mark');
+  if(await markBtn.count() === 0) throw new Error('No mark button in first card');
+  const setsEl = await firstCard.locator('.sets-display');
+  let attempts = 0;
+  while(attempts < 10){
+    const txt = await setsEl.textContent();
+    const m = (txt || '').match(/(\d+)\s*\/\s*(\d+|\-)/);
+    if(m){ const done = parseInt(m[1],10); const target = m[2] === '-' ? 1 : parseInt(m[2],10); if(done >= target) break; }
+    await markBtn.click();
+    attempts++; await page.waitForTimeout(200);
   }
 
   // reload and check the first card still has done class
