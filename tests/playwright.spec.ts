@@ -160,13 +160,13 @@ test('modal opens and closes when Open video clicked (if present)', async ({ pag
   const closeBtn = page.locator('#modal .close, #modal .btn-close, #modal button[aria-label="Close"]');
   if(await closeBtn.count() > 0) {
     await closeBtn.first().click();
-    await page.waitForSelector('#modal', { state: 'hidden', timeout: 5000 });
+    await expect(page.locator('#modal')).toBeHidden({ timeout: 5000 });
   } else {
     // click a safe position on the backdrop (top-left) to trigger backdrop close
     const modalLocator = page.locator('#modal');
     await modalLocator.click({ position: { x: 10, y: 10 } });
     // assert modal becomes hidden
-    await page.waitForSelector('#modal', { state: 'hidden', timeout: 5000 });
+    await expect(page.locator('#modal')).toBeHidden({ timeout: 5000 });
   }
 });
 
