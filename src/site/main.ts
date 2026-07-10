@@ -494,9 +494,11 @@ function showModalForIndex(idx: number) {
         iframe.src = 'https://www.youtube.com/embed/' + id + '?autoplay=1';
         iframe.width = '800';
         iframe.height = '450';
+        iframe.title = 'YouTube video';
+        iframe.allowFullscreen = true;
         iframe.setAttribute(
           'allow',
-          'accelerometer; autoplay; encrypted-media; picture-in-picture'
+          'accelerometer; autoplay; encrypted-media; picture-in-picture; fullscreen'
         );
         iframe.setAttribute('referrerpolicy', 'no-referrer');
         box.appendChild(iframe);
@@ -506,7 +508,12 @@ function showModalForIndex(idx: number) {
       iframe.src = 'https://www.youtube.com/embed/' + id + '?autoplay=1';
       iframe.width = '800';
       iframe.height = '450';
-      iframe.setAttribute('allow', 'accelerometer; autoplay; encrypted-media; picture-in-picture');
+      iframe.title = 'YouTube video';
+      iframe.allowFullscreen = true;
+      iframe.setAttribute(
+        'allow',
+        'accelerometer; autoplay; encrypted-media; picture-in-picture; fullscreen'
+      );
       iframe.setAttribute('referrerpolicy', 'no-referrer');
       box.appendChild(iframe);
     } else {
