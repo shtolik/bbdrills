@@ -64,7 +64,12 @@ High-level architecture
 
 - Commit/PR formatting guidance:
   - Use Markdown for PR bodies and commit messages where helpful (headings, code blocks, lists). This improves readability on GitHub.
-  - Always use real newlines rather than literal escape sequences like "\\n\\n". Escaped sequences appear verbatim in messages and break formatting.
+  - Always use real newlines rather than literal escape sequences like "\\n\\n". Escaped sequences appear verbatim in messages and break formatting. If automation or a shell produces literal backslash-n sequences, convert them to real newlines before sending. Recommended helper (PowerShell): `.\ .github\gh-comment.ps1` — it normalizes literal "\\n" into real newlines and posts via `gh pr comment`.
+
+    Examples:
+    - Use a file or pipe: `Get-Content comment.md | .\ .github\gh-comment.ps1 -PR 4` (preferred for long bodies)
+    - Pass a string with literal escapes: `.\ .github\gh-comment.ps1 -PR 4 -Body "Line1\\n\\nLine2"` (the helper will convert `\\n` to real line breaks)
+    - In bash, prefer `$'line1\n\nline2'` or a here-doc to emit real newlines: `gh pr comment 4 --body $'line1\n\nline2'`.
   - Prefer concise subject lines and a short paragraph body. If multiple paragraphs are needed, separate them with an empty line (a real blank line), not literal backslash-n characters.
   - If you want the assistant to include a longer multi-paragraph body, provide it as plain text; the assistant will format it with real newlines and Markdown.
 
@@ -114,8 +119,11 @@ High-level architecture
 - Pre-push test checklist (required):
   - Before pushing any branch that changes behavior, run unit tests and Playwright checks locally:
     - npm run test:unit   # runs vitest unit tests
-    - npx playwright test  # runs Playwright e2e (optionally use PERF_TESTS=1 locally for perf checks)
+  - npx playwright test  # runs Playwright e2e locally (optionally use PERF_TESTS=1 locally for perf checks)
   - Fix any failing tests locally before pushing. CI will also run unit tests before Playwright, but local verification avoids noisy failures and repeated pushes.
+- CI note: GitHub Actions should run Playwright using the @playwright/test CLI to avoid mismatched 'playwright' package issues. Use commands like:
+  - npx -p @playwright/test playwright install chromium --with-deps
+  - npx -p @playwright/test playwright test --reporter=list
 
 Other notes:
 - Git LFS: To keep the main Git history small, track large media with Git LFS. Steps a maintainer can run locally:
