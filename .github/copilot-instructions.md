@@ -63,9 +63,10 @@ High-level architecture
     - Document playbook commands in README when adding or changing env-gated tests (include both shell and PowerShell variants).
 
 - Commit/PR formatting guidance:
-  - When generating commit messages or PR bodies, use real newlines rather than literal escape sequences like "\\n\\n". This avoids the escaped sequences appearing in messages and ensures GitHub renders the body correctly.
-  - Prefer concise subject lines and a short paragraph body. If multiple paragraphs are needed, use an empty line between them (a true blank line), not literal backslash-n characters.
-  - If you want the assistant to include a longer multi-paragraph body, provide it as plain text (the assistant will format with real newlines).
+  - Use Markdown for PR bodies and commit messages where helpful (headings, code blocks, lists). This improves readability on GitHub.
+  - Always use real newlines rather than literal escape sequences like "\\n\\n". Escaped sequences appear verbatim in messages and break formatting.
+  - Prefer concise subject lines and a short paragraph body. If multiple paragraphs are needed, separate them with an empty line (a real blank line), not literal backslash-n characters.
+  - If you want the assistant to include a longer multi-paragraph body, provide it as plain text; the assistant will format it with real newlines and Markdown.
 
 Other notes:
 - Git LFS: To keep the main Git history small, track large media with Git LFS. Steps a maintainer can run locally:
