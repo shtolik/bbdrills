@@ -276,13 +276,12 @@ function showModalForIndex(idx: number){
             onReady: (e: any) => { try{ e.target.playVideo(); }catch(_){} },
             onError: (e: any) => {
               try {
-                // Replace modal content with a helpful fallback so users can still access the video
                 box.innerHTML = '';
                 const msg = document.createElement('div');
                 msg.style.color = '#fff';
                 msg.style.padding = '16px';
                 msg.style.textAlign = 'center';
-                msg.innerHTML = '<p style="color:#fff;font-size:18px">This video cannot be embedded (age-restricted or blocked). You can open it on YouTube instead.</p>';
+                msg.innerHTML = '<p style="color:#fff;font-size:18px">This video cannot be embedded. Open it on YouTube instead.</p>';
                 const a = document.createElement('a');
                 a.href = 'https://www.youtube.com/watch?v=' + id;
                 a.target = '_blank'; a.rel = 'noopener noreferrer';
@@ -296,7 +295,6 @@ function showModalForIndex(idx: number){
                 msg.appendChild(a);
                 box.appendChild(msg);
               } catch (err) {
-                // final fallback: open new tab
                 try { window.open('https://www.youtube.com/watch?v=' + id, '_blank') } catch (_) {}
               }
             }
