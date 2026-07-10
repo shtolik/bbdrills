@@ -1,4 +1,4 @@
-import { getDay, markSetComplete, addTargetSets, getWeeklySummary, migrateLegacyIfNeeded, readRaw } from '../lib/progress';
+import { getDay, markSetComplete, migrateLegacyIfNeeded } from '../lib/progress';
 
 // UI state keys
 const UI_KEY = 'bbdrills_ui_v1';
