@@ -100,8 +100,6 @@ test('theme, language and progress persist across reloads and assets exist', asy
   expect(doneClass).toContain('done');
 
   // verify that for manifest entries, at least one preview (webp or mp4) is served by the site
-  const manifestResp = await page.request.get(BASE + 'default_drills_with_meta.json');
-  const manifest = await manifestResp.json();
   const sampleLimit = 10;
   let checked = 0;
   for(const it of manifest){

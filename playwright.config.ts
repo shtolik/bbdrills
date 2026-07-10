@@ -2,6 +2,7 @@ import { PlaywrightTestConfig } from '@playwright/test';
 
 const config: PlaywrightTestConfig = {
   testDir: 'tests',
+  testMatch: /.*playwright\.spec\.ts$/,
   timeout: 30_000,
   use: {
     headless: true,
