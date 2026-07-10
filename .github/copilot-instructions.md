@@ -62,6 +62,11 @@ High-level architecture
     - For webServer reuse, prefer reusing an existing server only in local/dev runs. In CI, start a fresh server (use process.env.CI to differentiate).
     - Document playbook commands in README when adding or changing env-gated tests (include both shell and PowerShell variants).
 
+- Commit/PR formatting guidance:
+  - When generating commit messages or PR bodies, use real newlines rather than literal escape sequences like "\\n\\n". This avoids the escaped sequences appearing in messages and ensures GitHub renders the body correctly.
+  - Prefer concise subject lines and a short paragraph body. If multiple paragraphs are needed, use an empty line between them (a true blank line), not literal backslash-n characters.
+  - If you want the assistant to include a longer multi-paragraph body, provide it as plain text (the assistant will format with real newlines).
+
 Other notes:
 - Git LFS: To keep the main Git history small, track large media with Git LFS. Steps a maintainer can run locally:
   1. Install Git LFS (https://git-lfs.github.com/)
