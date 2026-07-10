@@ -3,11 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "build": "esbuild src/site/main.ts --bundle --minify --sourcemap --outfile=site/site.bundle.js --platform=browser --format=iife",
     "test": "npx playwright test",
     "test:unit": "vitest run tests/unit"
   },
   "devDependencies": {
     "@playwright/test": "^1.40.0",
+    "esbuild": "^0.19.0",
     "prettier": "^2.8.8",
     "vitest": "^3.2.6"
   }
