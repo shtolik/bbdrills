@@ -4,12 +4,25 @@
   "private": true,
   "scripts": {
     "build": "esbuild src/site/main.ts --bundle --minify --sourcemap --outfile=site/site.bundle.js --platform=browser --format=iife",
+    "format": "prettier --write \"src/**/*.{ts,js,tsx,jsx}\" \"site/**/*.{html,js,css}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,js,tsx,jsx}\" \"site/**/*.{html,js,css}\"",
     "test": "npx playwright test",
-    "test:unit": "vitest run tests/unit"
+    "test:unit": "vitest run tests/unit",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,js,tsx,jsx}": [
+      "prettier --write"
+    ],
+    "site/**/*.{html,js,css}": [
+      "prettier --write"
+    ]
   },
   "devDependencies": {
     "@playwright/test": "^1.40.0",
     "esbuild": "^0.28.1",
+    "husky": "^8.0.0",
+    "lint-staged": "^13.0.0",
     "prettier": "^2.8.8",
     "vitest": "^3.2.6"
   }
