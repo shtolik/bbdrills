@@ -146,7 +146,7 @@ test('buttons: card buttons present and mark done persists after reload (separat
     await page.waitForTimeout(200);
   }
 
-  // reload and check that numeric done count persisted (increased or equal)
+  // reload and check that numeric done count persisted (strictly increased)
   await page.reload();
   await page.waitForSelector('.card');
   const setsElAfter = await page.locator('.card').first().locator('.sets-display');

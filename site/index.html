@@ -212,7 +212,7 @@
             if(v === false || v == null) return;
             if(v === true){ out.byDate[key][k] = { targetSets:1, sessions:[{ timestamp: now, sets:1 }], setsCompleted:1, lastUpdated: now }; }
             else if(typeof v === 'number'){ const sets = Math.max(0, Math.floor(v)); out.byDate[key][k] = { targetSets: sets || 1, sessions: sets ? [{ timestamp: now, sets }] : [], setsCompleted: sets, lastUpdated: now }; }
-            else if(typeof v === 'object'){ const setsDone = v.setsDone || v.done || 0; const setsTotal = v.setsTotal || v.total || setsDone || 0; out.byDate[key][k] = { targetSets: setsTotal, repsPerSet: v.reps || undefined, sessions: setsDone ? [{ timestamp: now, sets: setsDone }] : [], setsCompleted: setsDone, lastUpdated: now }; }
+            else if(typeof v === 'object'){ const setsDone = Math.max(0, Math.floor(Number(v.setsDone ?? v.done ?? 0))); const setsTotal = Math.max(0, Math.floor(Number(v.setsTotal ?? v.total ?? setsDone ?? 0))); out.byDate[key][k] = { targetSets: setsTotal, repsPerSet: v.reps || undefined, sessions: setsDone ? [{ timestamp: now, sets: setsDone }] : [], setsCompleted: setsDone, lastUpdated: now }; }
           });
           try{ localStorage.removeItem('bbdrills_progress_v1'); }catch(e){}
           return out;

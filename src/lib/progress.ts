@@ -56,22 +56,6 @@ function writeAll(data: RawStore) {
   storage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
-function ensureDay(drillId: string, dateKey: string, createIfMissing = true): DrillDay | null {
-  const all = readAll();
-  all.byDate = all.byDate || {};
-  if (!all.byDate[dateKey]) {
-    if (!createIfMissing) return null;
-    all.byDate[dateKey] = {};
-  }
-  if (!all.byDate[dateKey][drillId]) {
-    if (!createIfMissing) return null;
-    const now = new Date().toISOString();
-    all.byDate[dateKey][drillId] = { targetSets: 0, sessions: [], setsCompleted: 0, lastUpdated: now };
-    writeAll(all);
-  }
-  return all.byDate[dateKey][drillId];
-}
-
 /**
  * Convert legacy payloads into v3 RawStore. Supports legacy shapes:
  * - map of drillId -> boolean (true means completed once)
