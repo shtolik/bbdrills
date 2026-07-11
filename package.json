@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "esbuild src/site/main.tsx --bundle --minify --sourcemap --outfile=site/site.bundle.js --platform=browser --format=iife --loader:.tsx=tsx",
+    "build": "esbuild src/site/main.tsx --bundle --minify --sourcemap --outfile=site/site.bundle.js --platform=browser --format=iife --loader:.tsx=tsx --jsx-factory=h --jsx-fragment=Fragment",
     "build:site": "npm run build",
     "format": "prettier --write \"src/**/*.{ts,js,tsx,jsx}\" \"site/**/*.{html,js,css}\"",
     "format:check": "prettier --check \"src/**/*.{ts,js,tsx,jsx}\" \"site/**/*.{html,js,css}\"",
