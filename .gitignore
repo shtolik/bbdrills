@@ -14,3 +14,5 @@ yt_meta*
 tools/
 /videos
 /test-results
+/site/site.bundle.js
+/site/site.bundle.js.map
