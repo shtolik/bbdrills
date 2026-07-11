@@ -29,7 +29,7 @@
     "lint-staged": "^13.0.0",
     "prettier": "^2.8.8",
     "vitest": "^3.2.6",
-    "@types/preact": "^10.5.2"
+
   }
 }
 
