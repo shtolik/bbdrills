@@ -7,9 +7,28 @@ const STORAGE_KEY = 'bbdrills_progress_v3';
 const langState = { lang: 'en' };
 const filterState = { mode: 'all' };
 const themeState = { mode: 'system' };
-let currentData: any[] = [];
+
+// Minimal Drill type used across this module to gain TS safety for core state
+type Drill = {
+  id: string;
+  name_en: string;
+  name_fi?: string;
+  group_en?: string;
+  group_fi?: string;
+  preview_webp?: string;
+  gif?: string;
+  preview_mp4?: string;
+  video_url?: string;
+  local_video?: string;
+  reps?: number | string;
+  reps_unit?: string;
+  sets?: number;
+  details?: string;
+};
+
+let currentData: Drill[] = [];
 let lazyObserver: IntersectionObserver | null = null;
-let modalVisibleItems: any[] = [];
+let modalVisibleItems: Drill[] = [];
 let modalCurrentIndex = 0;
 
 // Migrate legacy payload if present (progress module handles legacy key removal)
@@ -150,8 +169,8 @@ function clearProgress() {
   render(currentData);
 }
 
-function groupBy(data: any[], key: string) {
-  const map = new Map<string, any[]>();
+function groupBy(data: Drill[], key: string) {
+  const map = new Map<string, Drill[]>();
   data.forEach(item => {
     const k = item[key] || 'Other';
     if (!map.has(k)) map.set(k, []);
@@ -185,7 +204,7 @@ function youtubeThumbnail(url?: string) {
   return id ? 'https://img.youtube.com/vi/' + id + '/hqdefault.jpg' : '';
 }
 
-function render(data: any[]) {
+function render(data: Drill[]) {
   if (!data) return;
   const groups = groupBy(data, 'group_en');
   const container = document.getElementById('content');
@@ -198,7 +217,7 @@ function render(data: any[]) {
     container.appendChild(h);
     const grid = document.createElement('div');
     grid.className = 'grid';
-    items.forEach((it: any) => {
+    items.forEach((it: Drill) => {
       const day = getDay(it.id);
       const completed =
         day.targetSets && day.targetSets > 0
@@ -549,7 +568,7 @@ function showModalForIndex(idx: number) {
   modal.setAttribute('aria-hidden', 'false');
 }
 
-function openVideo(item: any) {
+function openVideo(item: Drill) {
   const idMap = new Map<string, any>();
   currentData.forEach(it => idMap.set(it.id, it));
   modalVisibleItems = [];
@@ -641,7 +660,7 @@ function openVideo(item: any) {
 })();
 
 // update a single card after progress change
-function updateCardById(drillId: string, item: any) {
+function updateCardById(drillId: string, item: Drill) {
   const card = document.querySelector('.card[data-id="' + drillId + '"]');
   if (!card) return;
   const day = getDay(drillId);
