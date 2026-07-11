@@ -569,7 +569,7 @@ function showModalForIndex(idx: number) {
 }
 
 function openVideo(item: Drill) {
-  const idMap = new Map<string, any>();
+  const idMap = new Map<string, Drill>();
   currentData.forEach(it => idMap.set(it.id, it));
   modalVisibleItems = [];
   Array.from(document.querySelectorAll('.card')).forEach(c => {
