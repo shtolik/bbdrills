@@ -290,7 +290,7 @@ function render(data: any[]) {
           thumb.appendChild(img);
         }
       }
-      if (!completed) thumb.addEventListener('click', () => openVideo(it, true));
+      if (!completed) thumb.addEventListener('click', () => openVideo(it));
 
       const meta = document.createElement('div');
       meta.className = 'meta';
@@ -344,7 +344,7 @@ function render(data: any[]) {
       link.style.marginTop = '6px';
       const viewBtn = document.createElement('button');
       viewBtn.textContent = 'Open video';
-      viewBtn.addEventListener('click', () => openVideo(it, true));
+      viewBtn.addEventListener('click', () => openVideo(it));
       link.appendChild(viewBtn);
       if (it.video_url) {
         const ext = document.createElement('a');
@@ -549,7 +549,7 @@ function showModalForIndex(idx: number) {
   modal.setAttribute('aria-hidden', 'false');
 }
 
-function openVideo(item: any, _embed = false) {
+function openVideo(item: any) {
   const idMap = new Map<string, any>();
   currentData.forEach(it => idMap.set(it.id, it));
   modalVisibleItems = [];
