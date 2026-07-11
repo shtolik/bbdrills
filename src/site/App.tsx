@@ -59,8 +59,26 @@ export default function App() {
   const [data, setData] = useState<Drill[]>([]);
   const lazyObserver = useRef<IntersectionObserver | null>(null);
 
+  // UI state (persisted)
+  const UI_KEY = 'bbdrills_ui_v1';
+  const STORAGE_KEY = 'bbdrills_progress_v3';
+  const [lang, setLang] = useState<'en' | 'fi'>('en');
+  const [filter, setFilter] = useState<'all' | 'incomplete'>('all');
+  const [theme, setTheme] = useState<'system' | 'dark' | 'light'>('system');
+
   useEffect(() => {
     migrateLegacyIfNeeded();
+    // load UI from localStorage
+    try {
+      const raw = localStorage.getItem(UI_KEY);
+      if (raw) {
+        const s = JSON.parse(raw);
+        if (s.lang === 'en' || s.lang === 'fi') setLang(s.lang);
+        if (s.filter === 'all' || s.filter === 'incomplete') setFilter(s.filter);
+        if (s.theme === 'system' || s.theme === 'dark' || s.theme === 'light') setTheme(s.theme);
+      }
+    } catch (e) {}
+
     (async () => {
       try {
         const res = await fetch('./default_drills_with_meta.json');
@@ -100,8 +118,75 @@ export default function App() {
       });
     }, options);
 
+    // wire header controls
+    const btnEn = document.getElementById('btn-en');
+    const btnFi = document.getElementById('btn-fi');
+    const filterBtn = document.getElementById('filter-btn');
+    const clearProgressBtn = document.getElementById('clear-progress');
+    const themeBtn = document.getElementById('theme-btn');
+
+    const onEn = () => {
+      setLang('en');
+      saveUI();
+      // re-render handled by state
+    };
+    const onFi = () => {
+      setLang('fi');
+      saveUI();
+    };
+    const onFilter = () => {
+      setFilter(prev => (prev === 'all' ? 'incomplete' : 'all'));
+      saveUI();
+    };
+    const onClear = () => {
+      if (!confirm('Clear local progress?')) return;
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (e) {}
+      // trigger re-render
+      setData(prev => prev.slice());
+    };
+    const onTheme = () => {
+      const order: ('system' | 'dark' | 'light')[] = ['system', 'dark', 'light'];
+      const idx = order.indexOf(theme || 'system');
+      const next = order[(idx + 1) % order.length];
+      setTheme(next);
+      saveUI();
+      applyTheme(next);
+    };
+
+    if (btnEn) btnEn.addEventListener('click', onEn);
+    if (btnFi) btnFi.addEventListener('click', onFi);
+    if (filterBtn) filterBtn.addEventListener('click', onFilter);
+    if (clearProgressBtn) clearProgressBtn.addEventListener('click', onClear);
+    if (themeBtn) themeBtn.addEventListener('click', onTheme);
+
+    // modal backdrop click to close
+    const modal = document.getElementById('modal');
+    const onModalClick = (e: MouseEvent) => {
+      if ((e.target as HTMLElement).id === 'modal') {
+        const box = document.getElementById('modal-box');
+        const v = box ? box.querySelector('video') : null;
+        if (v) (v as HTMLVideoElement).pause();
+        if (box) box.innerHTML = '';
+        modal!.classList.remove('open');
+        modal!.setAttribute('aria-hidden', 'true');
+      }
+    };
+    if (modal) modal.addEventListener('click', onModalClick);
+
+    // initial theme apply and filter label
+    applyTheme(theme);
+    updateFilterLabel(filter);
+
     return () => {
       if (lazyObserver.current) lazyObserver.current.disconnect();
+      if (btnEn) btnEn.removeEventListener('click', onEn);
+      if (btnFi) btnFi.removeEventListener('click', onFi);
+      if (filterBtn) filterBtn.removeEventListener('click', onFilter);
+      if (clearProgressBtn) clearProgressBtn.removeEventListener('click', onClear);
+      if (themeBtn) themeBtn.removeEventListener('click', onTheme);
+      if (modal) modal.removeEventListener('click', onModalClick);
     };
   }, []);
 
@@ -113,6 +198,28 @@ export default function App() {
       });
     });
   }, [data]);
+
+  function saveUI() {
+    try {
+      localStorage.setItem(UI_KEY, JSON.stringify({ lang, filter, theme }));
+    } catch (e) {}
+  }
+
+  function applyTheme(t: 'system' | 'dark' | 'light') {
+    const btn = document.getElementById('theme-btn');
+    if (t === 'system') {
+      document.documentElement.removeAttribute('data-theme');
+      if (btn) btn.textContent = 'Theme: system';
+    } else {
+      document.documentElement.setAttribute('data-theme', t);
+      if (btn) btn.textContent = 'Theme: ' + t;
+    }
+  }
+
+  function updateFilterLabel(f: 'all' | 'incomplete') {
+    const filterBtn = document.getElementById('filter-btn');
+    if (filterBtn) filterBtn.textContent = f === 'all' ? 'Show: All' : 'Show: Incomplete';
+  }
 
   const openVideo = (item: Drill) => {
     // collect visible items from DOM order
