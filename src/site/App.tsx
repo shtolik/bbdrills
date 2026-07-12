@@ -385,12 +385,7 @@ export default function App() {
         iframe.setAttribute('referrerpolicy', 'no-referrer');
         box.appendChild(iframe);
       } else {
-        const w = window.open(item.video_url, '_blank');
-        if (w) {
-          try {
-            (w as any).opener = null;
-          } catch (e) {}
-        }
+        window.open(item.video_url, '_blank', 'noopener,noreferrer');
         return;
       }
     } else if (item.preview_mp4) {
@@ -404,13 +399,8 @@ export default function App() {
       video.style.maxWidth = '90vw';
       box.appendChild(video);
     } else if (item.local_video) {
-      const w = window.open(resolveAsset(item.local_video) || item.local_video, '_blank');
-      if (w) {
-        try {
-          (w as any).opener = null;
-        } catch (e) {}
-      }
-      return;
+        window.open(resolveAsset(item.local_video) || item.local_video, '_blank', 'noopener,noreferrer');
+        return;
     }
 
     modal.classList.add('open');
