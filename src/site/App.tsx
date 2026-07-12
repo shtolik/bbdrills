@@ -1,7 +1,7 @@
 import { h, Fragment } from 'preact';
 import { useEffect, useState, useRef } from 'preact/hooks';
 import { getDay, markSetComplete, migrateLegacyIfNeeded } from '../lib/progress';
-import { loadLocale, t } from './i18n';
+import { loadLocale, t, localizedField } from './i18n';
 
 type Drill = {
   id: string;
@@ -214,6 +214,8 @@ export default function App() {
       applyTheme(theme);
       const clearBtn = document.getElementById('clear-progress');
       if (clearBtn) clearBtn.textContent = t('clear_progress', 'Clear progress');
+      // re-render cards so t() calls pick up new locale
+      setData(prev => prev.slice());
     };
     const onFilter = () => {
       setFilter(prev => {
@@ -309,14 +311,8 @@ export default function App() {
     }
   }
 
-  function localizedDrillField(item: Drill, field: string) {
-    // prefer field_en/field_fi style fields; fallback to plain field
-    const k = String(field);
-    const v = (item as any)[k + '_' + lang];
-    if (v) return v;
-    const en = (item as any)[k + '_en'];
-    if (en) return en;
-    return (item as any)[k] || '';
+  function localizedDrillField(item: any, field: string) {
+    return localizedField(item, field, lang);
   }
 
   function applyTheme(themeVal: 'system' | 'dark' | 'light') {
@@ -584,7 +580,7 @@ export default function App() {
           </div>
           <div className={'info-row'}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div className={'sets-label'}>Sets:</div>
+              <div className={'sets-label'}>{t('sets_label', 'Sets:')}</div>
               <div className={'sets-display'}>
                 {(day.setsCompleted || 0) +
                   '/' +
@@ -593,7 +589,7 @@ export default function App() {
               <button className={'btn-mark'} onClick={() => mark(it.id)}>
                 +1 done
               </button>
-              {completed && <span className={'done-badge'}>Done</span>}
+              {completed && <span className={'done-badge'}>{t('done', 'Done')}</span>}
             </div>
           </div>
           <div style={{ marginTop: '6px' }}>

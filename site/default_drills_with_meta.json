@@ -4,8 +4,8 @@
     "group_en": "Running",
     "gif": "",
     "group_fi": "Juoksu treeni",
-    "name_en": "Hip airplane",
-    "details": "Mieluusti ilman käsitukea",
+    "name": { "en": "Hip airplane", "fi": "Lonkan lentokone", "sv": "Höft-flygplan" },
+    "details": { "en": "Preferably without hand support", "fi": "Mieluusti ilman käsitukea", "sv": "Helst utan stöd i händerna" },
     "local_video": "videos/hip-airplane_URY-escJjss.mp4",
     "reps": "10/side",
     "id": "hip-airplane",
@@ -14,16 +14,15 @@
     "video_length": 21,
     "preview_webp": "previews/webp/hip-airplane_URY-escJjss.webp",
     "gif_end": 21.0,
-    "preview_mp4": "previews/mp4/hip-airplane_URY-escJjss.mp4",
-    "name_fi": "Lonkan lentokone"
+    "preview_mp4": "previews/mp4/hip-airplane_URY-escJjss.mp4"
   },
   {
     "sets": 2,
     "group_en": "Running",
     "gif": "",
     "group_fi": "Juoksu treeni",
-    "name_en": "A-skip / Knee drive",
-    "details": "Mitä vaan vasten mikä pysyy pystyssä (pidä tukea tarvittaessa)",
+    "name": { "en": "A-skip / Knee drive", "fi": "A-skip / polvivedo", "sv": "A-skip / Knälyft" },
+    "details": { "en": "Hold something stable if needed", "fi": "Mitä vaan vasten mikä pysyy pystyssä (pidä tukea tarvittaessa)", "sv": "Håll i något stadigt vid behov" },
     "local_video": "videos/a-skip_orOzt-bT2wc.mp4",
     "reps": "10/side",
     "id": "a-skip",
@@ -32,16 +31,16 @@
     "video_length": 30,
     "preview_webp": "previews/webp/a-skip_orOzt-bT2wc.webp",
     "gif_end": 23.0,
-    "preview_mp4": "previews/mp4/a-skip_orOzt-bT2wc.mp4",
-    "name_fi": "A-skip / polvivedo"
+    "preview_mp4": "previews/mp4/a-skip_orOzt-bT2wc.mp4"
   },
+
   {
     "sets": 2,
     "group_en": "Running",
     "gif": "",
     "group_fi": "Juoksu treeni",
-    "name_en": "Seisten lonkankoukistus pito",
-    "details": "Pito: 5 x 5 sekunttia (seisten)",
+    "name": { "en": "Standing hip flexor hold", "fi": "Seisten lonkankoukistus pito", "sv": "Stående höftflexion hållning" },
+    "details": { "en": "Hold: 5 x 5s (standing)", "fi": "Pito: 5 x 5 sekunttia (seisten)", "sv": "Håll: 5 x 5s (stående)" },
     "local_video": "videos/standing-hip-flexor_l3hmBGF9l3k.mp4",
     "reps": "5 x 5s",
     "id": "standing-hip-flexor",
@@ -50,9 +49,9 @@
     "video_length": 26,
     "preview_webp": "previews/webp/standing-hip-flexor_l3hmBGF9l3k.webp",
     "gif_end": 22.0,
-    "preview_mp4": "previews/mp4/standing-hip-flexor_l3hmBGF9l3k.mp4",
-    "name_fi": "Seisten lonkankoukistus pito"
+    "preview_mp4": "previews/mp4/standing-hip-flexor_l3hmBGF9l3k.mp4"
   },
+
   {
     "sets": 2,
     "group_en": "Running",

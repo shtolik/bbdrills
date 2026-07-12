@@ -1,0 +1,16 @@
+{
+  "brand": "Basketträning under lågsäsongen",
+  "loading": "Laddar övningar…",
+  "theme": "Tema",
+  "theme_system": "Tema: system",
+  "show_all": "Visa: Alla",
+  "show_incomplete": "Visa: Ofullständiga",
+  "clear_progress": "Rensa framsteg",
+  "reps_label": "Reps:",
+  "sets_label": "Set:",
+  "open_on_youtube": "Öppna på YouTube",
+  "open_video": "Öppna video",
+  "cannot_embed": "Denna video kan inte bäddas in (åldersbegränsad eller blockerad). Du kan öppna den på YouTube istället.",
+  "done": "Klar",
+  "confirm_clear": "Rensa lokala framsteg?"
+}

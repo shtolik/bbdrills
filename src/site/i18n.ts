@@ -18,3 +18,19 @@ export function t(key: string, fallback?: string) {
     return fallback || key;
   }
 }
+
+export function localizedField(item: any, field: string, lang: string) {
+  if (!item) return '';
+  // nested object e.g. name: { en: '', fi: '' }
+  const nested = item[field];
+  if (nested && typeof nested === 'object') {
+    if (nested[lang]) return nested[lang];
+    if (nested['en']) return nested['en'];
+  }
+  // flat fields: name_en / name_fi
+  const flat = item[field + '_' + lang];
+  if (flat) return flat;
+  const flatEn = item[field + '_en'];
+  if (flatEn) return flatEn;
+  return item[field] || '';
+}

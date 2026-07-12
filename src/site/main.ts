@@ -81,15 +81,10 @@ function loadUI() {
   } catch (e) {}
 }
 
-import { loadLocale, t } from './i18n';
+import { loadLocale, t, localizedField } from './i18n';
 
 function localizedDrillField(item: Drill, field: keyof Drill) {
-  const k = String(field);
-  const v = (item as any)[k + '_' + langState.lang];
-  if (v) return v;
-  const en = (item as any)[k + '_en'];
-  if (en) return en;
-  return (item as any)[k] || '';
+  return localizedField(item, String(field), langState.lang);
 }
 function saveUI() {
   try {
@@ -107,9 +102,15 @@ const clearProgressBtn = document.getElementById('clear-progress');
 const themeBtn = document.getElementById('theme-btn');
 
 if (langSelect)
-  langSelect.addEventListener('change', () => {
+  langSelect.addEventListener('change', async () => {
     langState.lang = (langSelect.value || 'en') as string;
     saveUI();
+    await loadLocale(langState.lang);
+    const brand = document.getElementById('brand');
+    if (brand && (window as any)._bbdrills_loc && (window as any)._bbdrills_loc.brand)
+      brand.textContent = (window as any)._bbdrills_loc.brand;
+    updateFilterLabel();
+    applyTheme();
     render(currentData);
   });
 if (filterBtn) filterBtn.addEventListener('click', toggleFilter);
