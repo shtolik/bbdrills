@@ -548,7 +548,7 @@ function showModalForIndex(idx: number) {
       iframe.setAttribute('referrerpolicy', 'no-referrer');
       box.appendChild(iframe);
     } else {
-      const w = window.open(normalizeUrl(item.video_url), '_blank');
+      const w = window.open(normalizeUrl(item.video_url), '_blank', 'noopener,noreferrer');
       if (w) {
         try {
           (w as any).opener = null;
