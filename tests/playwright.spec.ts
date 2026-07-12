@@ -181,7 +181,7 @@ test('modal opens and closes when Open video clicked (if present)', async ({ pag
   const viewBtn = firstCard.locator('button', { hasText: 'Open video' });
   if ((await viewBtn.count()) === 0) {
     // no Open video button in this environment; mark test as skipped so it's visible in test reports
-    test.info().skip(true);
+    test.info().skip(true,'Open video button not present in this environment');
     return;
   }
 
