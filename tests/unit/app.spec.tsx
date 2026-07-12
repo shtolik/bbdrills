@@ -45,7 +45,7 @@ describe('App (Preact) basic wiring', () => {
     `;
 
     // import App and render
-    const mod = await import('../../../src/site/App');
+    const mod = await import('../../src/site/App');
     const App = mod.default;
     render(App({} as any), document.getElementById('content')!);
 
