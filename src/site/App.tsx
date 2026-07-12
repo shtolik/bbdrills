@@ -59,7 +59,7 @@ function groupBy(data: Drill[], key: keyof Drill) {
 export default function App() {
   const [data, setData] = useState<Drill[]>([]);
   const lazyObserver = useRef<IntersectionObserver | null>(null);
-
+  const didSyncUI = useRef(false);
   // UI state (persisted)
   const UI_KEY = 'bbdrills_ui_v1';
   const STORAGE_KEY = 'bbdrills_progress_v3';
@@ -70,15 +70,24 @@ export default function App() {
   useEffect(() => {
     migrateLegacyIfNeeded();
     // load UI from localStorage
+    let initialLang: 'en' | 'fi' = 'en';
+    let initialFilter: 'all' | 'incomplete' = 'all';
+    let initialTheme: 'system' | 'dark' | 'light' = 'system';
     try {
       const raw = localStorage.getItem(UI_KEY);
       if (raw) {
         const s = JSON.parse(raw);
-        if (s.lang === 'en' || s.lang === 'fi') setLang(s.lang);
-        if (s.filter === 'all' || s.filter === 'incomplete') setFilter(s.filter);
-        if (s.theme === 'system' || s.theme === 'dark' || s.theme === 'light') setTheme(s.theme);
+        if (s.lang === 'en' || s.lang === 'fi') initialLang = s.lang;
+        if (s.filter === 'all' || s.filter === 'incomplete') initialFilter = s.filter;
+        if (s.theme === 'system' || s.theme === 'dark' || s.theme === 'light') initialTheme = s.theme;
       }
     } catch (e) {}
+
+    setLang(initialLang);
+    setFilter(initialFilter);
+    setTheme(initialTheme);
+    applyTheme(initialTheme);
+    updateFilterLabel(initialFilter);
 
     (async () => {
       try {
@@ -128,16 +137,12 @@ export default function App() {
 
     const onEn = () => {
       setLang('en');
-      saveUI();
-      // re-render handled by state
     };
     const onFi = () => {
       setLang('fi');
-      saveUI();
     };
     const onFilter = () => {
       setFilter(prev => (prev === 'all' ? 'incomplete' : 'all'));
-      saveUI();
     };
     const onClear = () => {
       if (!confirm('Clear local progress?')) return;
@@ -149,11 +154,13 @@ export default function App() {
     };
     const onTheme = () => {
       const order: ('system' | 'dark' | 'light')[] = ['system', 'dark', 'light'];
-      const idx = order.indexOf(theme || 'system');
-      const next = order[(idx + 1) % order.length];
-      setTheme(next);
-      saveUI();
-      applyTheme(next);
+      setTheme(prev => {
+        const idx = order.indexOf(prev || 'system');
+        const next = order[(idx + 1) % order.length];
+        writeUI({ theme: next });
+        applyTheme(next);
+        return next;
+      });
     };
 
     if (btnEn) btnEn.addEventListener('click', onEn);
@@ -176,9 +183,7 @@ export default function App() {
     };
     if (modal) modal.addEventListener('click', onModalClick);
 
-    // initial theme apply and filter label
-    applyTheme(theme);
-    updateFilterLabel(filter);
+    // initial theme/filter UI is applied when reading persisted UI above
 
     return () => {
       if (lazyObserver.current) lazyObserver.current.disconnect();
@@ -199,6 +204,16 @@ export default function App() {
       });
     });
   }, [data]);
+
+  useEffect(() => {
+    applyTheme(theme);
+    updateFilterLabel(filter);
+    if (!didSyncUI.current) {
+      didSyncUI.current = true;
+      return;
+    }
+    saveUI();
+  }, [lang, filter, theme]);
 
   function saveUI() {
     try {
@@ -308,8 +323,7 @@ export default function App() {
           iframe.setAttribute('referrerpolicy', 'no-referrer');
           box.appendChild(iframe);
         }
-      } else if ((window as any).YT || youtubeIdFromUrl(item.video_url)) {
-        const id = youtubeIdFromUrl(item.video_url);
+      } else if (id) {
         const iframe = document.createElement('iframe');
         iframe.src = 'https://www.youtube.com/embed/' + id + '?autoplay=1';
         iframe.width = '800';
@@ -358,21 +372,18 @@ export default function App() {
   const showModalForItem = (item: Drill) => showModalForIndex([item], 0);
 
   const mark = (id: string) => {
-    markSetComplete(id);
-    // trigger visible card update
-    const setsEl = document.querySelector('.card[data-id="' + id + '"] .sets-display');
-    if (setsEl) {
-      const day = getDay(id);
-      const target =
-        day.targetSets && day.targetSets > 0
-          ? day.targetSets
-          : data.find(d => d.id === id)?.sets || 0;
-      setsEl.textContent = (day.setsCompleted || 0) + '/' + (target || '-');
-    }
-    const card = document.querySelector('.card[data-id="' + id + '"]');
-    if (card) {
-      card.classList.add('done');
-    }
+    const day = markSetComplete(id);
+    const item = data.find(d => d.id === id);
+    const target = day.targetSets && day.targetSets > 0 ? day.targetSets : item?.sets || 0;
+
+    const card = document.querySelector('.card[data-id="' + id + '"]') as HTMLElement | null;
+    if (!card) return;
+
+    const setsEl = card.querySelector('.sets-display');
+    if (setsEl) setsEl.textContent = (day.setsCompleted || 0) + '/' + (target || '-');
+
+    const done = target > 0 && (day.setsCompleted || 0) >= target;
+    card.classList.toggle('done', done);
   };
 
   const renderCard = (it: Drill) => {
@@ -383,8 +394,9 @@ export default function App() {
         : it.sets
         ? day.setsCompleted >= it.sets
         : false;
+
+    if (filter === 'incomplete' && completed) return null;
     const previewWebp = it.preview_webp ? resolveAsset(it.preview_webp) : null;
-    const previewGif = it.gif ? resolveAsset(it.gif) : null;
     const ytThumb = it.video_url ? youtubeThumbnail(it.video_url) : '';
 
     const poster = completed ? previewWebp || previewGif || ytThumb || '' : '';
@@ -432,7 +444,7 @@ export default function App() {
           )}
         </div>
         <div className={'meta'}>
-          <div className={'title'}>{it.name_en}</div>
+          <div className={'title'}>{lang === 'fi' ? it.name_fi || it.name_en : it.name_en}</div>
           <div className={'details'}>
             {it.details}
             <br />
@@ -459,6 +471,7 @@ export default function App() {
                 href={it.video_url}
                 target={'_blank'}
                 rel={'noopener noreferrer'}
+                referrerPolicy={'no-referrer'}
                 style={{ marginLeft: '8px' }}
               >
                 Open on YouTube
@@ -474,12 +487,17 @@ export default function App() {
 
   return (
     <div>
-      {Array.from(groups).map(([group, items]) => (
-        <div>
-          <h2 className={'group-title'}>{group}</h2>
-          <div className={'grid'}>{items.map(it => renderCard(it))}</div>
-        </div>
-      ))}
+      {Array.from(groups).map(([group, items]) => {
+        const title = lang === 'fi' ? items[0]?.group_fi || group : group;
+        const rendered = items.map(it => renderCard(it));
+        if (!rendered.some(x => x != null)) return null;
+        return (
+          <div>
+            <h2 className={'group-title'}>{title}</h2>
+            <div className={'grid'}>{rendered}</div>
+          </div>
+        );
+      })}
     </div>
   );
 }
