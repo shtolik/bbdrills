@@ -24,7 +24,8 @@ const resolveAsset = (path?: string | null) => {
   if (path.startsWith('http') || path.startsWith('/')) return path;
   if (path.startsWith('site/')) return path.replace(/^site\//, '');
   if (path.startsWith('videos/')) return '../' + path;
-  if (path.startsWith('gifs25fps/') || path.startsWith('previews/') || path.startsWith('gifs61/')) return path;
+  if (path.startsWith('gifs25fps/') || path.startsWith('previews/') || path.startsWith('gifs61/'))
+    return path;
   return path.replace(/^\/+/, '');
 };
 
