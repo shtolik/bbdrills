@@ -79,7 +79,8 @@ export default function App() {
         const s = JSON.parse(raw);
         if (s.lang === 'en' || s.lang === 'fi') initialLang = s.lang;
         if (s.filter === 'all' || s.filter === 'incomplete') initialFilter = s.filter;
-        if (s.theme === 'system' || s.theme === 'dark' || s.theme === 'light') initialTheme = s.theme;
+        if (s.theme === 'system' || s.theme === 'dark' || s.theme === 'light')
+          initialTheme = s.theme;
       }
     } catch (e) {}
 
@@ -135,14 +136,24 @@ export default function App() {
     const clearProgressBtn = document.getElementById('clear-progress');
     const themeBtn = document.getElementById('theme-btn');
 
+    function saveUIImmediate(l: typeof lang, f: typeof filter, t: typeof theme) {
+      try {
+        localStorage.setItem(UI_KEY, JSON.stringify({ lang: l, filter: f, theme: t }));
+      } catch (e) {}
+    }
+
     const onEn = () => {
       setLang('en');
+      saveUIImmediate('en', filter, theme);
     };
     const onFi = () => {
       setLang('fi');
+      saveUIImmediate('fi', filter, theme);
     };
     const onFilter = () => {
-      setFilter(prev => (prev === 'all' ? 'incomplete' : 'all'));
+      const next = filter === 'all' ? 'incomplete' : 'all';
+      setFilter(next);
+      saveUIImmediate(lang, next, theme);
     };
     const onClear = () => {
       if (!confirm('Clear local progress?')) return;
@@ -154,12 +165,11 @@ export default function App() {
     };
     const onTheme = () => {
       const order: ('system' | 'dark' | 'light')[] = ['system', 'dark', 'light'];
-      setTheme(prev => {
-        const idx = order.indexOf(prev || 'system');
-        const next = order[(idx + 1) % order.length];
-        applyTheme(next);
-        return next;
-      });
+      const idx = order.indexOf(theme || 'system');
+      const next = order[(idx + 1) % order.length];
+      setTheme(next);
+      saveUIImmediate(lang, filter, next);
+      applyTheme(next);
     };
 
     if (btnEn) btnEn.addEventListener('click', onEn);
