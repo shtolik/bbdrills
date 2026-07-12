@@ -98,7 +98,7 @@ export default function App() {
         setData(json);
       } catch (e) {
         const content = document.getElementById('content');
-        if (content) content.innerHTML = '<p style="color:#900">Failed to load data</p>';
+        if (content) content.textContent = 'Failed to load data';
         console.error(e);
       }
     })();
