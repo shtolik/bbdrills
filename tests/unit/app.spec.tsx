@@ -24,7 +24,9 @@ describe('App (Preact) basic wiring', () => {
     (globalThis as any).localStorage = makeStorage();
 
     // mock fetch to return a tiny manifest
-    (globalThis as any).fetch = vi.fn(async () => ({ json: async () => [{ id: 'd1', name_en: 'Drill 1', group_en: 'G' }] }));
+    (globalThis as any).fetch = vi.fn(async () => ({
+      json: async () => [{ id: 'd1', name_en: 'Drill 1', group_en: 'G' }],
+    }));
 
     // prepare DOM expected by App (header buttons and content area + modal)
     document.body.innerHTML = `
@@ -59,13 +61,19 @@ describe('App (Preact) basic wiring', () => {
     render(<App />, document.getElementById('content')!);
 
     cleanup = () => {
-      try { render(null, document.getElementById('content')!); } catch (_) {}
+      try {
+        render(null, document.getElementById('content')!);
+      } catch (_) {}
       document.body.innerHTML = '';
       vi.resetAllMocks();
     };
 
-    // Allow microtasks to complete (fetch resolution/useEffect)
-    await new Promise(r => setTimeout(r, 100));
+    // Wait for effects (fetch/useEffect) to render at least one card (avoid fixed sleeps)
+    const start = Date.now();
+    while (!document.querySelector('.card')) {
+      if (Date.now() - start > 1000) throw new Error('Timed out waiting for App to render cards');
+      await new Promise(r => setTimeout(r, 10));
+    }
   });
 
   afterEach(() => {

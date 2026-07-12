@@ -556,7 +556,8 @@ function showModalForIndex(idx: number) {
     video.style.maxWidth = '90vw';
     box.appendChild(video);
   } else if (item.local_video) {
-    const w = window.open(item.local_video, '_blank');
+    const url = resolveAsset(item.local_video) || item.local_video;
+    const w = window.open(url, '_blank');
     if (w) {
       try {
         (w as any).opener = null;
