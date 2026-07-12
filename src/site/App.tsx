@@ -533,7 +533,7 @@ export default function App() {
                 <br />
               </>
             ) : null}
-            <span className={'reps-label'}>Reps:</span>{' '}
+            <span className={'reps-label'}>Reps:</span>
             <span className={'reps-display'}>
               {(it.reps || '') + (it.reps && it.reps_unit ? ' ' + it.reps_unit : '')}
             </span>

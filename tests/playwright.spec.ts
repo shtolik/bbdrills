@@ -61,7 +61,7 @@ test('site loads, no console errors, and cards match manifest', async ({ page }:
   expect(errors.length).toBe(0);
 });
 
-test('Open on YouTube links are normalized to absolute https URLs', async ({
+test('Open on YouTube links are normalized to absolute URLs', async ({
   page,
 }: {
   page: Page;

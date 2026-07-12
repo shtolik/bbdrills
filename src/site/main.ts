@@ -343,7 +343,6 @@ function render(data: Drill[]) {
       const sRepsVal = document.createElement('span');
       sRepsVal.className = 'reps-display';
       sRepsVal.textContent = (it.reps || '') + (it.reps && it.reps_unit ? ' ' + it.reps_unit : '');
-      details.appendChild(document.createTextNode(' '));
       details.appendChild(sRepsVal);
 
       const infoRow = document.createElement('div');
