@@ -49,12 +49,15 @@ function youtubeThumbnail(url?: string) {
 function normalizeUrl(url?: string) {
   if (!url) return '';
   let s = String(url).trim();
+  if (!s) return '';
   // already absolute
   if (/^https?:\/\//i.test(s)) return s;
   // miss-typed single-slash like "https:/youtu.be/..."
   if (/^https?:\//i.test(s)) return s.replace(/^https?:\/*/i, 'https://');
-  // leave protocol-relative and absolute paths alone
-  if (/^\/\//.test(s) || s.startsWith('/')) return s;
+  // protocol-relative: force https
+  if (/^\/\//.test(s)) return 'https:' + s;
+  // leading slash: treat as missing scheme/host (e.g. "/youtu.be/...")
+  if (s.startsWith('/')) s = s.replace(/^\/+/, '');
   return 'https://' + s;
 }
 

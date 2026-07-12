@@ -208,9 +208,11 @@ function youtubeThumbnail(url?: string) {
 function normalizeUrl(url?: string) {
   if (!url) return '';
   let s = String(url).trim();
+  if (!s) return '';
   if (/^https?:\/\//i.test(s)) return s;
   if (/^https?:\//i.test(s)) return s.replace(/^https?:\/*/i, 'https://');
-  if (/^\/\//.test(s) || s.startsWith('/')) return s;
+  if (/^\/\//.test(s)) return 'https:' + s;
+  if (s.startsWith('/')) s = s.replace(/^\/+/, '');
   return 'https://' + s;
 }
 
