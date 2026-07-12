@@ -5,19 +5,23 @@ import { loadLocale, t, localizedField } from './i18n';
 
 type Drill = {
   id: string;
-  name_en: string;
-  name_fi?: string;
-  group_en?: string;
-  group_fi?: string;
+  // name/details/groups/reps may be nested localized objects: { en: string, fi: string, sv: string }
+  name?: any;
+  details?: any;
+  group?: any;
+  reps?: any; // can be string or localized object
+  reps_unit?: string;
+  sets?: number;
   preview_webp?: string;
   gif?: string;
   preview_mp4?: string;
   video_url?: string;
   local_video?: string;
-  reps?: number | string;
-  reps_unit?: string;
-  sets?: number;
-  details?: string;
+  // legacy flat fields kept for backward-compat
+  name_en?: string;
+  name_fi?: string;
+  group_en?: string;
+  group_fi?: string;
 };
 
 const resolveAsset = (path?: string | null) => {
@@ -494,7 +498,7 @@ export default function App() {
             poster ? (
               <img
                 src={poster}
-                alt={it.name_en + ' thumbnail'}
+                alt={(localizedDrillField(it, 'name') || it.name_en) + ' thumbnail'}
                 className={'lazy-img'}
                 onLoad={e => {
                   const img = e.currentTarget as HTMLImageElement;
@@ -533,7 +537,7 @@ export default function App() {
                   <img
                     className={'lazy-img'}
                     data-src={previewGif || ytThumb || ''}
-                    alt={it.name_en + ' thumbnail'}
+                    alt={(localizedDrillField(it, 'name') || it.name_en) + ' thumbnail'}
                     loading={'lazy'}
                     onLoad={e => {
                       const img = e.currentTarget as HTMLImageElement;
@@ -548,7 +552,7 @@ export default function App() {
                 <img
                   className={'lazy-img'}
                   data-src={previewGif || ytThumb || ''}
-                  alt={it.name_en + ' thumbnail'}
+                  alt={(localizedDrillField(it, 'name') || it.name_en) + ' thumbnail'}
                   loading={'lazy'}
                   onLoad={e => {
                     const img = e.currentTarget as HTMLImageElement;
@@ -575,7 +579,8 @@ export default function App() {
             ) : null}
             <span className={'reps-label'}>{t('reps_label', 'Reps:')}</span>
             <span className={'reps-display'}>
-              {(it.reps || '') + (it.reps && it.reps_unit ? ' ' + it.reps_unit : '')}
+              {localizedDrillField(it, 'reps') ||
+                (it.reps || '') + (it.reps && it.reps_unit ? ' ' + it.reps_unit : '')}
             </span>
           </div>
           <div className={'info-row'}>
@@ -611,7 +616,15 @@ export default function App() {
     );
   };
 
-  const groups = groupBy(data || [], 'group_en');
+  // group by localized group label (fallback to legacy group_en)
+  const groupsMap = new Map<string, Drill[]>();
+  (data || []).forEach(item => {
+    const key =
+      (localizedField(item, 'group', lang) as string) || (item as any).group_en || 'Other';
+    if (!groupsMap.has(key)) groupsMap.set(key, []);
+    groupsMap.get(key)!.push(item);
+  });
+  const groups = Array.from(groupsMap);
 
   return (
     <div>

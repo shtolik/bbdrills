@@ -196,6 +196,17 @@ function groupBy(data: Drill[], key: keyof Drill) {
   return map;
 }
 
+// New helper to group by localized 'group' field using current lang
+function groupByLocalized(data: Drill[]) {
+  const map = new Map<string, Drill[]>();
+  data.forEach(item => {
+    const k = localizedDrillField(item, 'group') || (item as any).group_en || 'Other';
+    if (!map.has(k)) map.set(k, []);
+    map.get(k)!.push(item);
+  });
+  return map;
+}
+
 function resolveAsset(path?: string | null) {
   if (!path) return null;
   if (path.startsWith('http') || path.startsWith('/')) return path;
@@ -234,14 +245,14 @@ function normalizeUrl(url?: string) {
 
 function render(data: Drill[]) {
   if (!data) return;
-  const groups = groupBy(data, 'group_en');
+  const groups = groupByLocalized(data);
   const container = document.getElementById('content');
   if (!container) return;
   container.innerHTML = '';
   for (const [group, items] of groups) {
     const h = document.createElement('h2');
     h.className = 'group-title';
-    h.textContent = langState.lang === 'fi' ? items[0].group_fi || group : group;
+    h.textContent = localizedDrillField(items[0], 'group') || group;
     container.appendChild(h);
     const grid = document.createElement('div');
     grid.className = 'grid';
@@ -268,7 +279,7 @@ function render(data: Drill[]) {
         if (poster) {
           const img = document.createElement('img');
           img.src = poster;
-          img.alt = it.name_en + ' thumbnail';
+          img.alt = (localizedDrillField(it, 'name') || it.name_en) + ' thumbnail';
           img.loading = 'lazy';
           img.className = 'lazy-img';
           img.addEventListener('load', () => {
@@ -311,7 +322,7 @@ function render(data: Drill[]) {
           pic.appendChild(src);
           const img = document.createElement('img');
           (img as any).dataset.src = previewGif || ytThumb || '';
-          img.alt = it.name_en + ' thumbnail';
+          img.alt = (localizedDrillField(it, 'name') || it.name_en) + ' thumbnail';
           img.loading = 'lazy';
           img.className = 'lazy-img';
           img.addEventListener('load', () => {
@@ -343,10 +354,10 @@ function render(data: Drill[]) {
       meta.className = 'meta';
       const title = document.createElement('div');
       title.className = 'title';
-      title.textContent = langState.lang === 'fi' ? it.name_fi || it.name_en : it.name_en;
+      title.textContent = localizedDrillField(it, 'name') || it.name_en;
       const details = document.createElement('div');
       details.className = 'details';
-      const detailsText = langState.lang === 'fi' ? it.details || '' : it.details || '';
+      const detailsText = localizedDrillField(it, 'details') || it.details || '';
       if (detailsText) {
         details.appendChild(document.createTextNode(detailsText));
         details.appendChild(document.createElement('br'));
@@ -358,7 +369,9 @@ function render(data: Drill[]) {
       details.appendChild(sRepsLabel);
       const sRepsVal = document.createElement('span');
       sRepsVal.className = 'reps-display';
-      sRepsVal.textContent = (it.reps || '') + (it.reps && it.reps_unit ? ' ' + it.reps_unit : '');
+      sRepsVal.textContent =
+        localizedDrillField(it, 'reps') ||
+        (it.reps || '') + (it.reps && it.reps_unit ? ' ' + it.reps_unit : '');
       details.appendChild(sRepsVal);
 
       const infoRow = document.createElement('div');
@@ -722,7 +735,7 @@ function updateCardById(drillId: string, item: Drill) {
       if (poster) {
         const img = document.createElement('img');
         img.src = poster;
-        img.alt = item.name_en + ' thumbnail';
+        img.alt = (localizedDrillField(item, 'name') || item.name_en) + ' thumbnail';
         img.className = 'lazy-img';
         thumb.appendChild(img);
       }
