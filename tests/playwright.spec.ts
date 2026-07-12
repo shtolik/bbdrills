@@ -61,6 +61,47 @@ test('site loads, no console errors, and cards match manifest', async ({ page }:
   expect(errors.length).toBe(0);
 });
 
+test('Open on YouTube links are normalized to absolute URLs', async ({
+  page,
+}: {
+  page: Page;
+}) => {
+  await page.route('**/default_drills_with_meta.json', async route => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify([
+        {
+          id: 'single-slash-url',
+          name_en: 'Single slash URL',
+          video_url: 'https:/youtu.be/URY-escJjss',
+          sets: 1,
+          reps: 1,
+        },
+        {
+          id: 'bare-youtu-be-url',
+          name_en: 'Bare youtu.be URL',
+          video_url: 'youtu.be/orOzt-bT2wc',
+          sets: 1,
+          reps: 1,
+        },
+      ]),
+    });
+  });
+
+  await page.goto(URL);
+  await page.waitForSelector('.card');
+
+  const expectedHrefs = [
+    'https://youtu.be/URY-escJjss',
+    'https://youtu.be/orOzt-bT2wc',
+  ];
+
+  for (const [index, expectedHref] of expectedHrefs.entries()) {
+    const link = page.locator('.card').nth(index).getByRole('link', { name: 'Open on YouTube' });
+    await expect(link).toHaveAttribute('href', expectedHref);
+  }
+});
+
 test('theme, language and progress persist across reloads and assets exist', async ({ page }: { page: Page }) => {
   await page.goto(URL);
   // Ensure deterministic UI state in CI: clear persisted UI key to avoid cross-test or runner-localStorage carrying a different language

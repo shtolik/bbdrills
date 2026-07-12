@@ -205,6 +205,17 @@ function youtubeThumbnail(url?: string) {
   return id ? 'https://img.youtube.com/vi/' + id + '/hqdefault.jpg' : '';
 }
 
+function normalizeUrl(url?: string) {
+  if (!url) return '';
+  let s = String(url).trim();
+  if (!s) return '';
+  if (/^https?:\/\//i.test(s)) return s;
+  if (/^https?:\//i.test(s)) return s.replace(/^https?:\/*/i, 'https://');
+  if (/^\/\//.test(s)) return 'https:' + s;
+  if (s.startsWith('/')) s = s.replace(/^\/+/, '');
+  return 'https://' + s;
+}
+
 function render(data: Drill[]) {
   if (!data) return;
   const groups = groupBy(data, 'group_en');
@@ -325,14 +336,14 @@ function render(data: Drill[]) {
         details.appendChild(document.createElement('br'));
       }
 
-      const sReps = document.createElement('strong');
-      sReps.textContent = 'Reps:';
-      details.appendChild(sReps);
-      details.appendChild(
-        document.createTextNode(
-          ' ' + (it.reps || '') + (it.reps && it.reps_unit ? ' ' + it.reps_unit : '')
-        )
-      );
+      const sRepsLabel = document.createElement('span');
+      sRepsLabel.textContent = 'Reps:';
+      sRepsLabel.className = 'reps-label';
+      details.appendChild(sRepsLabel);
+      const sRepsVal = document.createElement('span');
+      sRepsVal.className = 'reps-display';
+      sRepsVal.textContent = (it.reps || '') + (it.reps && it.reps_unit ? ' ' + it.reps_unit : '');
+      details.appendChild(sRepsVal);
 
       const infoRow = document.createElement('div');
       infoRow.className = 'info-row';
@@ -343,7 +354,7 @@ function render(data: Drill[]) {
       setsWrap.style.gap = '8px';
       const sSets = document.createElement('div');
       sSets.textContent = 'Sets:';
-      sSets.style.fontWeight = '600';
+      sSets.className = 'sets-label';
       const target = day.targetSets && day.targetSets > 0 ? day.targetSets : it.sets || 0;
       const big = document.createElement('div');
       big.className = 'sets-display';
@@ -368,7 +379,7 @@ function render(data: Drill[]) {
       link.appendChild(viewBtn);
       if (it.video_url) {
         const ext = document.createElement('a');
-        ext.href = it.video_url;
+        ext.href = normalizeUrl(it.video_url);
         ext.target = '_blank';
         ext.rel = 'noopener noreferrer';
         ext.setAttribute('referrerpolicy', 'no-referrer');
@@ -537,7 +548,7 @@ function showModalForIndex(idx: number) {
       iframe.setAttribute('referrerpolicy', 'no-referrer');
       box.appendChild(iframe);
     } else {
-      const w = window.open(item.video_url, '_blank');
+      const w = window.open(normalizeUrl(item.video_url), '_blank', 'noopener,noreferrer');
       if (w) {
         try {
           (w as any).opener = null;

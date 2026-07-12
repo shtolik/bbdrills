@@ -1,0 +1,4 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+command -v git-lfs >/dev/null 2>&1 || { printf >&2 "\n%s\n\n" "Git LFS is required for this repo but 'git-lfs' was not found in PATH. Install it from https://git-lfs.github.com/ and run: git lfs install"; exit 2; }
+git lfs pre-push "$@"
