@@ -161,7 +161,6 @@ export default function App() {
     const clearProgressBtn = document.getElementById('clear-progress');
     const themeBtn = document.getElementById('theme-btn');
 
-
     // helper: merge and update persisted UI immediately without relying on captured state
     function mergeAndPersist(
       newVals: Partial<{
