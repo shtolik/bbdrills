@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 import { beforeEach, afterEach, describe, it, expect, vi } from 'vitest';
-import { render } from 'preact';
+import { h, render } from 'preact';
 
 function makeStorage() {
   const store: Record<string, string> = {};
