@@ -46,6 +46,18 @@ function youtubeThumbnail(url?: string) {
   return id ? 'https://img.youtube.com/vi/' + id + '/hqdefault.jpg' : '';
 }
 
+function normalizeUrl(url?: string) {
+  if (!url) return '';
+  let s = String(url).trim();
+  // already absolute
+  if (/^https?:\/\//i.test(s)) return s;
+  // miss-typed single-slash like "https:/youtu.be/..."
+  if (/^https?:\//i.test(s)) return s.replace(/^https?:\/*/i, 'https://');
+  // leave protocol-relative and absolute paths alone
+  if (/^\/\//.test(s) || s.startsWith('/')) return s;
+  return 'https://' + s;
+}
+
 function groupBy(data: Drill[], key: keyof Drill) {
   const map = new Map<string, Drill[]>();
   data.forEach(item => {
@@ -385,7 +397,7 @@ export default function App() {
         iframe.setAttribute('referrerpolicy', 'no-referrer');
         box.appendChild(iframe);
       } else {
-        window.open(item.video_url, '_blank', 'noopener,noreferrer');
+        window.open(normalizeUrl(item.video_url), '_blank', 'noopener,noreferrer');
         return;
       }
     } else if (item.preview_mp4) {
@@ -518,8 +530,10 @@ export default function App() {
                 <br />
               </>
             ) : null}
-            <strong>Reps:</strong>{' '}
-            {' ' + (it.reps || '') + (it.reps && it.reps_unit ? ' ' + it.reps_unit : '')}
+            <span className={'reps-label'}>Reps:</span>{' '}
+            <span className={'reps-display'}>
+              {(it.reps || '') + (it.reps && it.reps_unit ? ' ' + it.reps_unit : '')}
+            </span>
           </div>
           <div className={'info-row'}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -539,7 +553,7 @@ export default function App() {
             <button onClick={() => openVideo(it)}>Open video</button>
             {it.video_url && (
               <a
-                href={it.video_url}
+                href={normalizeUrl(it.video_url)}
                 target={'_blank'}
                 rel={'noopener noreferrer'}
                 referrerPolicy={'no-referrer'}
