@@ -1,18 +1,18 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page, ConsoleMessage } from '@playwright/test';
 
 const BASE = 'http://127.0.0.1:8000/site/';
 const URL = BASE + 'index.html';
 
 // Helper: collect console errors
-async function collectConsoleErrors(page) {
+async function collectConsoleErrors(page: Page) {
   const errors: string[] = [];
-  page.on('console', msg => {
+  page.on('console', (msg: ConsoleMessage) => {
     if (msg.type() === 'error') errors.push(msg.text());
   });
   return errors;
 }
 
-test('site loads, no console errors, and cards match manifest', async ({ page }) => {
+test('site loads, no console errors, and cards match manifest', async ({ page }: { page: Page }) => {
   const errors = await collectConsoleErrors(page);
   await page.goto(URL);
   await page.waitForSelector('.card');
@@ -61,8 +61,11 @@ test('site loads, no console errors, and cards match manifest', async ({ page })
   expect(errors.length).toBe(0);
 });
 
-test('theme, language and progress persist across reloads and assets exist', async ({ page }) => {
+test('theme, language and progress persist across reloads and assets exist', async ({ page }: { page: Page }) => {
   await page.goto(URL);
+  // Ensure deterministic UI state in CI: clear persisted UI key to avoid cross-test or runner-localStorage carrying a different language
+  await page.evaluate(() => localStorage.removeItem('bbdrills_ui_v1'));
+  await page.reload();
   await page.waitForSelector('.card');
 
   // fetch manifest for later asset checks
@@ -132,6 +135,8 @@ test('theme, language and progress persist across reloads and assets exist', asy
 
 test('buttons: card buttons present and mark done persists after reload (separate from modal)', async ({
   page,
+}: {
+  page: Page;
 }) => {
   await page.goto(URL);
   await page.waitForSelector('.card');
@@ -171,7 +176,7 @@ test('buttons: card buttons present and mark done persists after reload (separat
   expect(afterDone).toBeGreaterThan(initialDone);
 });
 
-test('modal opens and closes when Open video clicked (if present)', async ({ page }) => {
+test('modal opens and closes when Open video clicked (if present)', async ({ page }: { page: Page }) => {
   await page.goto(URL);
   await page.waitForSelector('.card');
 
@@ -179,7 +184,7 @@ test('modal opens and closes when Open video clicked (if present)', async ({ pag
   const viewBtn = firstCard.locator('button', { hasText: 'Open video' });
   if ((await viewBtn.count()) === 0) {
     // no Open video button in this environment; mark test as skipped so it's visible in test reports
-    test.info().skip('Open video button not present in this environment');
+    test.info().skip(true, 'Open video button not present in this environment');
     return;
   }
 

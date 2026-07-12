@@ -1,7 +1,15 @@
 name: Prettier check
 
 on:
+  push:
+    branches: ['**']
+    paths:
+      - 'src/**'
+      - 'site/**'
+      - '.prettierrc'
+      - 'package.json'
   pull_request:
+    branches: ['**']
     paths:
       - 'src/**'
       - 'site/**'
@@ -10,6 +18,7 @@ on:
 
 jobs:
   prettier:
+    name: Check Prettier formatting
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,7 +26,46 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
+          cache: 'npm'
       - name: Install dependencies
         run: npm ci
       - name: Run Prettier check
         run: npm run format:check
+
+  auto-format:
+    name: Auto-format & push (if needed)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.actor != 'github-actions[bot]'
+    steps:
+      - name: Checkout (with write access)
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run Prettier (write)
+        run: |
+          set -e
+          npm run format
+      - name: Commit and push formatting changes if any
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain)" ]; then
+            git add -A
+            git commit -m "chore: format code with Prettier (action)"
+            BRANCH_NAME=${{ github.head_ref || github.ref_name || github.ref }}
+            # Normalize branch name for push
+            BRANCH_NAME=${BRANCH_NAME#refs/heads/}
+            git push origin HEAD:"${BRANCH_NAME}"
+          else
+            echo "No formatting changes"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

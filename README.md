@@ -34,3 +34,14 @@ This repository contains the static website for BBDrills: a small, data-driven s
 - Run only the focused performance test (skipped by default). Enable it with PERF_TESTS=1:
   Shell (bash/zsh): PERF_TESTS=1 npx playwright test -g "performance: first two"
   PowerShell: $env:PERF_TESTS='1'; npx playwright test -g "performance: first two"
+
+## Key files
+
+- src/site/App.tsx — new Preact application entry that renders drills and handles UI state (theme/lang/filter), modal, and lazy loading.
+- src/site/main.tsx — Preact mount that also loads the YouTube iframe API flag.
+- site/site.bundle.js — generated bundle (gitignored); produced by `npm run build:site` using esbuild.
+- site/default_drills_with_meta.json — canonical manifest used by the site and tests.
+- src/lib/progress.ts — progress persistence helpers used by both site and tests.
+- tests/playwright.spec.ts and playwright.config.ts — Playwright end-to-end tests and configuration.
+
+Make sure to run `npm install` after switching branches so site bundle can be built locally with `npm run build:site`.

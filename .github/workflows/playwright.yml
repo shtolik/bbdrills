@@ -52,7 +52,6 @@ jobs:
 
       - name: Build site bundle
         run: npm run build:site
-
       - name: Diagnose Playwright installation
         run: |
           echo "--- resolve @playwright/test version and path ---"
