@@ -399,8 +399,12 @@ export default function App() {
       video.style.maxWidth = '90vw';
       box.appendChild(video);
     } else if (item.local_video) {
-        window.open(resolveAsset(item.local_video) || item.local_video, '_blank', 'noopener,noreferrer');
-        return;
+      window.open(
+        resolveAsset(item.local_video) || item.local_video,
+        '_blank',
+        'noopener,noreferrer'
+      );
+      return;
     }
 
     modal.classList.add('open');
