@@ -47,7 +47,8 @@ describe('App (Preact) basic wiring', () => {
     // import App and render
     const mod = await import('../../src/site/App');
     const App = mod.default;
-    render(App({} as any), document.getElementById('content')!);
+    // render via JSX so hooks are initialized correctly
+    render(<App />, document.getElementById('content')!);
 
     cleanup = () => {
       render(null, document.getElementById('content')!);
