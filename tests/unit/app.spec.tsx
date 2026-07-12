@@ -65,7 +65,7 @@ describe('App (Preact) basic wiring', () => {
     };
 
     // Allow microtasks to complete (fetch resolution/useEffect)
-    await new Promise(r => setTimeout(r, 20));
+    await new Promise(r => setTimeout(r, 100));
   });
 
   afterEach(() => {
