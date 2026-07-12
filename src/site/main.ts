@@ -81,14 +81,7 @@ function loadUI() {
   } catch (e) {}
 }
 
-function t(key: string, fallback?: string) {
-  try {
-    const loc = (window as any)._bbdrills_loc || {};
-    return (loc[key] as string) || fallback || key;
-  } catch (e) {
-    return fallback || key;
-  }
-}
+import { loadLocale, t } from './i18n';
 
 function localizedDrillField(item: Drill, field: keyof Drill) {
   const k = String(field);
@@ -396,7 +389,7 @@ function render(data: Drill[]) {
       const link = document.createElement('div');
       link.style.marginTop = '6px';
       const viewBtn = document.createElement('button');
-      viewBtn.textContent = 'Open video';
+      viewBtn.textContent = t('open_video', 'Open video');
       viewBtn.addEventListener('click', () => openVideo(it));
       link.appendChild(viewBtn);
       if (it.video_url) {

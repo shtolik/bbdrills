@@ -120,9 +120,9 @@ test('theme, language and progress persist across reloads and assets exist', asy
   const themeBefore = await page.evaluate(() => localStorage.getItem('bbdrills_ui_v1'));
   expect(themeBefore).toContain('"theme"');
 
-  // toggle language and verify persisted
-  await page.click('#btn-fi');
-  await page.click('#btn-en');
+  // toggle language via dropdown and verify persisted
+  await page.selectOption('#lang-select', 'fi');
+  await page.selectOption('#lang-select', 'en');
   const uiRaw = await page.evaluate(() => localStorage.getItem('bbdrills_ui_v1'));
   expect(uiRaw).toBeTruthy();
   const ui = JSON.parse(uiRaw || '{}');

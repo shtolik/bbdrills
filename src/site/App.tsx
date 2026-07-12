@@ -1,6 +1,7 @@
 import { h, Fragment } from 'preact';
 import { useEffect, useState, useRef } from 'preact/hooks';
 import { getDay, markSetComplete, migrateLegacyIfNeeded } from '../lib/progress';
+import { loadLocale, t } from './i18n';
 
 type Drill = {
   id: string;
@@ -112,15 +113,15 @@ export default function App() {
 
     (async () => {
       try {
-        const [res, locRes] = await Promise.all([
+        const [res, loc] = await Promise.all([
           fetch('./default_drills_with_meta.json'),
-          fetch('./locales/' + initialLang + '.json').catch(() => fetch('./locales/en.json')),
+          loadLocale(initialLang),
         ]);
         const json = await res.json();
-        const loc = await locRes.json();
-        (window as any)._bbdrills_loc = loc;
+        const locObj = await loc;
+        (window as any)._bbdrills_loc = locObj;
         const brandEl = document.getElementById('brand');
-        if (brandEl && loc && loc.brand) brandEl.textContent = loc.brand;
+        if (brandEl && locObj && locObj.brand) brandEl.textContent = locObj.brand;
         setData(json);
       } catch (e) {
         const content = document.getElementById('content');
@@ -202,9 +203,17 @@ export default function App() {
       } catch (e) {}
     }
 
-    const onLangChange = (next: string) => {
+    const onLangChange = async (next: string) => {
       setLang(next);
       mergeAndPersist({ lang: next });
+      const loc = await loadLocale(next);
+      const brandEl = document.getElementById('brand');
+      if (brandEl && loc && loc.brand) brandEl.textContent = loc.brand;
+      // update header labels
+      updateFilterLabel(filter);
+      applyTheme(theme);
+      const clearBtn = document.getElementById('clear-progress');
+      if (clearBtn) clearBtn.textContent = t('clear_progress', 'Clear progress');
     };
     const onFilter = () => {
       setFilter(prev => {
@@ -588,7 +597,7 @@ export default function App() {
             </div>
           </div>
           <div style={{ marginTop: '6px' }}>
-            <button onClick={() => openVideo(it)}>Open video</button>
+            <button onClick={() => openVideo(it)}>{t('open_video', 'Open video')}</button>
             {it.video_url && (
               <a
                 href={normalizeUrl(it.video_url)}
