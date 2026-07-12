@@ -157,7 +157,6 @@ export default function App() {
       setTheme(prev => {
         const idx = order.indexOf(prev || 'system');
         const next = order[(idx + 1) % order.length];
-        writeUI({ theme: next });
         applyTheme(next);
         return next;
       });
@@ -397,10 +396,9 @@ export default function App() {
 
     if (filter === 'incomplete' && completed) return null;
     const previewWebp = it.preview_webp ? resolveAsset(it.preview_webp) : null;
+    const previewGif = it.gif ? resolveAsset(it.gif) : null;
     const ytThumb = it.video_url ? youtubeThumbnail(it.video_url) : '';
-
     const poster = completed ? previewWebp || previewGif || ytThumb || '' : '';
-
     // produce DOM nodes similar to original markup but using JSX
     return (
       <article className={'card' + (completed ? ' done' : '')} data-id={it.id}>
