@@ -44,6 +44,14 @@ describe('App (Preact) basic wiring', () => {
       </div>
     `;
 
+    // polyfill IntersectionObserver used by App
+    (globalThis as any).IntersectionObserver = class {
+      constructor(cb: any) {}
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    } as any;
+
     // import App and render
     const mod = await import('../../src/site/App');
     const App = mod.default;
@@ -51,13 +59,13 @@ describe('App (Preact) basic wiring', () => {
     render(<App />, document.getElementById('content')!);
 
     cleanup = () => {
-      render(null, document.getElementById('content')!);
+      try { render(null, document.getElementById('content')!); } catch (_) {}
       document.body.innerHTML = '';
       vi.resetAllMocks();
     };
 
     // Allow microtasks to complete (fetch resolution/useEffect)
-    await new Promise(r => setTimeout(r, 0));
+    await new Promise(r => setTimeout(r, 20));
   });
 
   afterEach(() => {
