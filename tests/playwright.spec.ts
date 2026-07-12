@@ -63,6 +63,9 @@ test('site loads, no console errors, and cards match manifest', async ({ page }:
 
 test('theme, language and progress persist across reloads and assets exist', async ({ page }: { page: Page }) => {
   await page.goto(URL);
+  // Ensure deterministic UI state in CI: clear persisted UI key to avoid cross-test or runner-localStorage carrying a different language
+  await page.evaluate(() => localStorage.removeItem('bbdrills_ui_v1'));
+  await page.reload();
   await page.waitForSelector('.card');
 
   // fetch manifest for later asset checks
