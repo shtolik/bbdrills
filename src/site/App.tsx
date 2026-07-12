@@ -23,8 +23,8 @@ const resolveAsset = (path?: string | null) => {
   if (!path) return null;
   if (path.startsWith('http') || path.startsWith('/')) return path;
   if (path.startsWith('site/')) return path.replace(/^site\//, '');
-  if (path.startsWith('gifs25fps/') || path.startsWith('previews/') || path.startsWith('gifs61/'))
-    return path;
+  if (path.startsWith('videos/')) return '../' + path;
+  if (path.startsWith('gifs25fps/') || path.startsWith('previews/') || path.startsWith('gifs61/')) return path;
   return path.replace(/^\/+/, '');
 };
 
@@ -382,7 +382,7 @@ export default function App() {
       video.style.maxWidth = '90vw';
       box.appendChild(video);
     } else if (item.local_video) {
-      const w = window.open(item.local_video, '_blank');
+      const w = window.open(resolveAsset(item.local_video) || item.local_video, '_blank');
       if (w) {
         try {
           (w as any).opener = null;
