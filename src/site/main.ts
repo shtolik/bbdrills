@@ -353,7 +353,7 @@ function render(data: Drill[]) {
       setsWrap.style.gap = '8px';
       const sSets = document.createElement('div');
       sSets.textContent = 'Sets:';
-      sSets.style.fontWeight = '600';
+      sSets.className = 'sets-label';
       const target = day.targetSets && day.targetSets > 0 ? day.targetSets : it.sets || 0;
       const big = document.createElement('div');
       big.className = 'sets-display';

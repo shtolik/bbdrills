@@ -537,7 +537,7 @@ export default function App() {
           </div>
           <div className={'info-row'}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ fontWeight: 600 }}>Sets:</div>
+              <div className={'sets-label'}>Sets:</div>
               <div className={'sets-display'}>
                 {(day.setsCompleted || 0) +
                   '/' +
