@@ -114,15 +114,39 @@ export default function App() {
         }
         const srcEl = thumb.querySelector('source.lazy-source') as HTMLSourceElement | null;
         if (srcEl && (srcEl as any).dataset.srcset) srcEl.srcset = (srcEl as any).dataset.srcset;
+
         const img = thumb.querySelector('img.lazy-img') as HTMLImageElement | null;
-        if (img && (img as any).dataset.src) img.src = (img as any).dataset.src;
+        if (img) {
+          if ((img as any).dataset.src) img.src = (img as any).dataset.src;
+          const apply = () => {
+            if (img.naturalWidth && img.naturalHeight) {
+              thumb.classList.toggle('vertical', img.naturalHeight > img.naturalWidth);
+              thumb.classList.toggle('horizontal', img.naturalWidth >= img.naturalHeight);
+            }
+          };
+          if (img.complete) apply();
+          else img.addEventListener('load', apply, { once: true });
+        }
+
         const video = thumb.querySelector('video.lazy-video') as HTMLVideoElement | null;
-        if (video && (video as any).dataset.src) {
-          video.src = (video as any).dataset.src;
-          try {
-            video.load();
-            video.play().catch(() => {});
-          } catch (e) {}
+        if (video) {
+          if ((video as any).dataset.src) video.src = (video as any).dataset.src;
+          const apply = () => {
+            const w = video.videoWidth;
+            const h = video.videoHeight;
+            if (w && h) {
+              thumb.classList.toggle('vertical', h > w);
+              thumb.classList.toggle('horizontal', w >= h);
+            }
+          };
+          if (video.readyState >= 1) apply();
+          else video.addEventListener('loadedmetadata', apply, { once: true });
+          if ((video as any).dataset.src) {
+            try {
+              video.load();
+              video.play().catch(() => {});
+            } catch (e) {}
+          }
         }
         (thumb.dataset as any).loaded = '1';
         obs.unobserve(thumb);
@@ -142,18 +166,10 @@ export default function App() {
       } catch (e) {}
     }
 
-    const onEn = () => {
-      setLang('en');
-      saveUIImmediate('en', filter, theme);
-    };
-    const onFi = () => {
-      setLang('fi');
-      saveUIImmediate('fi', filter, theme);
-    };
+    const onEn = () => setLang('en');
+    const onFi = () => setLang('fi');
     const onFilter = () => {
-      const next = filter === 'all' ? 'incomplete' : 'all';
-      setFilter(next);
-      saveUIImmediate(lang, next, theme);
+      setFilter(prev => (prev === 'all' ? 'incomplete' : 'all'));
     };
     const onClear = () => {
       if (!confirm('Clear local progress?')) return;
@@ -164,12 +180,13 @@ export default function App() {
       setData(prev => prev.slice());
     };
     const onTheme = () => {
-      const order: ('system' | 'dark' | 'light')[] = ['system', 'dark', 'light'];
-      const idx = order.indexOf(theme || 'system');
-      const next = order[(idx + 1) % order.length];
-      setTheme(next);
-      saveUIImmediate(lang, filter, next);
-      applyTheme(next);
+      setTheme(prev => {
+        const order: ('system' | 'dark' | 'light')[] = ['system', 'dark', 'light'];
+        const idx = order.indexOf(prev || 'system');
+        const next = order[(idx + 1) % order.length];
+        applyTheme(next);
+        return next;
+      });
     };
 
     if (btnEn) btnEn.addEventListener('click', onEn);
@@ -212,7 +229,7 @@ export default function App() {
         if (!(t as any).dataset.loaded) lazyObserver.current && lazyObserver.current.observe(t);
       });
     });
-  }, [data]);
+  }, [data, filter]);
 
   useEffect(() => {
     applyTheme(theme);
@@ -381,18 +398,9 @@ export default function App() {
   const showModalForItem = (item: Drill) => showModalForIndex([item], 0);
 
   const mark = (id: string) => {
-    const day = markSetComplete(id);
-    const item = data.find(d => d.id === id);
-    const target = day.targetSets && day.targetSets > 0 ? day.targetSets : item?.sets || 0;
-
-    const card = document.querySelector('.card[data-id="' + id + '"]') as HTMLElement | null;
-    if (!card) return;
-
-    const setsEl = card.querySelector('.sets-display');
-    if (setsEl) setsEl.textContent = (day.setsCompleted || 0) + '/' + (target || '-');
-
-    const done = target > 0 && (day.setsCompleted || 0) >= target;
-    card.classList.toggle('done', done);
+    markSetComplete(id);
+    // Trigger a Preact re-render so filter mode and completed UI update immediately.
+    setData(prev => prev.slice());
   };
 
   const renderCard = (it: Drill) => {
@@ -411,11 +419,22 @@ export default function App() {
     const poster = completed ? previewWebp || previewGif || ytThumb || '' : '';
     // produce DOM nodes similar to original markup but using JSX
     return (
-      <article className={'card' + (completed ? ' done' : '')} data-id={it.id}>
+      <article key={it.id} className={'card' + (completed ? ' done' : '')} data-id={it.id}>
         <div className={'thumb'}>
           {completed ? (
             poster ? (
-              <img src={poster} alt={it.name_en + ' thumbnail'} className={'lazy-img'} />
+              <img
+                src={poster}
+                alt={it.name_en + ' thumbnail'}
+                className={'lazy-img'}
+                onLoad={e => {
+                  const img = e.currentTarget as HTMLImageElement;
+                  const thumb = img.closest('.thumb');
+                  if (!thumb || !img.naturalWidth || !img.naturalHeight) return;
+                  thumb.classList.toggle('vertical', img.naturalHeight > img.naturalWidth);
+                  thumb.classList.toggle('horizontal', img.naturalWidth >= img.naturalHeight);
+                }}
+              />
             ) : (
               <div style={{ height: '140px', background: 'rgba(0,0,0,0.06)' }} />
             )
@@ -429,6 +448,15 @@ export default function App() {
                   playsInline
                   loop
                   preload={'none'}
+                  onLoadedMetadata={e => {
+                    const video = e.currentTarget as HTMLVideoElement;
+                    const thumb = video.closest('.thumb');
+                    if (!thumb) return;
+                    const w = video.videoWidth;
+                    const h = video.videoHeight;
+                    thumb.classList.toggle('vertical', h > w);
+                    thumb.classList.toggle('horizontal', w >= h);
+                  }}
                 />
               ) : previewWebp ? (
                 <picture>
@@ -438,6 +466,13 @@ export default function App() {
                     data-src={previewGif || ytThumb || ''}
                     alt={it.name_en + ' thumbnail'}
                     loading={'lazy'}
+                    onLoad={e => {
+                      const img = e.currentTarget as HTMLImageElement;
+                      const thumb = img.closest('.thumb');
+                      if (!thumb || !img.naturalWidth || !img.naturalHeight) return;
+                      thumb.classList.toggle('vertical', img.naturalHeight > img.naturalWidth);
+                      thumb.classList.toggle('horizontal', img.naturalWidth >= img.naturalHeight);
+                    }}
                   />
                 </picture>
               ) : (
@@ -446,6 +481,13 @@ export default function App() {
                   data-src={previewGif || ytThumb || ''}
                   alt={it.name_en + ' thumbnail'}
                   loading={'lazy'}
+                  onLoad={e => {
+                    const img = e.currentTarget as HTMLImageElement;
+                    const thumb = img.closest('.thumb');
+                    if (!thumb || !img.naturalWidth || !img.naturalHeight) return;
+                    thumb.classList.toggle('vertical', img.naturalHeight > img.naturalWidth);
+                    thumb.classList.toggle('horizontal', img.naturalWidth >= img.naturalHeight);
+                  }}
                 />
               )}
             </>
@@ -470,6 +512,7 @@ export default function App() {
               <button className={'btn-mark'} onClick={() => mark(it.id)}>
                 +1 done
               </button>
+              {completed && <span className={'done-badge'}>Done</span>}
             </div>
           </div>
           <div style={{ marginTop: '6px' }}>
@@ -500,7 +543,7 @@ export default function App() {
         const rendered = items.map(it => renderCard(it));
         if (!rendered.some(x => x != null)) return null;
         return (
-          <div>
+          <div key={group}>
             <h2 className={'group-title'}>{title}</h2>
             <div className={'grid'}>{rendered}</div>
           </div>
