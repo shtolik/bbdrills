@@ -169,10 +169,11 @@ function clearProgress() {
   render(currentData);
 }
 
-function groupBy(data: Drill[], key: string) {
+function groupBy(data: Drill[], key: keyof Drill) {
   const map = new Map<string, Drill[]>();
   data.forEach(item => {
-    const k = item[key] || 'Other';
+    const v = item[key];
+    const k = (v && String(v)) || 'Other';
     if (!map.has(k)) map.set(k, []);
     map.get(k)!.push(item);
   });
