@@ -73,12 +73,30 @@ function loadUI() {
     const raw = localStorage.getItem(UI_KEY);
     if (raw) {
       const s = JSON.parse(raw);
-      if (s.lang === 'en' || s.lang === 'fi') langState.lang = s.lang;
+      if (s.lang) langState.lang = s.lang;
       if (s.filter === 'all' || s.filter === 'incomplete') filterState.mode = s.filter;
       if (s.theme === 'system' || s.theme === 'dark' || s.theme === 'light')
         themeState.mode = s.theme;
     }
   } catch (e) {}
+}
+
+function t(key: string, fallback?: string) {
+  try {
+    const loc = (window as any)._bbdrills_loc || {};
+    return (loc[key] as string) || fallback || key;
+  } catch (e) {
+    return fallback || key;
+  }
+}
+
+function localizedDrillField(item: Drill, field: keyof Drill) {
+  const k = String(field);
+  const v = (item as any)[k + '_' + langState.lang];
+  if (v) return v;
+  const en = (item as any)[k + '_en'];
+  if (en) return en;
+  return (item as any)[k] || '';
 }
 function saveUI() {
   try {
@@ -89,22 +107,15 @@ function saveUI() {
   } catch (e) {}
 }
 
-// Wire buttons
-const btnEn = document.getElementById('btn-en');
-const btnFi = document.getElementById('btn-fi');
+// Wire controls
+const langSelect = document.getElementById('lang-select') as HTMLSelectElement | null;
 const filterBtn = document.getElementById('filter-btn');
 const clearProgressBtn = document.getElementById('clear-progress');
 const themeBtn = document.getElementById('theme-btn');
 
-if (btnEn)
-  btnEn.addEventListener('click', () => {
-    langState.lang = 'en';
-    saveUI();
-    render(currentData);
-  });
-if (btnFi)
-  btnFi.addEventListener('click', () => {
-    langState.lang = 'fi';
+if (langSelect)
+  langSelect.addEventListener('change', () => {
+    langState.lang = (langSelect.value || 'en') as string;
     saveUI();
     render(currentData);
   });
@@ -114,13 +125,13 @@ if (themeBtn) themeBtn.addEventListener('click', cycleTheme);
 
 function applyTheme() {
   const btn = document.getElementById('theme-btn');
-  const t = themeState.mode || 'system';
-  if (t === 'system') {
+  const tv = themeState.mode || 'system';
+  if (tv === 'system') {
     document.documentElement.removeAttribute('data-theme');
-    if (btn) btn.textContent = 'Theme: system';
+    if (btn) btn.textContent = t('theme_system', 'Theme: system');
   } else {
-    document.documentElement.setAttribute('data-theme', t);
-    if (btn) btn.textContent = 'Theme: ' + t;
+    document.documentElement.setAttribute('data-theme', tv);
+    if (btn) btn.textContent = t('theme', 'Theme') + ': ' + tv;
   }
 }
 function cycleTheme() {
@@ -137,6 +148,17 @@ if (filterBtn) updateFilterLabel();
 
 async function load() {
   try {
+    // load localization for UI
+    try {
+      const locRes = await fetch('./locales/' + langState.lang + '.json').catch(() =>
+        fetch('./locales/en.json')
+      );
+      const loc = await locRes.json();
+      (window as any)._bbdrills_loc = loc;
+    } catch (e) {
+      (window as any)._bbdrills_loc = {};
+    }
+
     const res = await fetch('./default_drills_with_meta.json');
     const data = await res.json();
     currentData = data;
@@ -162,7 +184,7 @@ function updateFilterLabel() {
 }
 
 function clearProgress() {
-  if (!confirm('Clear local progress?')) return;
+  if (!confirm(t('confirm_clear', 'Clear local progress?'))) return;
   try {
     localStorage.removeItem(STORAGE_KEY);
   } catch (e) {}
@@ -337,7 +359,7 @@ function render(data: Drill[]) {
       }
 
       const sRepsLabel = document.createElement('span');
-      sRepsLabel.textContent = 'Reps:';
+      sRepsLabel.textContent = t('reps_label', 'Reps:');
       sRepsLabel.className = 'reps-label';
       details.appendChild(sRepsLabel);
       const sRepsVal = document.createElement('span');
@@ -353,7 +375,7 @@ function render(data: Drill[]) {
       setsWrap.style.alignItems = 'center';
       setsWrap.style.gap = '8px';
       const sSets = document.createElement('div');
-      sSets.textContent = 'Sets:';
+      sSets.textContent = t('sets_label', 'Sets:');
       sSets.className = 'sets-label';
       const target = day.targetSets && day.targetSets > 0 ? day.targetSets : it.sets || 0;
       const big = document.createElement('div');
@@ -384,7 +406,7 @@ function render(data: Drill[]) {
         ext.rel = 'noopener noreferrer';
         ext.setAttribute('referrerpolicy', 'no-referrer');
         ext.style.marginLeft = '8px';
-        ext.textContent = 'Open on YouTube';
+        ext.textContent = t('open_on_youtube', 'Open on YouTube');
         link.appendChild(ext);
       }
 
@@ -393,7 +415,7 @@ function render(data: Drill[]) {
       if (target > 0 && day.setsCompleted >= target) {
         const badge = document.createElement('span');
         badge.className = 'done-badge';
-        badge.textContent = 'Done';
+        badge.textContent = t('done', 'Done');
         setsWrap.appendChild(badge);
       }
 
@@ -497,12 +519,17 @@ function showModalForIndex(idx: number) {
                 msg.style.padding = '16px';
                 msg.style.textAlign = 'center';
                 msg.innerHTML =
-                  '<p style="color:#fff;font-size:18px">This video cannot be embedded (age-restricted or blocked). You can open it on YouTube instead.</p>';
+                  '<p style="color:#fff;font-size:18px">' +
+                  t(
+                    'cannot_embed',
+                    'This video cannot be embedded (age-restricted or blocked). You can open it on YouTube instead.'
+                  ) +
+                  '</p>';
                 const a = document.createElement('a');
                 a.href = 'https://www.youtube.com/watch?v=' + id;
                 a.target = '_blank';
                 a.rel = 'noopener noreferrer';
-                a.textContent = 'Open on YouTube';
+                a.textContent = t('open_on_youtube', 'Open on YouTube');
                 a.style.display = 'inline-block';
                 a.style.marginTop = '8px';
                 a.style.padding = '8px 12px';
@@ -687,7 +714,7 @@ function updateCardById(drillId: string, item: Drill) {
       if (setsWrap) {
         const badge = document.createElement('span');
         badge.className = 'done-badge';
-        badge.textContent = 'Done';
+        badge.textContent = t('done', 'Done');
         setsWrap.appendChild(badge);
       }
     }

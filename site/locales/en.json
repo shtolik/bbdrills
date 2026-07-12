@@ -1,0 +1,16 @@
+{
+  "brand": "Basketball Off-Season Drills",
+  "loading": "Loading drills…",
+  "theme": "Theme",
+  "theme_system": "Theme: system",
+  "show_all": "Show: All",
+  "show_incomplete": "Show: Incomplete",
+  "clear_progress": "Clear progress",
+  "reps_label": "Reps:",
+  "sets_label": "Sets:",
+  "open_on_youtube": "Open on YouTube",
+  "open_video": "Open video",
+  "cannot_embed": "This video cannot be embedded (age-restricted or blocked). You can open it on YouTube instead.",
+  "done": "Done",
+  "confirm_clear": "Clear local progress?"
+}
