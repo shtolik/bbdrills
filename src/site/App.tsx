@@ -167,10 +167,36 @@ export default function App() {
       } catch (e) {}
     }
 
-    const onEn = () => setLang('en');
-    const onFi = () => setLang('fi');
+    // helper: merge and update persisted UI immediately without relying on captured state
+    function mergeAndPersist(
+      newVals: Partial<{
+        lang: 'en' | 'fi';
+        filter: 'all' | 'incomplete';
+        theme: 'system' | 'dark' | 'light';
+      }>
+    ) {
+      try {
+        const raw = localStorage.getItem(UI_KEY);
+        const cur = raw ? JSON.parse(raw) : {};
+        const merged = Object.assign({}, cur, newVals);
+        localStorage.setItem(UI_KEY, JSON.stringify(merged));
+      } catch (e) {}
+    }
+
+    const onEn = () => {
+      setLang('en');
+      mergeAndPersist({ lang: 'en' });
+    };
+    const onFi = () => {
+      setLang('fi');
+      mergeAndPersist({ lang: 'fi' });
+    };
     const onFilter = () => {
-      setFilter(prev => (prev === 'all' ? 'incomplete' : 'all'));
+      setFilter(prev => {
+        const next = prev === 'all' ? 'incomplete' : 'all';
+        mergeAndPersist({ filter: next });
+        return next;
+      });
     };
     const onClear = () => {
       if (!confirm('Clear local progress?')) return;
@@ -186,6 +212,7 @@ export default function App() {
         const idx = order.indexOf(prev || 'system');
         const next = order[(idx + 1) % order.length];
         applyTheme(next);
+        mergeAndPersist({ theme: next });
         return next;
       });
     };
