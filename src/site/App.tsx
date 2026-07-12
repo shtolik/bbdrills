@@ -45,10 +45,11 @@ function youtubeThumbnail(url?: string) {
   return id ? 'https://img.youtube.com/vi/' + id + '/hqdefault.jpg' : '';
 }
 
-function groupBy(data: Drill[], key: string) {
+function groupBy(data: Drill[], key: keyof Drill) {
   const map = new Map<string, Drill[]>();
   data.forEach(item => {
-    const k = (item as any)[key] || 'Other';
+    const v = item[key];
+    const k = (v && String(v)) || 'Other';
     if (!map.has(k)) map.set(k, []);
     map.get(k)!.push(item);
   });

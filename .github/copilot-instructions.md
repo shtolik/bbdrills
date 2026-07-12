@@ -155,12 +155,20 @@ High-level architecture
 - Where to look next: site/index.html, site/default_drills_with_meta.json, site/gifs25fps/ (preview assets), drills.md
 - When asked about regenerating or renaming assets, prefer editing drills.md and site/default_drills_with_meta.json then run ffmpeg/yt-dlp routines.
 
+- Key code files introduced or relevant to UI and tests:
+  - src/site/App.tsx — Preact application component rendering drills and handling UI state (theme/lang/filter), modal, and lazy loading
+  - src/site/main.tsx — Preact mount and YouTube API loader
+  - src/site/main.ts — legacy TS module (kept for reference until full migration)
+  - site/site.bundle.js — generated bundle (gitignored); produced by `npm run build:site`
+  - site/default_drills_with_meta.json — canonical manifest used by site and tests
+  - src/lib/progress.ts — progress persistence helpers used by site and unit tests
+  - tests/playwright.spec.ts and playwright.config.ts — Playwright end-to-end tests and configuration
+
 - If asked to add performance improvements: recommend converting GIF previews to animated WebP or short muted MP4/WebM files for much lower size and better playback performance. See site performance notes.
 
 - Copilot sessions should not commit large binary files without asking the repository owner; add .gitattributes first and recommend LFS migration instead of committing large files directly.
 
 - Regeneration steps and Playwright test expectations are recorded above; reference them when making changes or CI updates.
-
 - Regeneration example commands and binary locations are in the top of this file (ffmpeg, yt-dlp).
   Existing docs and important lines to reuse
 
@@ -185,7 +193,6 @@ Contact / follow-ups
 Created: .github/copilot-instructions.md — captures repo-specific commands, architecture, and conventions. If you want additions (e.g., exact JSON field definitions, or to add a regeneration script and CI), say which area to cover and it will be added.
 
 Testing reminder
-
 - After making changes to site markup, manifest (site/default_drills_with_meta.json), or preview assets, run the Playwright tests and manually verify mobile layout.
 - Quick test run (local):
   1. Start a static server from the repo root: npx http-server -c-1 . -p 8000
