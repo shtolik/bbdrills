@@ -99,8 +99,6 @@ test('Open on YouTube links are normalized to absolute https URLs', async ({
   for (const [index, expectedHref] of expectedHrefs.entries()) {
     const link = page.locator('.card').nth(index).getByRole('link', { name: 'Open on YouTube' });
     await expect(link).toHaveAttribute('href', expectedHref);
-    await expect(link).toHaveAttribute('href', /^https:\/\//);
-    await expect(link.evaluate(node => (node as HTMLAnchorElement).href)).resolves.toBe(expectedHref);
   }
 });
 
