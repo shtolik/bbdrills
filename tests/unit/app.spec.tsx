@@ -81,7 +81,8 @@ describe('App (Preact) basic wiring', () => {
     const themeBtn = document.getElementById('theme-btn') as HTMLButtonElement | null;
     expect(themeBtn).toBeTruthy();
     themeBtn!.click();
-
+    // wait for state effect to flush and saveUI to run
+    await new Promise(r => setTimeout(r, 20));
     const uiRaw = (globalThis as any).localStorage.getItem('bbdrills_ui_v1');
     expect(uiRaw).toBeTruthy();
     expect(uiRaw).toContain('"theme"');
