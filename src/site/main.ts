@@ -200,11 +200,14 @@ function groupBy(data: Drill[], key: keyof Drill) {
   return map;
 }
 
-// New helper to group by localized 'group' field using current lang
+// New helper to group by group key. Title rendering will use locale translation for the group label.
 function groupByLocalized(data: Drill[]) {
   const map = new Map<string, Drill[]>();
   data.forEach(item => {
-    const k = localizedDrillField(item, 'group') || (item as any).group_en || 'Other';
+    const k =
+      typeof (item as any).group === 'string'
+        ? (item as any).group
+        : localizedDrillField(item, 'group') || (item as any).group_en || 'other';
     if (!map.has(k)) map.set(k, []);
     map.get(k)!.push(item);
   });

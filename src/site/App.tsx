@@ -619,8 +619,11 @@ export default function App() {
   // group by localized group label (fallback to legacy group_en)
   const groupsMap = new Map<string, Drill[]>();
   (data || []).forEach(item => {
+    // group key should be a stable identifier (string). If manifest still has localized group object, fall back to localizedField.
     const key =
-      (localizedField(item, 'group', lang) as string) || (item as any).group_en || 'Other';
+      typeof (item as any).group === 'string'
+        ? (item as any).group
+        : (localizedField(item, 'group', lang) as string) || (item as any).group_en || 'other';
     if (!groupsMap.has(key)) groupsMap.set(key, []);
     groupsMap.get(key)!.push(item);
   });
@@ -629,9 +632,11 @@ export default function App() {
   return (
     <div>
       {Array.from(groups).map(([group, items]) => {
-        const title =
+        const title = t(
+          'group.' + group,
           (items[0] && (((items[0] as any)[`group_${lang}`] as string) || items[0].group_en)) ||
-          group;
+            group
+        );
         const rendered = items.map(it => renderCard(it));
         if (!rendered.some(x => x != null)) return null;
         return (

@@ -12,5 +12,8 @@
   "open_video": "Avaa video",
   "cannot_embed": "Tätä videota ei voi upottaa (ikärajoitus tai estetty). Voit avata sen YouTubessa.",
   "done": "Valmis",
-  "confirm_clear": "Tyhjennetään paikallinen edistys?"
+  "confirm_clear": "Tyhjennetään paikallinen edistys?",
+  "group.running": "Juoksu",
+  "group.gym": "Kuntosali treeni",
+  "group.bodyweight": "Kehonpain treeni"
 }

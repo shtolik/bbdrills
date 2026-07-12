@@ -12,5 +12,8 @@
   "open_video": "Öppna video",
   "cannot_embed": "Denna video kan inte bäddas in (åldersbegränsad eller blockerad). Du kan öppna den på YouTube istället.",
   "done": "Klar",
-  "confirm_clear": "Rensa lokala framsteg?"
+  "confirm_clear": "Rensa lokala framsteg?",
+  "group.running": "Löpning",
+  "group.gym": "Gym",
+  "group.bodyweight": "Bodyweight"
 }

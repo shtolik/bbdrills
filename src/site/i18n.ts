@@ -21,8 +21,12 @@ export function t(key: string, fallback?: string) {
 
 export function localizedField(item: any, field: string, lang: string) {
   if (!item) return '';
-  // nested object e.g. name: { en: '', fi: '' }
   const nested = item[field];
+  // if group is stored as a key string, return translated label
+  if (field === 'group' && typeof nested === 'string') {
+    return t('group.' + nested, nested);
+  }
+  // nested object e.g. name: { en: '', fi: '' }
   if (nested && typeof nested === 'object') {
     if (nested[lang]) return nested[lang];
     if (nested['en']) return nested['en'];
