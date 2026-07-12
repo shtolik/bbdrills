@@ -161,11 +161,6 @@ export default function App() {
     const clearProgressBtn = document.getElementById('clear-progress');
     const themeBtn = document.getElementById('theme-btn');
 
-    function saveUIImmediate(l: typeof lang, f: typeof filter, t: typeof theme) {
-      try {
-        localStorage.setItem(UI_KEY, JSON.stringify({ lang: l, filter: f, theme: t }));
-      } catch (e) {}
-    }
 
     // helper: merge and update persisted UI immediately without relying on captured state
     function mergeAndPersist(
@@ -524,8 +519,12 @@ export default function App() {
         <div className={'meta'}>
           <div className={'title'}>{lang === 'fi' ? it.name_fi || it.name_en : it.name_en}</div>
           <div className={'details'}>
-            {it.details}
-            <br />
+            {it.details ? (
+              <>
+                {it.details}
+                <br />
+              </>
+            ) : null}
             <strong>Reps:</strong>{' '}
             {' ' + (it.reps || '') + (it.reps && it.reps_unit ? ' ' + it.reps_unit : '')}
           </div>
