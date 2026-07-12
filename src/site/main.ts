@@ -11,19 +11,23 @@ const themeState = { mode: 'system' };
 // Minimal Drill type used across this module to gain TS safety for core state
 type Drill = {
   id: string;
-  name_en: string;
-  name_fi?: string;
-  group_en?: string;
-  group_fi?: string;
+  // localized shapes supported: name/details/group/reps may be objects {en,fi,sv}
+  name?: any;
+  details?: any;
+  group?: any;
+  reps?: any;
+  reps_unit?: string;
+  sets?: number;
   preview_webp?: string;
   gif?: string;
   preview_mp4?: string;
   video_url?: string;
   local_video?: string;
-  reps?: number | string;
-  reps_unit?: string;
-  sets?: number;
-  details?: string;
+  // legacy flat fields
+  name_en?: string;
+  name_fi?: string;
+  group_en?: string;
+  group_fi?: string;
 };
 
 let currentData: Drill[] = [];
