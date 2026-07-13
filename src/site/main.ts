@@ -530,6 +530,35 @@ function render(data: Drill[]) {
         setsWrap.appendChild(badge);
       }
 
+      // Share button: copies deep link to clipboard
+      const shareBtn = document.createElement('button');
+      shareBtn.textContent = t('share', 'Share');
+      shareBtn.addEventListener('click', async ev => {
+        ev.stopPropagation();
+        const deep = `${location.protocol}//${location.host}/?id=${encodeURIComponent(it.id)}`;
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(deep);
+          } else {
+            const ta = document.createElement('textarea');
+            ta.value = deep;
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            ta.remove();
+          }
+          const prev = shareBtn.textContent;
+          shareBtn.textContent = t('copied', 'Copied!');
+          setTimeout(() => (shareBtn.textContent = prev), 1400);
+        } catch (e) {
+          // fallback: show prompt so user can copy manually
+          prompt(t('copy_prompt', 'Copy this link'), deep);
+        }
+      });
+      actions.appendChild(shareBtn);
+
       meta.appendChild(title);
       meta.appendChild(infoRow);
       meta.appendChild(link);

@@ -634,6 +634,34 @@ export default function App() {
                 {t('open_on_youtube', 'Open on YouTube')}
               </a>
             )}
+            <button
+              style={{ marginLeft: '8px' }}
+              onClick={() => {
+                const deep = `${location.protocol}//${location.host}/?id=${encodeURIComponent(
+                  it.id
+                )}`;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                  navigator.clipboard
+                    .writeText(deep)
+                    .then(() => alert(t('copied', 'Copied!')))
+                    .catch(() => prompt(t('copy_prompt', 'Copy this link'), deep));
+                } else {
+                  try {
+                    const ta = document.createElement('textarea');
+                    ta.value = deep;
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    ta.remove();
+                    alert(t('copied', 'Copied!'));
+                  } catch (e) {
+                    prompt(t('copy_prompt', 'Copy this link'), deep);
+                  }
+                }
+              }}
+            >
+              {t('share', 'Share')}
+            </button>
           </div>
         </div>
       </article>
