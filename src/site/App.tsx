@@ -617,7 +617,7 @@ export default function App() {
                 referrerPolicy={'no-referrer'}
                 style={{ marginLeft: '8px' }}
               >
-                Open on YouTube
+                {t('open_on_youtube', 'Open on YouTube')}
               </a>
             )}
           </div>
