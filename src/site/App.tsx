@@ -142,7 +142,14 @@ export default function App() {
         setData(json);
       } catch (e) {
         const content = document.getElementById('content');
-        if (content) content.textContent = 'Failed to load data';
+        if (content) {
+          content.innerHTML = '';
+          const p = document.createElement('p');
+          p.style.color = '#900';
+          p.style.whiteSpace = 'pre-wrap';
+          p.textContent = t('failed_to_load_data', 'Failed to load data');
+          content.appendChild(p);
+        }
         console.error(e);
       }
     })();

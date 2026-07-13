@@ -14,6 +14,7 @@
   "mark_done": "+1 done",
   "done": "Done",
   "confirm_clear": "Clear local progress?",
+  "failed_to_load_data": "Failed to load data",
   "group.running": "Running",
   "group.gym": "Gym",
   "group.bodyweight": "Bodyweight"
