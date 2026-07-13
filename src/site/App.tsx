@@ -119,15 +119,13 @@ export default function App() {
 
     (async () => {
       try {
-        const [res, loc] = await Promise.all([
+        const [res, locObj] = await Promise.all([
           fetch('./default_drills_with_meta.json'),
           loadLocale(initialLang),
         ]);
         const json = await res.json();
-        const locObj = await loc;
-        (window as any)._bbdrills_loc = locObj;
         const brandEl = document.getElementById('brand');
-        if (brandEl && locObj && locObj.brand) brandEl.textContent = locObj.brand;
+        if (brandEl && (locObj as any)?.brand) brandEl.textContent = (locObj as any).brand;
         // now that locale is available, update header labels that call t()
         applyTheme(initialTheme);
         updateFilterLabel(initialFilter);

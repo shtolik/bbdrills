@@ -109,12 +109,12 @@ const themeBtn = document.getElementById('theme-btn');
 
 if (langSelect)
   langSelect.addEventListener('change', async () => {
-    langState.lang = (langSelect.value || 'en') as string;
-    await loadLocale(langState.lang);
-    applyTheme();
-    if (filterBtn) updateFilterLabel();
+    const nextLang = langSelect.value === 'fi' || langSelect.value === 'sv' ? langSelect.value : 'en';
+    langState.lang = nextLang;
+    const loc = await loadLocale(nextLang);
+
     saveUI();
-    const loc = await loadLocale(langState.lang);
+
     const brand = document.getElementById('brand');
     if (brand && (loc as any)?.brand) brand.textContent = (loc as any).brand;
     if (clearProgressBtn) clearProgressBtn.textContent = t('clear_progress', 'Clear progress');
@@ -123,8 +123,8 @@ if (langSelect)
         filterState.mode === 'all'
           ? t('show_all', 'Show: All')
           : t('show_incomplete', 'Show: Incomplete');
+
     applyTheme();
-    if (clearProgressBtn) clearProgressBtn.textContent = t('clear_progress', 'Clear progress');
     render(currentData);
   });
 if (filterBtn)
