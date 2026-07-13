@@ -17,5 +17,8 @@
   "failed_to_load_data": "Failed to load data",
   "group.running": "Running",
   "group.gym": "Gym",
-  "group.bodyweight": "Bodyweight"
+  "group.bodyweight": "Bodyweight",
+  "share": "Share",
+  "copied": "Copied!",
+  "copy_prompt": "Copy this link"
 }

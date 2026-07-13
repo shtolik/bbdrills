@@ -88,6 +88,7 @@ function loadUI() {
 }
 
 import { loadLocale, t, localizedField } from './i18n';
+import { buildDeepLink } from './url';
 
 function localizedDrillField(item: Drill, field: keyof Drill) {
   return localizedField(item, String(field), langState.lang);
@@ -535,7 +536,6 @@ function render(data: Drill[]) {
       shareBtn.textContent = t('share', 'Share');
       shareBtn.addEventListener('click', async ev => {
         ev.stopPropagation();
-        import { buildDeepLink } from './url';
         const deep = buildDeepLink(it.id);
         try {
           if (navigator.clipboard && navigator.clipboard.writeText) {
