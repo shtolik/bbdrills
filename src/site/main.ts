@@ -177,6 +177,76 @@ async function load() {
     const data = await res.json();
     currentData = data;
     render(data);
+
+    // Deep-link handling: support ?id=<drill-id> deep links and set canonical/meta tags per drill
+    try {
+      const params = new URLSearchParams(location.search);
+      const idParam = params.get('id');
+      if (idParam) {
+        const item = data.find((d: any) => d.id === idParam);
+        if (item) {
+          const canonicalUrl = `${location.protocol}//${location.host}/?id=${encodeURIComponent(
+            item.id
+          )}`;
+          // ensure canonical link exists
+          let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+          if (!link) {
+            link = document.createElement('link');
+            link.setAttribute('rel', 'canonical');
+            document.head.appendChild(link);
+          }
+          link.href = canonicalUrl;
+
+          // set title and description
+          const titleText =
+            (localizedDrillField(item, 'name') || (item as any).name_en || 'Drills') + ' — Drills';
+          document.title = titleText;
+          let md = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
+          const desc = localizedDrillField(item, 'details') || item.details || '';
+          if (!md) {
+            md = document.createElement('meta');
+            md.setAttribute('name', 'description');
+            document.head.appendChild(md);
+          }
+          md.content = String(desc || titleText).slice(0, 160);
+
+          // Open Graph tags
+          function setMetaProp(prop: string, content: string) {
+            let m = document.querySelector(`meta[property="${prop}"]`) as HTMLMetaElement | null;
+            if (!m) {
+              m = document.createElement('meta');
+              m.setAttribute('property', prop);
+              document.head.appendChild(m);
+            }
+            m.content = content;
+          }
+          setMetaProp('og:title', titleText);
+          setMetaProp('og:description', desc || titleText);
+          setMetaProp('og:url', canonicalUrl);
+          const img =
+            (item.preview_webp as string) ||
+            (item.preview_mp4 as string) ||
+            (item.video_url ? youtubeThumbnail(item.video_url) : '') ||
+            '';
+          if (img) setMetaProp('og:image', normalizeUrl(img));
+
+          // scroll to the drill card so crawlers render focused content
+          setTimeout(() => {
+            const el = document.querySelector(`[data-id="${item.id}"]`) as HTMLElement | null;
+            if (el) el.scrollIntoView({ behavior: 'auto', block: 'center' });
+          }, 50);
+        }
+      } else {
+        // default canonical for homepage
+        let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+        if (!link) {
+          link = document.createElement('link');
+          link.setAttribute('rel', 'canonical');
+          document.head.appendChild(link);
+        }
+        link.href = `${location.protocol}//${location.host}/`;
+      }
+    } catch (e) {}
   } catch (e) {
     const content = document.getElementById('content');
     if (content) {
