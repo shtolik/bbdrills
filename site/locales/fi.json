@@ -1,0 +1,19 @@
+{
+  "brand": "Koripallon harjoitteet (off-season)",
+  "loading": "Ladataan harjoitteita…",
+  "theme": "Teema",
+  "theme_system": "Teema: järjestelmä",
+  "show_all": "Näytä: kaikki",
+  "show_incomplete": "Näytä: keskeneräiset",
+  "clear_progress": "Tyhjennä edistys",
+  "reps_label": "Toistot:",
+  "sets_label": "Sarjat:",
+  "open_on_youtube": "Avaa YouTubessa",
+  "open_video": "Avaa video",
+  "cannot_embed": "Tätä videota ei voi upottaa (ikärajoitus tai estetty). Voit avata sen YouTubessa.",
+  "done": "Valmis",
+  "confirm_clear": "Tyhjennetään paikallinen edistys?",
+  "group.running": "Juoksu",
+  "group.gym": "Kuntosali treeni",
+  "group.bodyweight": "Kehonpain treeni"
+}

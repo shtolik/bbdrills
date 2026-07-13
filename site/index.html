@@ -123,6 +123,17 @@
         font-weight: 800;
         margin-right: 8px;
       }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
       .sets-label {
         font-size: 14px;
         color: var(--muted);
@@ -290,10 +301,14 @@
   <body>
     <div class="container">
       <header>
-        <div class="brand">Basketball Off-Season Drills</div>
+        <div class="brand" id="brand">Basketball Off-Season Drills</div>
         <div class="controls">
-          <button id="btn-en">English</button>
-          <button id="btn-fi">Suomi</button>
+          <span class="lang-icon" aria-hidden="true">🌐</span>
+          <select id="lang-select" aria-label="Language">
+            <option value="en">English</option>
+            <option value="fi">Suomi</option>
+            <option value="sv">Svenska</option>
+          </select>
           <button id="theme-btn" title="Theme: system">Theme</button>
           <button id="filter-btn">Show: All</button>
           <button id="clear-progress" title="Clear stored progress">Clear progress</button>

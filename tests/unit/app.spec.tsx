@@ -28,14 +28,17 @@ describe('App (Preact) basic wiring', () => {
       json: async () => [{ id: 'd1', name_en: 'Drill 1', group_en: 'G' }],
     }));
 
-    // prepare DOM expected by App (header buttons and content area + modal)
+    // prepare DOM expected by App (header dropdown and content area + modal)
     document.body.innerHTML = `
       <div class="container">
         <header>
-          <div class="brand">Basketball Off-Season Drills</div>
+          <div class="brand" id="brand">Basketball Off-Season Drills</div>
           <div class="controls">
-            <button id="btn-en">English</button>
-            <button id="btn-fi">Suomi</button>
+            <select id="lang-select" aria-label="Language">
+              <option value="en">English</option>
+              <option value="fi">Suomi</option>
+              <option value="sv">Svenska</option>
+            </select>
             <button id="theme-btn">Theme</button>
             <button id="filter-btn">Show: All</button>
             <button id="clear-progress">Clear progress</button>
@@ -95,11 +98,15 @@ describe('App (Preact) basic wiring', () => {
     expect(uiRaw).toBeTruthy();
     expect(uiRaw).toContain('"theme"');
 
-    // language toggle persisted
-    const btnFi = document.getElementById('btn-fi') as HTMLButtonElement | null;
-    const btnEn = document.getElementById('btn-en') as HTMLButtonElement | null;
-    btnFi!.click();
-    btnEn!.click();
+    // language dropdown persisted
+    const langSelect = document.getElementById('lang-select') as HTMLSelectElement | null;
+    expect(langSelect).toBeTruthy();
+    if (langSelect) {
+      langSelect.value = 'fi';
+      langSelect.dispatchEvent(new Event('change'));
+      langSelect.value = 'en';
+      langSelect.dispatchEvent(new Event('change'));
+    }
     const ui = JSON.parse((globalThis as any).localStorage.getItem('bbdrills_ui_v1') || '{}');
     expect(ui.lang).toBe('en');
   });

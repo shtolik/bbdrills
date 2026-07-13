@@ -11,19 +11,25 @@ const themeState = { mode: 'system' };
 // Minimal Drill type used across this module to gain TS safety for core state
 type Drill = {
   id: string;
-  name_en: string;
-  name_fi?: string;
-  group_en?: string;
-  group_fi?: string;
+  // localized shapes supported: name/details/group/reps may be objects {en,fi,sv}
+  name?: any;
+  details?: any;
+  group?: any;
+  reps?: any;
+  reps_num?: string;
+  reps_label?: any;
+  reps_unit?: string;
+  sets?: number;
   preview_webp?: string;
   gif?: string;
   preview_mp4?: string;
   video_url?: string;
   local_video?: string;
-  reps?: number | string;
-  reps_unit?: string;
-  sets?: number;
-  details?: string;
+  // legacy flat fields
+  name_en?: string;
+  name_fi?: string;
+  group_en?: string;
+  group_fi?: string;
 };
 
 let currentData: Drill[] = [];
@@ -73,12 +79,18 @@ function loadUI() {
     const raw = localStorage.getItem(UI_KEY);
     if (raw) {
       const s = JSON.parse(raw);
-      if (s.lang === 'en' || s.lang === 'fi') langState.lang = s.lang;
+      if (s.lang === 'en' || s.lang === 'fi' || s.lang === 'sv') langState.lang = s.lang;
       if (s.filter === 'all' || s.filter === 'incomplete') filterState.mode = s.filter;
       if (s.theme === 'system' || s.theme === 'dark' || s.theme === 'light')
         themeState.mode = s.theme;
     }
   } catch (e) {}
+}
+
+import { loadLocale, t, localizedField } from './i18n';
+
+function localizedDrillField(item: Drill, field: keyof Drill) {
+  return localizedField(item, String(field), langState.lang);
 }
 function saveUI() {
   try {
@@ -89,38 +101,50 @@ function saveUI() {
   } catch (e) {}
 }
 
-// Wire buttons
-const btnEn = document.getElementById('btn-en');
-const btnFi = document.getElementById('btn-fi');
+// Wire controls
+const langSelect = document.getElementById('lang-select') as HTMLSelectElement | null;
 const filterBtn = document.getElementById('filter-btn');
 const clearProgressBtn = document.getElementById('clear-progress');
 const themeBtn = document.getElementById('theme-btn');
 
-if (btnEn)
-  btnEn.addEventListener('click', () => {
-    langState.lang = 'en';
+if (langSelect)
+  langSelect.addEventListener('change', async () => {
+    const nextLang =
+      langSelect.value === 'fi' || langSelect.value === 'sv' ? langSelect.value : 'en';
+    langState.lang = nextLang;
+    const loc = await loadLocale(nextLang);
+
     saveUI();
+
+    const brand = document.getElementById('brand');
+    if (brand && (loc as any)?.brand) brand.textContent = (loc as any).brand;
+    if (clearProgressBtn) clearProgressBtn.textContent = t('clear_progress', 'Clear progress');
+    if (filterBtn)
+      filterBtn.textContent =
+        filterState.mode === 'all'
+          ? t('show_all', 'Show: All')
+          : t('show_incomplete', 'Show: Incomplete');
+
+    applyTheme();
     render(currentData);
   });
-if (btnFi)
-  btnFi.addEventListener('click', () => {
-    langState.lang = 'fi';
-    saveUI();
-    render(currentData);
+if (filterBtn)
+  filterBtn.addEventListener('click', () => {
+    toggleFilter();
+    updateFilterLabel();
   });
-if (filterBtn) filterBtn.addEventListener('click', toggleFilter);
 if (clearProgressBtn) clearProgressBtn.addEventListener('click', clearProgress);
 if (themeBtn) themeBtn.addEventListener('click', cycleTheme);
 
 function applyTheme() {
   const btn = document.getElementById('theme-btn');
-  const t = themeState.mode || 'system';
-  if (t === 'system') {
+  const tv = themeState.mode || 'system';
+  if (tv === 'system') {
     document.documentElement.removeAttribute('data-theme');
-    if (btn) btn.textContent = 'Theme: system';
+    if (btn) btn.textContent = t('theme_system', 'Theme: system');
   } else {
-    document.documentElement.setAttribute('data-theme', t);
-    if (btn) btn.textContent = 'Theme: ' + t;
+    document.documentElement.setAttribute('data-theme', tv);
+    if (btn) btn.textContent = t('theme', 'Theme') + ': ' + tv;
   }
 }
 function cycleTheme() {
@@ -137,6 +161,18 @@ if (filterBtn) updateFilterLabel();
 
 async function load() {
   try {
+    // load localization for UI
+    const loc = await loadLocale(langState.lang);
+    const brand = document.getElementById('brand');
+    if (brand && (loc as any)?.brand) brand.textContent = (loc as any).brand;
+    if (clearProgressBtn) clearProgressBtn.textContent = t('clear_progress', 'Clear progress');
+    if (filterBtn)
+      filterBtn.textContent =
+        filterState.mode === 'all'
+          ? t('show_all', 'Show: All')
+          : t('show_incomplete', 'Show: Incomplete');
+    applyTheme();
+
     const res = await fetch('./default_drills_with_meta.json');
     const data = await res.json();
     currentData = data;
@@ -162,7 +198,7 @@ function updateFilterLabel() {
 }
 
 function clearProgress() {
-  if (!confirm('Clear local progress?')) return;
+  if (!confirm(t('confirm_clear', 'Clear local progress?'))) return;
   try {
     localStorage.removeItem(STORAGE_KEY);
   } catch (e) {}
@@ -174,6 +210,20 @@ function groupBy(data: Drill[], key: keyof Drill) {
   data.forEach(item => {
     const v = item[key];
     const k = (v && String(v)) || 'Other';
+    if (!map.has(k)) map.set(k, []);
+    map.get(k)!.push(item);
+  });
+  return map;
+}
+
+// New helper to group by group key. Title rendering will use locale translation for the group label.
+function groupByLocalized(data: Drill[]) {
+  const map = new Map<string, Drill[]>();
+  data.forEach(item => {
+    const k =
+      typeof (item as any).group === 'string'
+        ? (item as any).group
+        : localizedDrillField(item, 'group') || (item as any).group_en || 'other';
     if (!map.has(k)) map.set(k, []);
     map.get(k)!.push(item);
   });
@@ -218,14 +268,14 @@ function normalizeUrl(url?: string) {
 
 function render(data: Drill[]) {
   if (!data) return;
-  const groups = groupBy(data, 'group_en');
+  const groups = groupByLocalized(data);
   const container = document.getElementById('content');
   if (!container) return;
   container.innerHTML = '';
   for (const [group, items] of groups) {
     const h = document.createElement('h2');
     h.className = 'group-title';
-    h.textContent = langState.lang === 'fi' ? items[0].group_fi || group : group;
+    h.textContent = localizedDrillField(items[0], 'group') || group;
     container.appendChild(h);
     const grid = document.createElement('div');
     grid.className = 'grid';
@@ -252,7 +302,7 @@ function render(data: Drill[]) {
         if (poster) {
           const img = document.createElement('img');
           img.src = poster;
-          img.alt = it.name_en + ' thumbnail';
+          img.alt = (localizedDrillField(it, 'name') || it.name_en) + ' thumbnail';
           img.loading = 'lazy';
           img.className = 'lazy-img';
           img.addEventListener('load', () => {
@@ -295,7 +345,7 @@ function render(data: Drill[]) {
           pic.appendChild(src);
           const img = document.createElement('img');
           (img as any).dataset.src = previewGif || ytThumb || '';
-          img.alt = it.name_en + ' thumbnail';
+          img.alt = (localizedDrillField(it, 'name') || it.name_en) + ' thumbnail';
           img.loading = 'lazy';
           img.className = 'lazy-img';
           img.addEventListener('load', () => {
@@ -327,22 +377,28 @@ function render(data: Drill[]) {
       meta.className = 'meta';
       const title = document.createElement('div');
       title.className = 'title';
-      title.textContent = langState.lang === 'fi' ? it.name_fi || it.name_en : it.name_en;
+      title.textContent = localizedDrillField(it, 'name') || it.name_en;
       const details = document.createElement('div');
       details.className = 'details';
-      const detailsText = langState.lang === 'fi' ? it.details || '' : it.details || '';
+      const detailsText = localizedDrillField(it, 'details') || it.details || '';
       if (detailsText) {
         details.appendChild(document.createTextNode(detailsText));
         details.appendChild(document.createElement('br'));
       }
 
       const sRepsLabel = document.createElement('span');
-      sRepsLabel.textContent = 'Reps:';
+      sRepsLabel.textContent = t('reps_label', 'Reps:');
       sRepsLabel.className = 'reps-label';
       details.appendChild(sRepsLabel);
       const sRepsVal = document.createElement('span');
       sRepsVal.className = 'reps-display';
-      sRepsVal.textContent = (it.reps || '') + (it.reps && it.reps_unit ? ' ' + it.reps_unit : '');
+      sRepsVal.textContent =
+        (it.reps_num || localizedDrillField(it, 'reps') || '') +
+        (localizedDrillField(it, 'reps_label')
+          ? ' ' + localizedDrillField(it, 'reps_label')
+          : it.reps_unit
+          ? ' ' + it.reps_unit
+          : '');
       details.appendChild(sRepsVal);
 
       const infoRow = document.createElement('div');
@@ -353,7 +409,7 @@ function render(data: Drill[]) {
       setsWrap.style.alignItems = 'center';
       setsWrap.style.gap = '8px';
       const sSets = document.createElement('div');
-      sSets.textContent = 'Sets:';
+      sSets.textContent = t('sets_label', 'Sets:');
       sSets.className = 'sets-label';
       const target = day.targetSets && day.targetSets > 0 ? day.targetSets : it.sets || 0;
       const big = document.createElement('div');
@@ -374,7 +430,7 @@ function render(data: Drill[]) {
       const link = document.createElement('div');
       link.style.marginTop = '6px';
       const viewBtn = document.createElement('button');
-      viewBtn.textContent = 'Open video';
+      viewBtn.textContent = t('open_video', 'Open video');
       viewBtn.addEventListener('click', () => openVideo(it));
       link.appendChild(viewBtn);
       if (it.video_url) {
@@ -384,7 +440,7 @@ function render(data: Drill[]) {
         ext.rel = 'noopener noreferrer';
         ext.setAttribute('referrerpolicy', 'no-referrer');
         ext.style.marginLeft = '8px';
-        ext.textContent = 'Open on YouTube';
+        ext.textContent = t('open_on_youtube', 'Open on YouTube');
         link.appendChild(ext);
       }
 
@@ -393,7 +449,7 @@ function render(data: Drill[]) {
       if (target > 0 && day.setsCompleted >= target) {
         const badge = document.createElement('span');
         badge.className = 'done-badge';
-        badge.textContent = 'Done';
+        badge.textContent = t('done', 'Done');
         setsWrap.appendChild(badge);
       }
 
@@ -496,13 +552,19 @@ function showModalForIndex(idx: number) {
                 msg.style.color = '#fff';
                 msg.style.padding = '16px';
                 msg.style.textAlign = 'center';
-                msg.innerHTML =
-                  '<p style="color:#fff;font-size:18px">This video cannot be embedded (age-restricted or blocked). You can open it on YouTube instead.</p>';
+                const p = document.createElement('p');
+                p.style.color = '#fff';
+                p.style.fontSize = '18px';
+                p.textContent = t(
+                  'cannot_embed',
+                  'This video cannot be embedded (age-restricted or blocked). You can open it on YouTube instead.'
+                );
+                msg.appendChild(p);
                 const a = document.createElement('a');
                 a.href = 'https://www.youtube.com/watch?v=' + id;
                 a.target = '_blank';
                 a.rel = 'noopener noreferrer';
-                a.textContent = 'Open on YouTube';
+                a.textContent = t('open_on_youtube', 'Open on YouTube');
                 a.style.display = 'inline-block';
                 a.style.marginTop = '8px';
                 a.style.padding = '8px 12px';
@@ -687,7 +749,7 @@ function updateCardById(drillId: string, item: Drill) {
       if (setsWrap) {
         const badge = document.createElement('span');
         badge.className = 'done-badge';
-        badge.textContent = 'Done';
+        badge.textContent = t('done', 'Done');
         setsWrap.appendChild(badge);
       }
     }
@@ -701,7 +763,7 @@ function updateCardById(drillId: string, item: Drill) {
       if (poster) {
         const img = document.createElement('img');
         img.src = poster;
-        img.alt = item.name_en + ' thumbnail';
+        img.alt = (localizedDrillField(item, 'name') || item.name_en) + ' thumbnail';
         img.className = 'lazy-img';
         thumb.appendChild(img);
       }

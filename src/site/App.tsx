@@ -1,22 +1,29 @@
 import { h, Fragment } from 'preact';
 import { useEffect, useState, useRef } from 'preact/hooks';
 import { getDay, markSetComplete, migrateLegacyIfNeeded } from '../lib/progress';
+import { loadLocale, localizedField, t } from './i18n';
 
 type Drill = {
   id: string;
-  name_en: string;
-  name_fi?: string;
-  group_en?: string;
-  group_fi?: string;
+  // name/details/groups/reps may be nested localized objects: { en: string, fi: string, sv: string }
+  name?: any;
+  details?: any;
+  group?: any;
+  reps?: any; // legacy
+  reps_num?: string; // numeric or range (non-localized)
+  reps_label?: any; // localized object {en,fi,sv}
+  reps_unit?: string;
+  sets?: number;
   preview_webp?: string;
   gif?: string;
   preview_mp4?: string;
   video_url?: string;
   local_video?: string;
-  reps?: number | string;
-  reps_unit?: string;
-  sets?: number;
-  details?: string;
+  // legacy flat fields kept for backward-compat
+  name_en?: string;
+  name_fi?: string;
+  group_en?: string;
+  group_fi?: string;
 };
 
 const resolveAsset = (path?: string | null) => {
@@ -79,21 +86,21 @@ export default function App() {
   // UI state (persisted)
   const UI_KEY = 'bbdrills_ui_v1';
   const STORAGE_KEY = 'bbdrills_progress_v3';
-  const [lang, setLang] = useState<'en' | 'fi'>('en');
+  const [lang, setLang] = useState<string>('en');
   const [filter, setFilter] = useState<'all' | 'incomplete'>('all');
   const [theme, setTheme] = useState<'system' | 'dark' | 'light'>('system');
 
   useEffect(() => {
     migrateLegacyIfNeeded();
     // load UI from localStorage
-    let initialLang: 'en' | 'fi' = 'en';
+    let initialLang = 'en';
     let initialFilter: 'all' | 'incomplete' = 'all';
     let initialTheme: 'system' | 'dark' | 'light' = 'system';
     try {
       const raw = localStorage.getItem(UI_KEY);
       if (raw) {
         const s = JSON.parse(raw);
-        if (s.lang === 'en' || s.lang === 'fi') initialLang = s.lang;
+        if (typeof s.lang === 'string' && ['en', 'fi', 'sv'].includes(s.lang)) initialLang = s.lang;
         if (s.filter === 'all' || s.filter === 'incomplete') initialFilter = s.filter;
         if (s.theme === 'system' || s.theme === 'dark' || s.theme === 'light')
           initialTheme = s.theme;
@@ -106,10 +113,24 @@ export default function App() {
     applyTheme(initialTheme);
     updateFilterLabel(initialFilter);
 
+    // set language dropdown if present
+    const langSelectElem = document.getElementById('lang-select') as HTMLSelectElement | null;
+    if (langSelectElem) langSelectElem.value = initialLang;
+
     (async () => {
       try {
-        const res = await fetch('./default_drills_with_meta.json');
+        const [res, locObj] = await Promise.all([
+          fetch('./default_drills_with_meta.json'),
+          loadLocale(initialLang),
+        ]);
         const json = await res.json();
+        const brandEl = document.getElementById('brand');
+        if (brandEl && (locObj as any)?.brand) brandEl.textContent = (locObj as any).brand;
+        // now that locale is available, update header labels that call t()
+        applyTheme(initialTheme);
+        updateFilterLabel(initialFilter);
+        const clearBtn = document.getElementById('clear-progress');
+        if (clearBtn) clearBtn.textContent = t('clear_progress', 'Clear progress');
         setData(json);
       } catch (e) {
         const content = document.getElementById('content');
@@ -170,8 +191,7 @@ export default function App() {
     }, options);
 
     // wire header controls
-    const btnEn = document.getElementById('btn-en');
-    const btnFi = document.getElementById('btn-fi');
+    const langSelect = document.getElementById('lang-select') as HTMLSelectElement | null;
     const filterBtn = document.getElementById('filter-btn');
     const clearProgressBtn = document.getElementById('clear-progress');
     const themeBtn = document.getElementById('theme-btn');
@@ -179,7 +199,7 @@ export default function App() {
     // helper: merge and update persisted UI immediately without relying on captured state
     function mergeAndPersist(
       newVals: Partial<{
-        lang: 'en' | 'fi';
+        lang: string;
         filter: 'all' | 'incomplete';
         theme: 'system' | 'dark' | 'light';
       }>
@@ -192,13 +212,26 @@ export default function App() {
       } catch (e) {}
     }
 
-    const onEn = () => {
-      setLang('en');
-      mergeAndPersist({ lang: 'en' });
-    };
-    const onFi = () => {
-      setLang('fi');
-      mergeAndPersist({ lang: 'fi' });
+    const onLangChange = async (next: string) => {
+      setLang(next);
+      mergeAndPersist({ lang: next });
+      const loc = await loadLocale(next);
+      const brandEl = document.getElementById('brand');
+      if (brandEl && loc && loc.brand) brandEl.textContent = loc.brand;
+      // update header labels
+      try {
+        const raw = localStorage.getItem(UI_KEY);
+        const cur = raw ? JSON.parse(raw) : {};
+        updateFilterLabel(cur.filter === 'incomplete' ? 'incomplete' : 'all');
+        applyTheme(cur.theme === 'dark' || cur.theme === 'light' ? cur.theme : 'system');
+      } catch (e) {
+        updateFilterLabel(filter);
+        applyTheme(theme);
+      }
+      const clearBtn = document.getElementById('clear-progress');
+      if (clearBtn) clearBtn.textContent = t('clear_progress', 'Clear progress');
+      // re-render cards so t() calls pick up new locale
+      setData(prev => prev.slice());
     };
     const onFilter = () => {
       setFilter(prev => {
@@ -208,7 +241,7 @@ export default function App() {
       });
     };
     const onClear = () => {
-      if (!confirm('Clear local progress?')) return;
+      if (!confirm(t('confirm_clear', 'Clear local progress?'))) return;
       try {
         localStorage.removeItem(STORAGE_KEY);
       } catch (e) {}
@@ -226,8 +259,9 @@ export default function App() {
       });
     };
 
-    if (btnEn) btnEn.addEventListener('click', onEn);
-    if (btnFi) btnFi.addEventListener('click', onFi);
+    const langChangeHandler = (e: Event) =>
+      onLangChange((e.target as HTMLSelectElement).value || 'en');
+    if (langSelect) langSelect.addEventListener('change', langChangeHandler);
     if (filterBtn) filterBtn.addEventListener('click', onFilter);
     if (clearProgressBtn) clearProgressBtn.addEventListener('click', onClear);
     if (themeBtn) themeBtn.addEventListener('click', onTheme);
@@ -250,8 +284,7 @@ export default function App() {
 
     return () => {
       if (lazyObserver.current) lazyObserver.current.disconnect();
-      if (btnEn) btnEn.removeEventListener('click', onEn);
-      if (btnFi) btnFi.removeEventListener('click', onFi);
+      if (langSelect) langSelect.removeEventListener('change', langChangeHandler);
       if (filterBtn) filterBtn.removeEventListener('click', onFilter);
       if (clearProgressBtn) clearProgressBtn.removeEventListener('click', onClear);
       if (themeBtn) themeBtn.removeEventListener('click', onTheme);
@@ -284,20 +317,28 @@ export default function App() {
     } catch (e) {}
   }
 
-  function applyTheme(t: 'system' | 'dark' | 'light') {
+  // helper to read localized UI strings loaded into window._bbdrills_loc (see src/site/i18n.ts)
+
+  function localizedDrillField(item: any, field: string) {
+    return localizedField(item, field, lang);
+  }
+
+  function applyTheme(themeVal: 'system' | 'dark' | 'light') {
     const btn = document.getElementById('theme-btn');
-    if (t === 'system') {
+    if (themeVal === 'system') {
       document.documentElement.removeAttribute('data-theme');
-      if (btn) btn.textContent = 'Theme: system';
+      if (btn) btn.textContent = t('theme_system', 'Theme: system');
     } else {
-      document.documentElement.setAttribute('data-theme', t);
-      if (btn) btn.textContent = 'Theme: ' + t;
+      document.documentElement.setAttribute('data-theme', themeVal);
+      if (btn) btn.textContent = t('theme', 'Theme') + ': ' + themeVal;
     }
   }
 
   function updateFilterLabel(f: 'all' | 'incomplete') {
     const filterBtn = document.getElementById('filter-btn');
-    if (filterBtn) filterBtn.textContent = f === 'all' ? 'Show: All' : 'Show: Incomplete';
+    if (filterBtn)
+      filterBtn.textContent =
+        f === 'all' ? t('show_all', 'Show: All') : t('show_incomplete', 'Show: Incomplete');
   }
 
   const openVideo = (item: Drill) => {
@@ -354,13 +395,19 @@ export default function App() {
                 msg.style.color = '#fff';
                 msg.style.padding = '16px';
                 msg.style.textAlign = 'center';
-                msg.innerHTML =
-                  '<p style="color:#fff;font-size:18px">This video cannot be embedded (age-restricted or blocked). You can open it on YouTube instead.</p>';
+                const p = document.createElement('p');
+                p.style.color = '#fff';
+                p.style.fontSize = '18px';
+                p.textContent = t(
+                  'cannot_embed',
+                  'This video cannot be embedded (age-restricted or blocked). You can open it on YouTube instead.'
+                );
+                msg.appendChild(p);
                 const a = document.createElement('a');
                 a.href = 'https://www.youtube.com/watch?v=' + id;
                 a.target = '_blank';
                 a.rel = 'noopener noreferrer';
-                a.textContent = 'Open on YouTube';
+                a.textContent = t('open_on_youtube', 'Open on YouTube');
                 a.style.display = 'inline-block';
                 a.style.marginTop = '8px';
                 a.style.padding = '8px 12px';
@@ -456,7 +503,7 @@ export default function App() {
             poster ? (
               <img
                 src={poster}
-                alt={it.name_en + ' thumbnail'}
+                alt={(localizedDrillField(it, 'name') || it.name_en) + ' thumbnail'}
                 className={'lazy-img'}
                 onLoad={e => {
                   const img = e.currentTarget as HTMLImageElement;
@@ -495,7 +542,7 @@ export default function App() {
                   <img
                     className={'lazy-img'}
                     data-src={previewGif || ytThumb || ''}
-                    alt={it.name_en + ' thumbnail'}
+                    alt={(localizedDrillField(it, 'name') || it.name_en) + ' thumbnail'}
                     loading={'lazy'}
                     onLoad={e => {
                       const img = e.currentTarget as HTMLImageElement;
@@ -510,7 +557,7 @@ export default function App() {
                 <img
                   className={'lazy-img'}
                   data-src={previewGif || ytThumb || ''}
-                  alt={it.name_en + ' thumbnail'}
+                  alt={(localizedDrillField(it, 'name') || it.name_en) + ' thumbnail'}
                   loading={'lazy'}
                   onLoad={e => {
                     const img = e.currentTarget as HTMLImageElement;
@@ -525,22 +572,29 @@ export default function App() {
           )}
         </div>
         <div className={'meta'}>
-          <div className={'title'}>{lang === 'fi' ? it.name_fi || it.name_en : it.name_en}</div>
+          <div className={'title'}>
+            {localizedDrillField(it, 'name') || localizedDrillField(it, 'name_en')}
+          </div>
           <div className={'details'}>
-            {it.details ? (
+            {localizedDrillField(it, 'details') ? (
               <>
-                {it.details}
+                {localizedDrillField(it, 'details')}
                 <br />
               </>
             ) : null}
-            <span className={'reps-label'}>Reps:</span>
+            <span className={'reps-label'}>{t('reps_label', 'Reps:')}</span>
             <span className={'reps-display'}>
-              {(it.reps || '') + (it.reps && it.reps_unit ? ' ' + it.reps_unit : '')}
+              {(it.reps_num || localizedDrillField(it, 'reps') || '') +
+                (localizedDrillField(it, 'reps_label')
+                  ? ' ' + localizedDrillField(it, 'reps_label')
+                  : it.reps_unit
+                  ? ' ' + it.reps_unit
+                  : '')}
             </span>
           </div>
           <div className={'info-row'}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div className={'sets-label'}>Sets:</div>
+              <div className={'sets-label'}>{t('sets_label', 'Sets:')}</div>
               <div className={'sets-display'}>
                 {(day.setsCompleted || 0) +
                   '/' +
@@ -549,11 +603,11 @@ export default function App() {
               <button className={'btn-mark'} onClick={() => mark(it.id)}>
                 +1 done
               </button>
-              {completed && <span className={'done-badge'}>Done</span>}
+              {completed && <span className={'done-badge'}>{t('done', 'Done')}</span>}
             </div>
           </div>
           <div style={{ marginTop: '6px' }}>
-            <button onClick={() => openVideo(it)}>Open video</button>
+            <button onClick={() => openVideo(it)}>{t('open_video', 'Open video')}</button>
             {it.video_url && (
               <a
                 href={normalizeUrl(it.video_url)}
@@ -562,7 +616,7 @@ export default function App() {
                 referrerPolicy={'no-referrer'}
                 style={{ marginLeft: '8px' }}
               >
-                Open on YouTube
+                {t('open_on_youtube', 'Open on YouTube')}
               </a>
             )}
           </div>
@@ -571,12 +625,27 @@ export default function App() {
     );
   };
 
-  const groups = groupBy(data || [], 'group_en');
+  // group by localized group label (fallback to legacy group_en)
+  const groupsMap = new Map<string, Drill[]>();
+  (data || []).forEach(item => {
+    // group key should be a stable identifier (string). If manifest still has localized group object, fall back to localizedField.
+    const key =
+      typeof (item as any).group === 'string'
+        ? (item as any).group
+        : (localizedField(item, 'group', lang) as string) || (item as any).group_en || 'other';
+    if (!groupsMap.has(key)) groupsMap.set(key, []);
+    groupsMap.get(key)!.push(item);
+  });
+  const groups = Array.from(groupsMap);
 
   return (
     <div>
       {Array.from(groups).map(([group, items]) => {
-        const title = lang === 'fi' ? items[0]?.group_fi || group : group;
+        const title = t(
+          'group.' + group,
+          (items[0] && (((items[0] as any)[`group_${lang}`] as string) || items[0].group_en)) ||
+            group
+        );
         const rendered = items.map(it => renderCard(it));
         if (!rendered.some(x => x != null)) return null;
         return (
