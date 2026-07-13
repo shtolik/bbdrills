@@ -20,10 +20,10 @@ function readSvg(p){
     if(!fullSvg){ process.exit(2); }
 
     const tasks = [
-      // use full logo for larger icons
+      // use full logo for larger touch icon
       {src: fullSvg, name:'apple-touch-icon.png', size:180},
-      {src: fullSvg, name:'favicon-32x32.png', size:32},
-      // use ball-only SVG for the smallest favicon to keep it legible
+      // use ball-only SVG for both favicons (32 and 16) for legibility
+      {src: ballOnlySvg, name:'favicon-32x32.png', size:32},
       {src: ballOnlySvg, name:'favicon-16x16.png', size:16}
     ];
 
