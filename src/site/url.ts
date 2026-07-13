@@ -13,30 +13,49 @@ export function buildDeepLink(id: string): string {
     }
   } catch (e) {}
 
-  // Fallback: derive from location.origin and normalize path
+  // Fallback: derive from location and prefer preserving dev-server paths when present
   try {
-    const origin = location && (location as any).origin ? (location as any).origin : '';
-    let path = location && location.pathname ? location.pathname : '/';
-    // Normalize common dev/server paths that include /site or /site/index.html
+    const loc = typeof location !== 'undefined' ? location : ({} as Location);
+    const origin = (loc as any).origin || '';
+    const pathname = loc && loc.pathname ? loc.pathname : '/';
+
+    // If the current path ends with index.html, use the directory that contains it.
+    // This preserves IDE server paths like /user/project/site/index.html → /user/project/site/
+    let basePath = '/';
     try {
-      // keep only origin + '/' to avoid long IDE-serving paths like /project/site/index.html
-      if (/\/site(\/index\.html)?$/i.test(path) || path.match(/\/site\//i)) {
-        path = '/';
+      if (/\/index\.html$/i.test(pathname)) {
+        basePath = pathname.replace(/\/index\.html$/i, '/');
+      } else if (/\/site\//i.test(pathname)) {
+        // If path contains /site/ keep up to and including /site/ so links resolve on servers
+        const idx = pathname.toLowerCase().indexOf('/site/');
+        if (idx >= 0) {
+          basePath = pathname.substring(0, idx + '/site/'.length);
+          if (!basePath.endsWith('/')) basePath += '/';
+        } else {
+          basePath = '/';
+        }
+      } else if (pathname && pathname !== '/') {
+        // Use the current directory to be conservative on weird server setups
+        basePath = pathname;
+        if (!basePath.endsWith('/')) basePath += '/';
+      } else {
+        basePath = '/';
       }
-      // If path contains /site/ anywhere, reduce to '/'
-      if (/\/site\//i.test(path)) path = '/';
-    } catch (e) {}
-    if (!origin || origin === 'null') {
-      // Last resort
-      return `http://localhost/?id=${encodeURIComponent(id)}`;
+    } catch (e) {
+      basePath = '/';
     }
-    const base = origin + path;
+
+    if (!origin || origin === 'null') {
+      return `http://localhost${basePath}?id=${encodeURIComponent(id)}`;
+    }
+
+    const candidate = origin + basePath;
     try {
-      const u = new URL(base);
+      const u = new URL(candidate);
       u.searchParams.set('id', id);
       return u.toString();
     } catch (e) {
-      return `${origin}/?id=${encodeURIComponent(id)}`;
+      return `${origin}${basePath}?id=${encodeURIComponent(id)}`;
     }
   } catch (e) {
     return `http://localhost/?id=${encodeURIComponent(id)}`;
