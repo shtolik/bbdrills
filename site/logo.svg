@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" width="320" height="80">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120" width="420" height="120">
   <!-- Basketball pictogram on the left -->
   <defs>
     <linearGradient id="g" x1="0" x2="1">
@@ -9,15 +9,15 @@
   </defs>
   <rect width="100%" height="100%" fill="none" />
   <g transform="translate(16,12)">
-    <circle cx="28" cy="28" r="28" fill="url(#g)" stroke="#d96412" stroke-width="2" />
+    <circle cx="48" cy="48" r="48" fill="url(#g)" stroke="#d96412" stroke-width="3" />
     <!-- simple basketball seams -->
-    <path d="M12 8 C28 20, 28 36, 12 48" stroke="#a84f10" stroke-width="2" fill="none" stroke-linecap="round"/>
-    <path d="M44 8 C28 20, 28 36, 44 48" stroke="#a84f10" stroke-width="2" fill="none" stroke-linecap="round"/>
-    <path d="M8 28 A20 20 0 0 0 48 28" stroke="#a84f10" stroke-width="2" fill="none" stroke-linecap="round"/>
-    <path d="M8 28 A20 20 0 0 1 48 28" stroke="#a84f10" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <path d="M20 16 C48 44, 48 76, 20 96" stroke="#a84f10" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M116 16 C88 44, 88 76, 116 96" stroke="#a84f10" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M8 48 A40 40 0 0 0 88 48" stroke="#a84f10" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M8 48 A40 40 0 0 1 88 48" stroke="#a84f10" stroke-width="3" fill="none" stroke-linecap="round"/>
   </g>
   <!-- Text mark -->
-  <g transform="translate(80,52)">
-    <text x="0" y="0" font-family="Segoe UI, Arial, sans-serif" font-weight="700" font-size="36" fill="#0b74de">Drills</text>
+  <g transform="translate(128,72)">
+    <text x="0" y="0" font-family="Segoe UI, Arial, sans-serif" font-weight="700" font-size="44" fill="#0b74de">Drills</text>
   </g>
 </svg>

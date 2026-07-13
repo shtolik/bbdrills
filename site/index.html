@@ -61,8 +61,19 @@
         justify-content: space-between;
         gap: 12px;
       }
+      .brand-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      #site-logo {
+        width: 44px;
+        height: 44px;
+        display: inline-block;
+      }
       .brand {
         font-weight: 700;
+        font-size: 18px;
       }
       .controls {
         display: flex;
@@ -305,7 +316,10 @@
   <body>
     <div class="container">
       <header>
-        <div class="brand" id="brand">Basketball Off-Season Drills</div>
+        <div class="brand-container">
+          <img id="site-logo" src="logo.svg" alt="Drills logo" />
+          <div class="brand" id="brand">Basketball Off-Season Drills</div>
+        </div>
         <div class="controls">
           <span class="lang-icon" aria-hidden="true">🌐</span>
           <select id="lang-select" aria-label="Language">
