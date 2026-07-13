@@ -131,6 +131,16 @@ export default function App() {
         updateFilterLabel(initialFilter);
         const clearBtn = document.getElementById('clear-progress');
         if (clearBtn) clearBtn.textContent = t('clear_progress', 'Clear progress');
+        // remove initial loading placeholder if still present
+        try {
+          const contentEl = document.getElementById('content');
+          if (contentEl) {
+            Array.from(contentEl.querySelectorAll('p')).forEach(p => {
+              const txt = (p.textContent || '').trim();
+              if (txt && txt === (t('loading', 'Loading drills…') || 'Loading drills…')) p.remove();
+            });
+          }
+        } catch (e) {}
         setData(json);
       } catch (e) {
         const content = document.getElementById('content');
@@ -601,7 +611,7 @@ export default function App() {
                   (day.targetSets && day.targetSets > 0 ? day.targetSets : it.sets || '-')}
               </div>
               <button className={'btn-mark'} onClick={() => mark(it.id)}>
-                +1 done
+                {t('mark_done', '+1 done')}
               </button>
               {completed && <span className={'done-badge'}>{t('done', 'Done')}</span>}
             </div>

@@ -418,7 +418,7 @@ function render(data: Drill[]) {
       setsWrap.appendChild(sSets);
       setsWrap.appendChild(big);
       const markBtn = document.createElement('button');
-      markBtn.textContent = '+1 done';
+      markBtn.textContent = t('mark_done', '+1 done');
       markBtn.className = 'btn-mark';
       markBtn.addEventListener('click', async () => {
         markSetComplete(it.id);
