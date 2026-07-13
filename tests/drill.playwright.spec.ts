@@ -3,7 +3,6 @@ import { test, expect } from '@playwright/test';
 const BASE = 'http://127.0.0.1:8000/site/';
 
 test('drill page shows single drill view with navigation', async ({ page }) => {
-  // load manifest to pick a sample id
   const manifestResp = await page.request.get(BASE + 'default_drills_with_meta.json');
   expect(manifestResp.ok()).toBeTruthy();
   const manifest = await manifestResp.json();
@@ -12,7 +11,6 @@ test('drill page shows single drill view with navigation', async ({ page }) => {
 
   const url = BASE + `drill.html?id=${encodeURIComponent(first.id)}`;
   await page.goto(url);
-  // wait for single view title
   await page.waitForSelector('.single-title');
 
   // ensure there are no .card elements on the single drill page
@@ -26,7 +24,7 @@ test('drill page shows single drill view with navigation', async ({ page }) => {
   // check prev/next buttons exist and navigation works
   const prev = page.locator('#drill-prev');
   const next = page.locator('#drill-next');
-  expect(await prev.count()).toBeGreaterThanOrEqual(0); // may be present in actions
+  expect(await prev.count()).toBeGreaterThanOrEqual(0);
   expect(await next.count()).toBeGreaterThanOrEqual(0);
 
   if ((await next.count()) > 0) {
@@ -34,8 +32,6 @@ test('drill page shows single drill view with navigation', async ({ page }) => {
     await next.first().click();
     await page.waitForTimeout(300);
     const newTitle = await page.locator('.single-title').textContent();
-    expect(newTitle).not.toBeNull();
-    // title should change unless there is only one drill (handle that case)
     if (manifest.length > 1) expect(newTitle).not.toEqual(originalTitle);
   }
 });

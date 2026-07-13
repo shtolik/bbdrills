@@ -317,8 +317,26 @@ async function load() {
         if (idx >= 0) {
           showDrillByIndex(idx);
         } else {
-          // id not found: show list fallback
-          render(data);
+          // id not found on drill.html — show a focused 'not found' single page instead of the full list
+          function showNotFound(id: string) {
+            const container = document.getElementById('content');
+            if (!container) return;
+            container.innerHTML = '';
+            const h = document.createElement('h1');
+            h.textContent = t('drill_not_found', 'Drill not found');
+            container.appendChild(h);
+            const p = document.createElement('p');
+            p.textContent = `${t('drill_not_found_desc', 'The requested drill')} (${id}) ${t(
+              'drill_not_found_suggest',
+              'was not found. See the list instead.'
+            )}`;
+            container.appendChild(p);
+            const a = document.createElement('a');
+            a.href = location.pathname.replace(/\/drill\.html$/i, '/index.html');
+            a.textContent = t('back_to_list', 'Back to list');
+            container.appendChild(a);
+          }
+          showNotFound(idParam);
         }
       } else if (idParam) {
         // homepage deep-link: set canonical and scroll to card
