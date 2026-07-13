@@ -22,12 +22,12 @@
     ]
   },
   "dependencies": {
-    "png-to-ico": "^3.0.2",
     "preact": "^10.13.2"
   },
   "devDependencies": {
+    "png-to-ico": "^3.0.2",
     "@playwright/test": "^1.40.0",
-    "@types/node": "^20.3.1",
+    "@types-node": "^20.3.1",
     "esbuild": "^0.28.1",
     "husky": "^8.0.0",
     "jsdom": "^22.1.0",
