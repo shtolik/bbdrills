@@ -179,7 +179,14 @@ async function load() {
     render(data);
   } catch (e) {
     const content = document.getElementById('content');
-    if (content) content.innerHTML = '<p style="color:#900">Failed to load data</p>';
+    if (content) {
+      content.innerHTML = '';
+      const p = document.createElement('p');
+      p.style.color = '#900';
+      p.style.whiteSpace = 'pre-wrap';
+      p.textContent = t('failed_to_load_data', 'Failed to load data');
+      content.appendChild(p);
+    }
     console.error(e);
   }
 }
@@ -418,7 +425,7 @@ function render(data: Drill[]) {
       setsWrap.appendChild(sSets);
       setsWrap.appendChild(big);
       const markBtn = document.createElement('button');
-      markBtn.textContent = '+1 done';
+      markBtn.textContent = t('mark_done', '+1 done');
       markBtn.className = 'btn-mark';
       markBtn.addEventListener('click', async () => {
         markSetComplete(it.id);

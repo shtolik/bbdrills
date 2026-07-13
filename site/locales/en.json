@@ -11,8 +11,10 @@
   "open_on_youtube": "Open on YouTube",
   "open_video": "Open video",
   "cannot_embed": "This video cannot be embedded (age-restricted or blocked). You can open it on YouTube instead.",
+  "mark_done": "+1 done",
   "done": "Done",
   "confirm_clear": "Clear local progress?",
+  "failed_to_load_data": "Failed to load data",
   "group.running": "Running",
   "group.gym": "Gym",
   "group.bodyweight": "Bodyweight"

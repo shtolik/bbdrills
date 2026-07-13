@@ -4,6 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Drills — Running & Training</title>
+    <!-- Site icons and theme color -->
+    <link rel="icon" href="logo.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="logo.svg" />
+    <meta name="theme-color" content="#0b74de" />
     <style>
       :root {
         --gap: 12px;
@@ -57,8 +61,19 @@
         justify-content: space-between;
         gap: 12px;
       }
+      .brand-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      #site-logo {
+        width: 88px;
+        height: 88px;
+        display: inline-block;
+      }
       .brand {
         font-weight: 700;
+        font-size: 18px;
       }
       .controls {
         display: flex;
@@ -301,7 +316,10 @@
   <body>
     <div class="container">
       <header>
-        <div class="brand" id="brand">Basketball Off-Season Drills</div>
+        <div class="brand-container">
+          <img id="site-logo" src="logo.svg" alt="Drills logo" />
+          <div class="brand" id="brand">Basketball Off-Season Drills</div>
+        </div>
         <div class="controls">
           <span class="lang-icon" aria-hidden="true">🌐</span>
           <select id="lang-select" aria-label="Language">

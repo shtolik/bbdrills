@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 340 170"
+     role="img"
+     aria-labelledby="title desc">
+
+  <title id="title">Drills.my</title>
+  <desc id="desc">Drills.my basketball training logo.</desc>
+
+  <defs>
+    <linearGradient id="ball" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFBD59"/>
+      <stop offset="100%" stop-color="#F47C20"/>
+    </linearGradient>
+  </defs>
+
+  <!-- top line -->
+  <g transform="translate(195,18)">
+
+    <!-- basketball -->
+    <g transform="rotate(8 12 12)">
+
+      <circle
+              cx="12"
+              cy="12"
+              r="11"
+              fill="url(#ball)"
+              stroke="#C96515"
+              stroke-width="1.8"/>
+
+      <path
+              d="M12 2
+               C10.8 7 10.8 17 12 22"
+              stroke="#6A3600"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              fill="none"/>
+
+      <path
+              d="M5 3
+               C10 7 10 17 5 21"
+              stroke="#6A3600"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              fill="none"/>
+
+      <path
+              d="M19 3
+               C14 7 14 17 19 21"
+              stroke="#6A3600"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              fill="none"/>
+
+    </g>
+
+    <text
+            x="30"
+            y="22"
+            font-family="Inter, Poppins, Montserrat, Arial, sans-serif"
+            font-size="34"
+            font-weight="600"
+            fill="#1565C0">
+      my
+    </text>
+
+  </g>
+
+  <text
+          x="20"
+          y="120"
+          font-family="Inter, Poppins, Montserrat, Arial, sans-serif"
+          font-size="60"
+          font-weight="800"
+          fill="#1565C0">
+    Drills
+  </text>
+
+</svg>

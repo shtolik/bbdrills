@@ -131,10 +131,25 @@ export default function App() {
         updateFilterLabel(initialFilter);
         const clearBtn = document.getElementById('clear-progress');
         if (clearBtn) clearBtn.textContent = t('clear_progress', 'Clear progress');
+        // remove any initial loading <p> placeholder if still present (avoid leaving static text at bottom)
+        const contentEl = document.getElementById('content');
+        if (
+          contentEl?.children.length === 1 &&
+          contentEl.firstElementChild?.tagName?.toLowerCase() === 'p'
+        ) {
+          contentEl.firstElementChild.remove();
+        }
         setData(json);
       } catch (e) {
         const content = document.getElementById('content');
-        if (content) content.textContent = 'Failed to load data';
+        if (content) {
+          content.innerHTML = '';
+          const p = document.createElement('p');
+          p.style.color = '#900';
+          p.style.whiteSpace = 'pre-wrap';
+          p.textContent = t('failed_to_load_data', 'Failed to load data');
+          content.appendChild(p);
+        }
         console.error(e);
       }
     })();
@@ -601,7 +616,7 @@ export default function App() {
                   (day.targetSets && day.targetSets > 0 ? day.targetSets : it.sets || '-')}
               </div>
               <button className={'btn-mark'} onClick={() => mark(it.id)}>
-                +1 done
+                {t('mark_done', '+1 done')}
               </button>
               {completed && <span className={'done-badge'}>{t('done', 'Done')}</span>}
             </div>
