@@ -109,7 +109,8 @@ const themeBtn = document.getElementById('theme-btn');
 
 if (langSelect)
   langSelect.addEventListener('change', async () => {
-    const nextLang = langSelect.value === 'fi' || langSelect.value === 'sv' ? langSelect.value : 'en';
+    const nextLang =
+      langSelect.value === 'fi' || langSelect.value === 'sv' ? langSelect.value : 'en';
     langState.lang = nextLang;
     const loc = await loadLocale(nextLang);
 
