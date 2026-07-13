@@ -17,8 +17,15 @@ export function buildDeepLink(id: string): string {
   try {
     const origin = location && (location as any).origin ? (location as any).origin : '';
     let path = location && location.pathname ? location.pathname : '/';
-    // If running from a dev server that serves from /site/, prefer root '/' for deep links
-    if (/\/site\/?$/.test(path)) path = '/';
+    // Normalize common dev/server paths that include /site or /site/index.html
+    try {
+      // keep only origin + '/' to avoid long IDE-serving paths like /project/site/index.html
+      if (/\/site(\/index\.html)?$/i.test(path) || path.match(/\/site\//i)) {
+        path = '/';
+      }
+      // If path contains /site/ anywhere, reduce to '/'
+      if (/\/site\//i.test(path)) path = '/';
+    } catch (e) {}
     if (!origin || origin === 'null') {
       // Last resort
       return `http://localhost/?id=${encodeURIComponent(id)}`;
