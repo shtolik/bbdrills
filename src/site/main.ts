@@ -354,6 +354,104 @@ function normalizeUrl(url?: string) {
   return 'https://' + s;
 }
 
+function renderSingle(item: Drill) {
+  const container = document.getElementById('content');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const title = document.createElement('h1');
+  title.className = 'single-title';
+  title.textContent = localizedDrillField(item, 'name') || item.name_en || 'Drill';
+  container.appendChild(title);
+
+  // media / preview
+  const mediaWrap = document.createElement('div');
+  mediaWrap.className = 'single-media';
+  const poster =
+    resolveAsset(item.preview_webp) ||
+    resolveAsset(item.gif) ||
+    (item.video_url ? youtubeThumbnail(item.video_url) : '');
+  if (poster) {
+    const img = document.createElement('img');
+    img.src = poster;
+    img.alt = (localizedDrillField(item, 'name') || item.name_en) + ' preview';
+    img.style.maxWidth = '720px';
+    img.style.width = '100%';
+    mediaWrap.appendChild(img);
+  }
+  container.appendChild(mediaWrap);
+
+  // details
+  const desc = document.createElement('div');
+  desc.className = 'single-desc';
+  const detailsText = localizedDrillField(item, 'details') || item.details || '';
+  if (detailsText) {
+    const p = document.createElement('p');
+    p.textContent = detailsText;
+    desc.appendChild(p);
+  }
+
+  const meta = document.createElement('div');
+  meta.className = 'single-meta';
+  const sets = document.createElement('div');
+  const day = getDay(item.id);
+  const target = day.targetSets && day.targetSets > 0 ? day.targetSets : item.sets || 0;
+  sets.textContent = `${t('sets_label', 'Sets:')} ${day.setsCompleted || 0}/${target || '-'}`;
+  meta.appendChild(sets);
+
+  const reps = document.createElement('div');
+  reps.textContent = `${t('reps_label', 'Reps:')} ${
+    item.reps_num || localizedDrillField(item, 'reps') || ''
+  }`;
+  meta.appendChild(reps);
+
+  // action row: open video, share
+  const actions = document.createElement('div');
+  actions.className = 'single-actions';
+  const viewBtn = document.createElement('button');
+  viewBtn.textContent = t('open_video', 'Open video');
+  viewBtn.addEventListener('click', () => openVideo(item));
+  actions.appendChild(viewBtn);
+  if (item.video_url) {
+    const a = document.createElement('a');
+    a.href = normalizeUrl(item.video_url);
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.textContent = t('open_on_youtube', 'Open on YouTube');
+    a.style.marginLeft = '8px';
+    actions.appendChild(a);
+  }
+  const shareBtn = document.createElement('button');
+  shareBtn.textContent = t('share', 'Share');
+  shareBtn.addEventListener('click', async () => {
+    const deep = buildDeepLink(item.id);
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText)
+        await navigator.clipboard.writeText(deep);
+      else {
+        const ta = document.createElement('textarea');
+        ta.value = deep;
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+      }
+      const prev = shareBtn.textContent;
+      shareBtn.textContent = t('copied', 'Copied!');
+      setTimeout(() => (shareBtn.textContent = prev), 1400);
+    } catch (e) {
+      prompt(t('copy_prompt', 'Copy this link'), deep);
+    }
+  });
+  actions.appendChild(shareBtn);
+
+  desc.appendChild(meta);
+  desc.appendChild(actions);
+  container.appendChild(desc);
+}
+
 function render(data: Drill[]) {
   if (!data) return;
   const groups = groupByLocalized(data);

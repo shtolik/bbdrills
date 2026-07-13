@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Drill — Drills</title>
+    <link rel="icon" href="favicon.ico" />
+    <link rel="icon" href="favicon-32x32.png" type="image/png" sizes="32x32" />
+    <link rel="icon" href="favicon-16x16.png" type="image/png" sizes="16x16" />
+    <link rel="icon" href="logo-ball.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180" />
+    <meta name="theme-color" content="#0b74de" />
+    <style>
+      /* keep a minimal subset of index styles for single drill page */
+      body {
+        font-family: Segoe UI, Arial, sans-serif;
+        margin: 12px;
+        background: var(--bg);
+        color: var(--text);
+      }
+      .container {
+        max-width: 900px;
+        margin: 12px auto;
+      }
+      .single-title {
+        font-size: 28px;
+        margin-bottom: 12px;
+      }
+      .single-media img {
+        width: 100%;
+        max-width: 720px;
+        display: block;
+        margin-bottom: 12px;
+      }
+      .single-desc {
+        background: #fff;
+        padding: 12px;
+        border-radius: 8px;
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+      }
+      .single-actions {
+        margin-top: 12px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      button {
+        background: #0b74de;
+        color: #fff;
+        border: none;
+        padding: 8px 10px;
+        border-radius: 6px;
+      }
+      a {
+        color: #0b74de;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <main id="content">
+        <p>Loading drill…</p>
+      </main>
+    </div>
+
+    <script
+      src="./site.bundle.js"
+      defer
+      onerror="(function(){try{const c=document.getElementById('content'); if(c){c.textContent='site.bundle.js not found — the site JavaScript is missing. Run npm install && npm run build:site before serving/publishing.';} console.warn('site.bundle.js not found — run npm run build:site.');}catch(e){} })()"
+    ></script>
+  </body>
+</html>

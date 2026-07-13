@@ -49,13 +49,24 @@ export function buildDeepLink(id: string): string {
       return `http://localhost${basePath}?id=${encodeURIComponent(id)}`;
     }
 
-    const candidate = origin + basePath;
+    // Prefer a dedicated drill page under the same directory (drill.html)
+    let pathWithDrill = basePath;
+    try {
+      if (!/drill\.html$/i.test(pathWithDrill)) {
+        if (!pathWithDrill.endsWith('/')) pathWithDrill += '/';
+        pathWithDrill += 'drill.html';
+      }
+    } catch (e) {
+      pathWithDrill = basePath;
+    }
+
+    const candidate = origin + pathWithDrill;
     try {
       const u = new URL(candidate);
       u.searchParams.set('id', id);
       return u.toString();
     } catch (e) {
-      return `${origin}${basePath}?id=${encodeURIComponent(id)}`;
+      return `${origin}${pathWithDrill}?id=${encodeURIComponent(id)}`;
     }
   } catch (e) {
     return `http://localhost/?id=${encodeURIComponent(id)}`;
