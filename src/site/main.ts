@@ -127,7 +127,11 @@ if (langSelect)
     if (clearProgressBtn) clearProgressBtn.textContent = t('clear_progress', 'Clear progress');
     render(currentData);
   });
-if (filterBtn) filterBtn.addEventListener('click', toggleFilter);
+if (filterBtn)
+  filterBtn.addEventListener('click', () => {
+    toggleFilter();
+    updateFilterLabel();
+  });
 if (clearProgressBtn) clearProgressBtn.addEventListener('click', clearProgress);
 if (themeBtn) themeBtn.addEventListener('click', cycleTheme);
 
