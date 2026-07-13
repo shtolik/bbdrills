@@ -18,7 +18,7 @@
     "details": {
       "en": "Preferably without hand support",
       "fi": "Mieluusti ilman käsitukea",
-      "sv": "Preferably without hand support"
+      "sv": "Helst utan handstöd"
     },
     "group": "running",
     "reps_num": "10",
@@ -47,7 +47,7 @@
     "details": {
       "en": "Hold something stable if needed",
       "fi": "Mitä vaan vasten mikä pysyy pystyssä (pidä tukea tarvittaessa)",
-      "sv": "Hold something stable if needed"
+      "sv": "Allt som förblir upprätt (håll stöd vid behov)"
     },
     "group": "running",
     "reps_num": "10",
@@ -76,7 +76,7 @@
     "details": {
       "en": "Hold: 5 x 5s (standing)",
       "fi": "Pito: 5 x 5 sekunttia (seisten)",
-      "sv": "Hold: 5 x 5s (standing)"
+      "sv": "Håll: 5 x 5 sekunder (stående)"
     },
     "group": "running",
     "reps_num": "5",
@@ -100,12 +100,12 @@
     "name": {
       "en": "Pogo jumps",
       "fi": "Pogo-hypyt",
-      "sv": "Pogo jumps"
+      "sv": "Pogo hoppar"
     },
     "details": {
       "en": "Small, rapidly repeated vertical jumps (ankle stiffness)",
       "fi": "Pieniä, nopeasti toistuvia pystysuuntaisia hyppyjä (ankle stiffness)",
-      "sv": "Pieniä, nopeasti toistuvia pystysuuntaisia hyppyjä (ankle stiffness)"
+      "sv": "Små, snabbt upprepade vertikala hopp (ankelstelhet)"
     },
     "group": "running",
     "reps_num": "10",
@@ -129,12 +129,12 @@
     "name": {
       "en": "Skier jumps",
       "fi": "Suksihypyt",
-      "sv": "Skier jumps"
+      "sv": "Backhoppning"
     },
     "details": {
       "en": "Lateral explosiveness, controlled descent",
       "fi": "Sivuttaista räjähtävyyttä, hallittu laskeutuminen",
-      "sv": "Sivuttaista räjähtävyyttä, hallittu laskeutuminen"
+      "sv": "Sidoexplosivitet, kontrollerad landning"
     },
     "group": "running",
     "reps_num": "20",
@@ -158,12 +158,12 @@
     "name": {
       "en": "Skater jumps to balance",
       "fi": "Luisteluhypyt",
-      "sv": "Skater jumps to balance"
+      "sv": "Skridskohopp"
     },
     "details": {
       "en": "Lateral jumps, focus on landing on one foot",
       "fi": "Sivuttaiset hypyt, keskity yhden jalan laskeutumiseen",
-      "sv": "Sivuttaiset hypyt, keskity yhden jalan laskeutumiseen"
+      "sv": "Sidohopp, fokusera på att landa på ett ben"
     },
     "group": "running",
     "reps_num": "10",
@@ -187,12 +187,12 @@
     "name": {
       "en": "Low step lunge",
       "fi": "Matala askelkyykky (vaihto)",
-      "sv": "Low step lunge"
+      "sv": "Low Step Squat (Exchange)"
     },
     "details": {
       "en": "Change front leg; use body weight in an upward direction",
       "fi": "Vaihda etujalkaa; kehonpainolla nousujohteisesti",
-      "sv": "Vaihda etujalkaa; kehonpainolla nousujohteisesti"
+      "sv": "Byt framben; med kroppsvikten i riktning uppåt"
     },
     "group": "running",
     "reps_num": "3",
@@ -216,12 +216,12 @@
     "name": {
       "en": "Bounds",
       "fi": "Rajat",
-      "sv": "Bounds"
+      "sv": "Gräns"
     },
     "details": {
       "en": "High horizontal efforts; focus on hip extension",
       "fi": "Suuria horisontaalisia ponnistuksia; keskity lonkan ojennukseen",
-      "sv": "Suuria horisontaalisia ponnistuksia; keskity lonkan ojennukseen"
+      "sv": "Stora horisontella ansträngningar; fokus på höftförlängning"
     },
     "group": "running",
     "reps_num": "5",
@@ -245,12 +245,12 @@
     "name": {
       "en": "Straight-leg runs",
       "fi": "Suorat jalan juoksut",
-      "sv": "Straight-leg runs"
+      "sv": "Raka benlöpningar"
     },
     "details": {
       "en": "Lyhyitä suoria vedon kaltaisia strideoja, 20–30 m",
       "fi": "Lyhyitä suoria vedon kaltaisia strideoja, 20–30 m",
-      "sv": "Lyhyitä suoria vedon kaltaisia strideoja, 20–30 m"
+      "sv": "Korta raka slagliknande steg, 20–30 m"
     },
     "group": "running",
     "reps_num": "20-30",
@@ -279,7 +279,7 @@
     "details": {
       "en": "5 x 20 m, 3 min recovery in between",
       "fi": "5 x 20 m, 3 min palautus välissä",
-      "sv": "5 x 20 m, 3 min palautus välissä"
+      "sv": "5 x 20 m, 3 min återhämtning emellan"
     },
     "group": "running",
     "reps_num": "20",
@@ -303,12 +303,12 @@
     "name": {
       "en": "Walking lunges",
       "fi": "Kävelyaskelkyykyt",
-      "sv": "Walking lunges"
+      "sv": "Walking step squats"
     },
     "details": {
       "en": "100–400 m walking with step squats",
       "fi": "100–400 m kävelyä askelkyykkyinä",
-      "sv": "100–400 m kävelyä askelkyykkyinä"
+      "sv": "100–400 m gång med step squats"
     },
     "group": "running",
     "reps_num": "100-400",
@@ -332,12 +332,12 @@
     "name": {
       "en": "Reverse lunge",
       "fi": "Askelkyykky taakse",
-      "sv": "Reverse lunge"
+      "sv": "Back step squat"
     },
     "details": {
       "en": "DB(Dumbbell) in front; if no larger DBs available, do two DBs on the sides",
       "fi": "DB etukädessä; jos ei isompia DB saatavilla, tee kaksi DB sivuilla",
-      "sv": "DB etukädessä; jos ei isompia DB saatavilla, tee kaksi DB sivuilla"
+      "sv": "DB i forehand; om inga större DB finns tillgängliga, gör två DBs på sidorna"
     },
     "group": "gym",
     "reps_num": "8",
@@ -361,12 +361,12 @@
     "name": {
       "en": "Renegade row",
       "fi": "Renegade-soutu",
-      "sv": "Renegade row"
+      "sv": "Renegade rodd"
     },
     "details": {
       "en": "Do as in the video; core stability and traction",
       "fi": "Tee kuten videolla; core-stability ja veto",
-      "sv": "Tee kuten videolla; core-stability ja veto"
+      "sv": "Gör som i videon; kärnans stabilitet och dragkraft"
     },
     "group": "gym",
     "reps_num": "8",
@@ -390,12 +390,12 @@
     "name": {
       "en": "Death march",
       "fi": "Maastaveto kävely",
-      "sv": "Death march"
+      "sv": "Längdskidåkning"
     },
     "details": {
       "en": "Do static and single-leg (walking deadlift)",
       "fi": "Tee staattisesti ja yksijalkaisesti (kävelymaastaveto)",
-      "sv": "Tee staattisesti ja yksijalkaisesti (kävelymaastaveto)"
+      "sv": "Gör statiskt och på ett ben (gå marklyft)"
     },
     "group": "gym",
     "reps_num": "8",
@@ -419,12 +419,12 @@
     "name": {
       "en": "Z-press",
       "fi": "Z-press",
-      "sv": "Z-press"
+      "sv": "Z-tryck"
     },
     "details": {
       "en": "Seated push-ups on the floor; 3 x 10 DB",
       "fi": "Pystypunnerrus istuen lattialla; 3 x 10 DB",
-      "sv": "Pystypunnerrus istuen lattialla; 3 x 10 DB"
+      "sv": "Push-up sittande på golvet; 3 x 10 DB"
     },
     "group": "gym",
     "reps_num": "10",
@@ -448,7 +448,7 @@
     "name": {
       "en": "Step squat sliding from side to side",
       "fi": "Askelkyykky liutus sivulta sivulle",
-      "sv": "Askelkyykky liutus sivulta sivulle"
+      "sv": "Hukande från sida till sida"
     },
     "details": {
       "en": "1 set; reps 10,15,20,25; bodyweight or progression",
@@ -477,12 +477,12 @@
     "name": {
       "en": "Elephant walk",
       "fi": "Elefantti kävely",
-      "sv": "Elephant walk"
+      "sv": "Elefant som går"
     },
     "details": {
       "en": "Body movement and warm-up; 3 x 10",
       "fi": "Kehon liikkuvuutta ja lämmittelyä",
-      "sv": "Kehon liikkuvuutta ja lämmittelyä"
+      "sv": "Kroppsrörlighet och uppvärmning"
     },
     "group": "bodyweight",
     "reps_num": "10",
@@ -535,7 +535,7 @@
     "name": {
       "en": "Sit-up + toe touch",
       "fi": "Istumaan nousu + varpaiden kosketus",
-      "sv": "Sit-up + toe touch"
+      "sv": "Sitter upp + rör vid tårna"
     },
     "details": {
       "en": "Abdominal and mobility exercise",
@@ -564,12 +564,12 @@
     "name": {
       "en": "Hip 90/90 Get-Up",
       "fi": "90/90 lantionkierto",
-      "sv": "90/90 lantionkierto"
+      "sv": "90/90 höftrotation"
     },
     "details": {
       "en": "Pelvic mobility",
       "fi": "Lantion liikkuvuus",
-      "sv": "Lantion liikkuvuus"
+      "sv": "Bäckenrörlighet"
     },
     "group": "bodyweight",
     "reps_num": "10",
@@ -593,12 +593,12 @@
     "name": {
       "en": "Rotation - Windshield Wipers",
       "fi": "Tuulilasin pyyhkijä",
-      "sv": "Tuulilasin pyyhkijä"
+      "sv": "Vindrutetorkare"
     },
     "details": {
       "en": "Core movement",
       "fi": "Core-liike",
-      "sv": "Core-liike"
+      "sv": "Kärnrörelse"
     },
     "group": "bodyweight",
     "reps_num": "10",
@@ -622,12 +622,12 @@
     "name": {
       "en": "World's best stretch",
       "fi": "Maailman paras venytys",
-      "sv": "World's best stretch"
+      "sv": "Världens bästa sträcka"
     },
     "details": {
       "en": "Deep hip stretch",
       "fi": "Syvä lonkkan venytys",
-      "sv": "Syvä lonkkan venytys"
+      "sv": "Djup höftsträckning"
     },
     "group": "bodyweight",
     "reps_num": "10",
@@ -651,7 +651,7 @@
     "name": {
       "en": "Shoulder airplane",
       "fi": "Olkapää lentokone",
-      "sv": "Shoulder airplane"
+      "sv": "Axelplan"
     },
     "details": {
       "en": "Shoulder and shoulder muscle mobility",
@@ -680,12 +680,12 @@
     "name": {
       "en": "Pike push-up",
       "fi": "Pike punnerrus",
-      "sv": "Pike push-up"
+      "sv": "Gädda push-up"
     },
     "details": {
       "en": "Shoulder progression exercise",
       "fi": "Etenemisharjoite olkapäille",
-      "sv": "Etenemisharjoite olkapäille"
+      "sv": "Progressionsövning för axlarna"
     },
     "group": "bodyweight",
     "reps_num": "10",
@@ -709,12 +709,12 @@
     "name": {
       "en": "Plank rotations",
       "fi": "Lankusta kierto sivulle",
-      "sv": "Plank rotations"
+      "sv": "Planka rotationen åt sidan"
     },
     "details": {
       "en": "Anti-rotation core",
       "fi": "Pyörimisenestoydin",
-      "sv": "Anti-rotation core"
+      "sv": "Antirotationskärna"
     },
     "group": "bodyweight",
     "reps_num": "10",
@@ -738,12 +738,12 @@
     "name": {
       "en": "Bear crawl / Crab walk",
       "fi": "Karhu kävely / rapu kävely",
-      "sv": "Bear crawl / Crab walk"
+      "sv": "Björnvandring / krabbavandring"
     },
     "details": {
       "en": "Bear walk from plank to crab walk with reach",
       "fi": "Karhukävely lankusta rapu kävelyyn kurotuksella",
-      "sv": "Karhukävely lankusta rapu kävelyyn kurotuksella"
+      "sv": "Björnvandring från planka till krabbavandring med räckvidd"
     },
     "group": "bodyweight",
     "reps_num": "10",
