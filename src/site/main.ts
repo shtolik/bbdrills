@@ -231,11 +231,21 @@ async function load() {
             '';
           if (img) setMetaProp('og:image', normalizeUrl(img));
 
-          // scroll to the drill card so crawlers render focused content
-          setTimeout(() => {
-            const el = document.querySelector(`[data-id="${item.id}"]`) as HTMLElement | null;
-            if (el) el.scrollIntoView({ behavior: 'auto', block: 'center' });
-          }, 50);
+          // scroll to the drill card so crawlers render focused content (retry in case render is delayed)
+          (function scrollToCard(id: string) {
+            let tries = 0;
+            const maxTries = 20;
+            const attempt = () => {
+              const el = document.querySelector(`[data-id="${id}"]`) as HTMLElement | null;
+              if (el) {
+                el.scrollIntoView({ behavior: 'auto', block: 'center' });
+                return;
+              }
+              tries++;
+              if (tries < maxTries) setTimeout(attempt, 100);
+            };
+            attempt();
+          })(item.id);
         }
       } else {
         // default canonical for homepage

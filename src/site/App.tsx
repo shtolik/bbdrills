@@ -639,10 +639,37 @@ export default function App() {
               style={{ marginLeft: '8px' }}
               onClick={() => {
                 const deep = buildDeepLink(it.id);
+                const showToast = (msg: string) => {
+                  const id = 'bbdrills-toast';
+                  let tEl = document.getElementById(id) as HTMLDivElement | null;
+                  if (!tEl) {
+                    tEl = document.createElement('div');
+                    tEl.id = id;
+                    tEl.style.position = 'fixed';
+                    tEl.style.right = '16px';
+                    tEl.style.bottom = '24px';
+                    tEl.style.padding = '8px 12px';
+                    tEl.style.borderRadius = '8px';
+                    tEl.style.background = 'rgba(0,0,0,0.8)';
+                    tEl.style.color = '#fff';
+                    tEl.style.zIndex = '10000';
+                    tEl.style.fontSize = '14px';
+                    document.body.appendChild(tEl);
+                  }
+                  tEl.textContent = msg;
+                  tEl.style.opacity = '1';
+                  setTimeout(() => {
+                    try {
+                      tEl!.style.transition = 'opacity 300ms ease';
+                      tEl!.style.opacity = '0';
+                      setTimeout(() => tEl && tEl.remove(), 400);
+                    } catch (e) {}
+                  }, 1200);
+                };
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                   navigator.clipboard
                     .writeText(deep)
-                    .then(() => alert(t('copied', 'Copied!')))
+                    .then(() => showToast(t('copied', 'Copied!')))
                     .catch(() => prompt(t('copy_prompt', 'Copy this link'), deep));
                 } else {
                   try {
@@ -652,7 +679,7 @@ export default function App() {
                     ta.select();
                     document.execCommand('copy');
                     ta.remove();
-                    alert(t('copied', 'Copied!'));
+                    showToast(t('copied', 'Copied!'));
                   } catch (e) {
                     prompt(t('copy_prompt', 'Copy this link'), deep);
                   }
