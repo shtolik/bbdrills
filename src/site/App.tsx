@@ -131,15 +131,10 @@ export default function App() {
         updateFilterLabel(initialFilter);
         const clearBtn = document.getElementById('clear-progress');
         if (clearBtn) clearBtn.textContent = t('clear_progress', 'Clear progress');
-        // remove initial loading placeholder if still present
+        // remove any initial loading placeholder if still present
         try {
           const contentEl = document.getElementById('content');
-          if (contentEl) {
-            Array.from(contentEl.querySelectorAll('p')).forEach(p => {
-              const txt = (p.textContent || '').trim();
-              if (txt && txt === (t('loading', 'Loading drills…') || 'Loading drills…')) p.remove();
-            });
-          }
+          if (contentEl) contentEl.innerHTML = '';
         } catch (e) {}
         setData(json);
       } catch (e) {
