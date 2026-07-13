@@ -100,7 +100,7 @@ export default function App() {
       const raw = localStorage.getItem(UI_KEY);
       if (raw) {
         const s = JSON.parse(raw);
-        if (s.lang) initialLang = s.lang;
+        if (typeof s.lang === 'string' && ['en', 'fi', 'sv'].includes(s.lang)) initialLang = s.lang;
         if (s.filter === 'all' || s.filter === 'incomplete') initialFilter = s.filter;
         if (s.theme === 'system' || s.theme === 'dark' || s.theme === 'light')
           initialTheme = s.theme;
