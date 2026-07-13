@@ -177,19 +177,155 @@ async function load() {
     const res = await fetch('./default_drills_with_meta.json');
     const data = await res.json();
     currentData = data;
-    render(data);
 
-    // Deep-link handling: support ?id=<drill-id> deep links and set canonical/meta tags per drill
+    // Helper: update canonical/meta/og for a single drill
+    function updateMetaForDrill(item: Drill) {
+      try {
+        const canonicalUrl = `${location.protocol}//${location.host}${
+          location.pathname
+        }?id=${encodeURIComponent(item.id)}`;
+        let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+        if (!link) {
+          link = document.createElement('link');
+          link.setAttribute('rel', 'canonical');
+          document.head.appendChild(link);
+        }
+        link.href = canonicalUrl;
+
+        const titleText =
+          (localizedDrillField(item, 'name') || (item as any).name_en || 'Drill') + ' — Drills';
+        document.title = titleText;
+        let md = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
+        const desc = localizedDrillField(item, 'details') || item.details || '';
+        if (!md) {
+          md = document.createElement('meta');
+          md.setAttribute('name', 'description');
+          document.head.appendChild(md);
+        }
+        md.content = String(desc || titleText).slice(0, 160);
+
+        function setMetaProp(prop: string, content: string) {
+          let m = document.querySelector(`meta[property="${prop}"]`) as HTMLMetaElement | null;
+          if (!m) {
+            m = document.createElement('meta');
+            m.setAttribute('property', prop);
+            document.head.appendChild(m);
+          }
+          m.content = content;
+        }
+        setMetaProp('og:title', titleText);
+        setMetaProp('og:description', desc || titleText);
+        setMetaProp('og:url', canonicalUrl);
+        const img =
+          (item.preview_webp as string) ||
+          (item.preview_mp4 as string) ||
+          (item.video_url ? youtubeThumbnail(item.video_url) : '') ||
+          '';
+        if (img) setMetaProp('og:image', normalizeUrl(img));
+      } catch (e) {}
+    }
+
+    // Functions to show a single drill by index and wire navigation
+    function showDrillByIndex(idx: number) {
+      if (!currentData || currentData.length === 0) return;
+      const n = currentData.length;
+      const wrapped = ((idx % n) + n) % n;
+      const item = currentData[wrapped];
+      if (!item) return;
+      renderSingle(item);
+      updateMetaForDrill(item);
+      // update history so the link is shareable
+      try {
+        const newUrl = new URL(location.href);
+        newUrl.searchParams.set('id', item.id);
+        history.replaceState({}, '', newUrl.toString());
+      } catch (e) {}
+      // attach navigation controls
+      attachDrillNavigation(wrapped);
+    }
+
+    function attachDrillNavigation(currentIndex: number) {
+      const container = document.getElementById('content');
+      if (!container) return;
+      // cleanup existing nav
+      const existingPrev = document.getElementById('drill-prev');
+      const existingNext = document.getElementById('drill-next');
+      if (existingPrev) existingPrev.remove();
+      if (existingNext) existingNext.remove();
+
+      const prevBtn = document.createElement('button');
+      prevBtn.id = 'drill-prev';
+      prevBtn.textContent = '<';
+      prevBtn.title = t('previous', 'Previous');
+      prevBtn.style.marginRight = '8px';
+      prevBtn.addEventListener('click', () => showDrillByIndex(currentIndex - 1));
+
+      const nextBtn = document.createElement('button');
+      nextBtn.id = 'drill-next';
+      nextBtn.textContent = '>';
+      nextBtn.title = t('next', 'Next');
+      nextBtn.style.marginLeft = '8px';
+      nextBtn.addEventListener('click', () => showDrillByIndex(currentIndex + 1));
+
+      const actions =
+        container.querySelector('.single-actions') ||
+        container.appendChild(document.createElement('div'));
+      if (actions.classList) (actions as HTMLElement).className = 'single-actions';
+      // Insert prev as first child and next after
+      actions.prepend(prevBtn);
+      actions.appendChild(nextBtn);
+
+      // keyboard navigation
+      function onKey(e: KeyboardEvent) {
+        if (e.key === 'ArrowLeft') showDrillByIndex(currentIndex - 1);
+        if (e.key === 'ArrowRight') showDrillByIndex(currentIndex + 1);
+      }
+      window.removeEventListener('keydown', onKey);
+      window.addEventListener('keydown', onKey);
+
+      // touch swipe navigation
+      let startX = 0;
+      let isTouch = false;
+      container.removeEventListener('touchstart', onTouchStart);
+      container.removeEventListener('touchend', onTouchEnd);
+      function onTouchStart(e: TouchEvent) {
+        isTouch = true;
+        startX = e.touches[0].clientX;
+      }
+      function onTouchEnd(e: TouchEvent) {
+        if (!isTouch) return;
+        const dx = e.changedTouches[0].clientX - startX;
+        if (Math.abs(dx) > 60) {
+          if (dx < 0) showDrillByIndex(currentIndex + 1);
+          else showDrillByIndex(currentIndex - 1);
+        }
+        isTouch = false;
+      }
+      container.addEventListener('touchstart', onTouchStart);
+      container.addEventListener('touchend', onTouchEnd);
+    }
+
+    // Decide whether to render single drill page or full list
     try {
       const params = new URLSearchParams(location.search);
       const idParam = params.get('id');
-      if (idParam) {
+      const isDrillPage =
+        /drill\.html$/i.test(location.pathname) || /\/drill\./i.test(location.pathname);
+      if (isDrillPage && idParam) {
+        const idx = data.findIndex((d: any) => d.id === idParam);
+        if (idx >= 0) {
+          showDrillByIndex(idx);
+        } else {
+          // id not found: show list fallback
+          render(data);
+        }
+      } else if (idParam) {
+        // homepage deep-link: set canonical and scroll to card
         const item = data.find((d: any) => d.id === idParam);
         if (item) {
           const canonicalUrl = `${location.protocol}//${location.host}/?id=${encodeURIComponent(
             item.id
           )}`;
-          // ensure canonical link exists
           let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
           if (!link) {
             link = document.createElement('link');
@@ -198,7 +334,6 @@ async function load() {
           }
           link.href = canonicalUrl;
 
-          // set title and description
           const titleText =
             (localizedDrillField(item, 'name') || (item as any).name_en || 'Drills') + ' — Drills';
           document.title = titleText;
@@ -211,7 +346,6 @@ async function load() {
           }
           md.content = String(desc || titleText).slice(0, 160);
 
-          // Open Graph tags
           function setMetaProp(prop: string, content: string) {
             let m = document.querySelector(`meta[property="${prop}"]`) as HTMLMetaElement | null;
             if (!m) {
@@ -231,7 +365,6 @@ async function load() {
             '';
           if (img) setMetaProp('og:image', normalizeUrl(img));
 
-          // scroll to the drill card so crawlers render focused content (retry in case render is delayed)
           (function scrollToCard(id: string) {
             let tries = 0;
             const maxTries = 20;
@@ -247,6 +380,8 @@ async function load() {
             attempt();
           })(item.id);
         }
+        // still render list so the card is present to scroll to
+        render(data);
       } else {
         // default canonical for homepage
         let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
@@ -256,6 +391,7 @@ async function load() {
           document.head.appendChild(link);
         }
         link.href = `${location.protocol}//${location.host}/`;
+        render(data);
       }
     } catch (e) {}
   } catch (e) {
@@ -561,9 +697,52 @@ function render(data: Drill[]) {
 
       const meta = document.createElement('div');
       meta.className = 'meta';
+
+      // Title row: title + share icon on the right
+      const titleRow = document.createElement('div');
+      titleRow.className = 'title-row';
+      titleRow.style.display = 'flex';
+      titleRow.style.alignItems = 'center';
+      titleRow.style.justifyContent = 'space-between';
+
       const title = document.createElement('div');
       title.className = 'title';
       title.textContent = localizedDrillField(it, 'name') || it.name_en;
+
+      const shareIconBtn = document.createElement('button');
+      shareIconBtn.className = 'share-btn';
+      shareIconBtn.setAttribute('aria-label', String(t('share', 'Share')));
+      shareIconBtn.title = String(t('share', 'Share'));
+      // svg icon
+      shareIconBtn.innerHTML = ` <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7a3.5 3.5 0 000-1.39l7.05-4.11A2.99 2.99 0 0018 7.92 3 3 0 109 4a3 3 0 103 3.92l7.05 4.11c.52-.47 1.2-.77 1.96-.77A3 3 0 1021 16.08z"/></svg>`;
+      shareIconBtn.addEventListener('click', async ev => {
+        ev.stopPropagation();
+        const deep = buildDeepLink(it.id);
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(deep);
+          } else {
+            const ta = document.createElement('textarea');
+            ta.value = deep;
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            ta.remove();
+          }
+          const prevTitle = shareIconBtn.title;
+          shareIconBtn.title = String(t('copied', 'Copied!'));
+          setTimeout(() => (shareIconBtn.title = prevTitle), 1400);
+        } catch (e) {
+          prompt(String(t('copy_prompt', 'Copy this link')), deep);
+        }
+      });
+
+      titleRow.appendChild(title);
+      titleRow.appendChild(shareIconBtn);
+      meta.appendChild(titleRow);
+
       const details = document.createElement('div');
       details.className = 'details';
       const detailsText = localizedDrillField(it, 'details') || it.details || '';
@@ -638,35 +817,6 @@ function render(data: Drill[]) {
         badge.textContent = t('done', 'Done');
         setsWrap.appendChild(badge);
       }
-
-      // Share button: copies deep link to clipboard
-      const shareBtn = document.createElement('button');
-      shareBtn.textContent = t('share', 'Share');
-      shareBtn.addEventListener('click', async ev => {
-        ev.stopPropagation();
-        const deep = buildDeepLink(it.id);
-        try {
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            await navigator.clipboard.writeText(deep);
-          } else {
-            const ta = document.createElement('textarea');
-            ta.value = deep;
-            ta.style.position = 'fixed';
-            ta.style.left = '-9999px';
-            document.body.appendChild(ta);
-            ta.select();
-            document.execCommand('copy');
-            ta.remove();
-          }
-          const prev = shareBtn.textContent;
-          shareBtn.textContent = t('copied', 'Copied!');
-          setTimeout(() => (shareBtn.textContent = prev), 1400);
-        } catch (e) {
-          // fallback: show prompt so user can copy manually
-          prompt(t('copy_prompt', 'Copy this link'), deep);
-        }
-      });
-      actions.appendChild(shareBtn);
 
       meta.appendChild(title);
       meta.appendChild(infoRow);
