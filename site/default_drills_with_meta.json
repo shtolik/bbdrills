@@ -17,15 +17,15 @@
     "preview_mp4": "previews/mp4/hip-airplane_URY-escJjss.mp4",
     "details": {
       "en": "Preferably without hand support",
-      "fi": "Preferably without hand support",
+      "fi": "Mieluusti ilman käsitukea",
       "sv": "Preferably without hand support"
     },
     "group": "running",
     "reps_num": "10",
     "reps_label": {
-      "en": "",
-      "fi": "",
-      "sv": ""
+      "en": "/side",
+      "fi": "/puoli",
+      "sv": "/sida"
     }
   },
   {
@@ -46,15 +46,15 @@
     "preview_mp4": "previews/mp4/a-skip_orOzt-bT2wc.mp4",
     "details": {
       "en": "Hold something stable if needed",
-      "fi": "Hold something stable if needed",
+      "fi": "Mitä vaan vasten mikä pysyy pystyssä (pidä tukea tarvittaessa)",
       "sv": "Hold something stable if needed"
     },
     "group": "running",
     "reps_num": "10",
     "reps_label": {
-      "en": "",
-      "fi": "",
-      "sv": ""
+      "en": "/side",
+      "fi": "/puoli",
+      "sv": "/sida"
     }
   },
   {
@@ -81,9 +81,9 @@
     "group": "running",
     "reps_num": "5",
     "reps_label": {
-      "en": "",
-      "fi": "",
-      "sv": ""
+      "en": "x 5s",
+      "fi": "x 5s",
+      "sv": "x 5s"
     }
   },
   {
@@ -197,9 +197,9 @@
     "group": "running",
     "reps_num": "3",
     "reps_label": {
-      "en": "",
-      "fi": "",
-      "sv": ""
+      "en": "/side",
+      "fi": "/puoli",
+      "sv": "/sida"
     }
   },
   {
@@ -226,9 +226,9 @@
     "group": "running",
     "reps_num": "5",
     "reps_label": {
-      "en": "",
-      "fi": "",
-      "sv": ""
+      "en": "/side",
+      "fi": "/puoli",
+      "sv": "/sida"
     }
   },
   {
@@ -342,9 +342,9 @@
     "group": "gym",
     "reps_num": "8",
     "reps_label": {
-      "en": "",
-      "fi": "",
-      "sv": ""
+      "en": "/side",
+      "fi": "/puoli",
+      "sv": "/sida"
     }
   },
   {
@@ -371,9 +371,9 @@
     "group": "gym",
     "reps_num": "8",
     "reps_label": {
-      "en": "",
-      "fi": "",
-      "sv": ""
+      "en": "/side",
+      "fi": "/puoli",
+      "sv": "/sida"
     }
   },
   {
@@ -400,9 +400,9 @@
     "group": "gym",
     "reps_num": "8",
     "reps_label": {
-      "en": "",
-      "fi": "",
-      "sv": ""
+      "en": "/side",
+      "fi": "/puoli",
+      "sv": "/sida"
     }
   },
   {
@@ -452,15 +452,15 @@
     },
     "details": {
       "en": "1 sarja; toistot 10,15,20,25; kehonpainolla tai progressio",
-      "fi": "1 sarja; toistot 10,15,20,25; kehonpainolla tai progressio",
+      "fi": "1 sarja; toistot 10,15,20,25 per puoli; kehonpainolla tai progressio",
       "sv": "1 sarja; toistot 10,15,20,25; kehonpainolla tai progressio"
     },
     "group": "gym",
     "reps_num": "10-25",
     "reps_label": {
-      "en": "",
-      "fi": "",
-      "sv": ""
+      "en": "/side",
+      "fi": "/puoli",
+      "sv": "/sida"
     }
   },
   {
@@ -481,15 +481,15 @@
     },
     "details": {
       "en": "Kehon liikkuvuutta ja lämmittelyä; 3 x 10",
-      "fi": "Kehon liikkuvuutta ja lämmittelyä; 3 x 10",
+      "fi": "Kehon liikkuvuutta ja lämmittelyä; 3 x 10/puoli",
       "sv": "Kehon liikkuvuutta ja lämmittelyä; 3 x 10"
     },
     "group": "bodyweight",
     "reps_num": "10",
     "reps_label": {
-      "en": "",
-      "fi": "",
-      "sv": ""
+      "en": "/side",
+      "fi": "/puoli",
+      "sv": "/sida"
     }
   },
   {
@@ -510,15 +510,15 @@
     },
     "details": {
       "en": "3 x 10; liikkuvuusharjoite",
-      "fi": "3 x 10; liikkuvuusharjoite",
+      "fi": "3 x 10/puoli; liikkuvuusharjoite",
       "sv": "3 x 10; liikkuvuusharjoite"
     },
     "group": "bodyweight",
     "reps_num": "10",
     "reps_label": {
-      "en": "",
-      "fi": "",
-      "sv": ""
+      "en": "/side",
+      "fi": "/puoli",
+      "sv": "/sida"
     }
   },
   {
@@ -568,15 +568,15 @@
     },
     "details": {
       "en": "3 x 10; lantion liikkuvuus",
-      "fi": "3 x 10; lantion liikkuvuus",
+      "fi": "3 x 10/puoli; lantion liikkuvuus",
       "sv": "3 x 10; lantion liikkuvuus"
     },
     "group": "bodyweight",
     "reps_num": "10",
     "reps_label": {
-      "en": "",
-      "fi": "",
-      "sv": ""
+      "en": "/side",
+      "fi": "/puoli",
+      "sv": "/sida"
     }
   },
   {
@@ -597,15 +597,15 @@
     },
     "details": {
       "en": "3 x 10; core-liike",
-      "fi": "3 x 10; core-liike",
+      "fi": "3 x 10/puoli; core-liike",
       "sv": "3 x 10; core-liike"
     },
     "group": "bodyweight",
     "reps_num": "10",
     "reps_label": {
-      "en": "",
-      "fi": "",
-      "sv": ""
+      "en": "/side",
+      "fi": "/puoli",
+      "sv": "/sida"
     }
   },
   {
@@ -626,15 +626,15 @@
     },
     "details": {
       "en": "3 x 10; syvä lonkkan venytys",
-      "fi": "3 x 10; syvä lonkkan venytys",
+      "fi": "3 x 10/puoli; syvä lonkkan venytys",
       "sv": "3 x 10; syvä lonkkan venytys"
     },
     "group": "bodyweight",
     "reps_num": "10",
     "reps_label": {
-      "en": "",
-      "fi": "",
-      "sv": ""
+      "en": "/side",
+      "fi": "/puoli",
+      "sv": "/sida"
     }
   },
   {
@@ -655,15 +655,15 @@
     },
     "details": {
       "en": "3 x 10; hartia- ja lapalihasten liikkuvuus",
-      "fi": "3 x 10; hartia- ja lapalihasten liikkuvuus",
+      "fi": "3 x 10/puoli; hartia- ja lapalihasten liikkuvuus",
       "sv": "3 x 10; hartia- ja lapalihasten liikkuvuus"
     },
     "group": "bodyweight",
     "reps_num": "10",
     "reps_label": {
-      "en": "",
-      "fi": "",
-      "sv": ""
+      "en": "/side",
+      "fi": "/puoli",
+      "sv": "/sida"
     }
   },
   {
@@ -713,15 +713,15 @@
     },
     "details": {
       "en": "3 x 10; anti-rotation core",
-      "fi": "3 x 10; anti-rotation core",
+      "fi": "3 x 10/puoli; anti-rotation core",
       "sv": "3 x 10; anti-rotation core"
     },
     "group": "bodyweight",
     "reps_num": "10",
     "reps_label": {
-      "en": "",
-      "fi": "",
-      "sv": ""
+      "en": "/side",
+      "fi": "/puoli",
+      "sv": "/sida"
     }
   },
   {
@@ -742,15 +742,15 @@
     },
     "details": {
       "en": "Karhukävely lankusta rapu kävelyyn kurotuksella; 3 x 10",
-      "fi": "Karhukävely lankusta rapu kävelyyn kurotuksella; 3 x 10",
+      "fi": "Karhukävely lankusta rapu kävelyyn kurotuksella; 3 x 10/puoli",
       "sv": "Karhukävely lankusta rapu kävelyyn kurotuksella; 3 x 10"
     },
     "group": "bodyweight",
     "reps_num": "10",
     "reps_label": {
-      "en": "",
-      "fi": "",
-      "sv": ""
+      "en": "/side",
+      "fi": "/puoli",
+      "sv": "/sida"
     }
   }
 ]
