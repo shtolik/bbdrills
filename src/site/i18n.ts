@@ -26,6 +26,11 @@ export function localizedField(item: any, field: string, lang: string) {
   if (field === 'group' && typeof nested === 'string') {
     return t('group.' + nested, nested);
   }
+  // handle reps_label specially: it's a nested localized label
+  if (field === 'reps_label' && nested && typeof nested === 'object') {
+    if (nested[lang]) return nested[lang];
+    if (nested['en']) return nested['en'];
+  }
   // nested object e.g. name: { en: '', fi: '' }
   if (nested && typeof nested === 'object') {
     if (nested[lang]) return nested[lang];

@@ -8,11 +8,6 @@
       "sv": "Höft-flygplan"
     },
     "local_video": "videos/hip-airplane_URY-escJjss.mp4",
-    "reps": {
-      "en": "10",
-      "fi": "10",
-      "sv": "10"
-    },
     "id": "hip-airplane",
     "gif_start": 0,
     "video_url": "https:/youtu.be/URY-escJjss",
@@ -21,11 +16,17 @@
     "gif_end": 21,
     "preview_mp4": "previews/mp4/hip-airplane_URY-escJjss.mp4",
     "details": {
-      "en": "Preferably without hand support /side",
-      "fi": "Preferably without hand support /puoli",
-      "sv": "Preferably without hand support /sida"
+      "en": "Preferably without hand support",
+      "fi": "Preferably without hand support",
+      "sv": "Preferably without hand support"
     },
-    "group": "running"
+    "group": "running",
+    "reps_num": "10",
+    "reps_label": {
+      "en": "",
+      "fi": "",
+      "sv": ""
+    }
   },
   {
     "sets": 2,
@@ -36,11 +37,6 @@
       "sv": "A-skip / Knälyft"
     },
     "local_video": "videos/a-skip_orOzt-bT2wc.mp4",
-    "reps": {
-      "en": "10",
-      "fi": "10",
-      "sv": "10"
-    },
     "id": "a-skip",
     "gif_start": 2,
     "video_url": "https:/youtu.be/orOzt-bT2wc",
@@ -49,11 +45,17 @@
     "gif_end": 23,
     "preview_mp4": "previews/mp4/a-skip_orOzt-bT2wc.mp4",
     "details": {
-      "en": "Hold something stable if needed /side",
-      "fi": "Hold something stable if needed /puoli",
-      "sv": "Hold something stable if needed /sida"
+      "en": "Hold something stable if needed",
+      "fi": "Hold something stable if needed",
+      "sv": "Hold something stable if needed"
     },
-    "group": "running"
+    "group": "running",
+    "reps_num": "10",
+    "reps_label": {
+      "en": "",
+      "fi": "",
+      "sv": ""
+    }
   },
   {
     "sets": 2,
@@ -64,11 +66,6 @@
       "sv": "Stående höftflexion hållning"
     },
     "local_video": "videos/standing-hip-flexor_l3hmBGF9l3k.mp4",
-    "reps": {
-      "en": "5",
-      "fi": "5",
-      "sv": "5"
-    },
     "id": "standing-hip-flexor",
     "gif_start": 3,
     "video_url": "https:/youtu.be/l3hmBGF9l3k",
@@ -81,17 +78,18 @@
       "fi": "Hold: 5 x 5s (standing)",
       "sv": "Hold: 5 x 5s (standing)"
     },
-    "group": "running"
+    "group": "running",
+    "reps_num": "5",
+    "reps_label": {
+      "en": "",
+      "fi": "",
+      "sv": ""
+    }
   },
   {
     "sets": 2,
     "gif": "",
     "local_video": "videos/pogo-jumps_SjHRwhGXBl8.mp4",
-    "reps": {
-      "en": "10",
-      "fi": "10",
-      "sv": "10"
-    },
     "id": "pogo-jumps",
     "gif_start": 0,
     "video_url": "https:/youtu.be/SjHRwhGXBl8",
@@ -109,17 +107,18 @@
       "fi": "Pieniä, nopeasti toistuvia pystysuuntaisia hyppyjä (ankle stiffness)",
       "sv": "Pieniä, nopeasti toistuvia pystysuuntaisia hyppyjä (ankle stiffness)"
     },
-    "group": "running"
+    "group": "running",
+    "reps_num": "10",
+    "reps_label": {
+      "en": "",
+      "fi": "",
+      "sv": ""
+    }
   },
   {
     "sets": 2,
     "gif": "",
     "local_video": "videos/skier-jumps_v0uWe13-t0M.mp4",
-    "reps": {
-      "en": "20",
-      "fi": "20",
-      "sv": "20"
-    },
     "id": "skier-jumps",
     "gif_start": 9,
     "video_url": "https:/youtu.be/v0uWe13-t0M",
@@ -137,17 +136,18 @@
       "fi": "Sivuttaista räjähtävyyttä, hallittu laskeutuminen",
       "sv": "Sivuttaista räjähtävyyttä, hallittu laskeutuminen"
     },
-    "group": "running"
+    "group": "running",
+    "reps_num": "20",
+    "reps_label": {
+      "en": "",
+      "fi": "",
+      "sv": ""
+    }
   },
   {
     "sets": 1,
     "gif": "",
     "local_video": "videos/skater-jumps_X1-zLtilaEg.mp4",
-    "reps": {
-      "en": "10",
-      "fi": "10",
-      "sv": "10"
-    },
     "id": "skater-jumps",
     "gif_start": 0,
     "video_url": "https:/youtu.be/X1-zLtilaEg",
@@ -165,17 +165,18 @@
       "fi": "Sivuttaiset hypyt, keskity yhden jalan laskeutumiseen",
       "sv": "Sivuttaiset hypyt, keskity yhden jalan laskeutumiseen"
     },
-    "group": "running"
+    "group": "running",
+    "reps_num": "10",
+    "reps_label": {
+      "en": "",
+      "fi": "",
+      "sv": ""
+    }
   },
   {
     "sets": 2,
     "gif": "",
     "local_video": "videos/low-step-lunge_aebO9Rae1Lo.mp4",
-    "reps": {
-      "en": "3",
-      "fi": "3",
-      "sv": "3"
-    },
     "id": "low-step-lunge",
     "gif_start": 0,
     "video_url": "https:/youtu.be/aebO9Rae1Lo",
@@ -189,21 +190,22 @@
       "sv": "Low step lunge"
     },
     "details": {
-      "en": "Vaihda etujalkaa; kehonpainolla nousujohteisesti /side",
-      "fi": "Vaihda etujalkaa; kehonpainolla nousujohteisesti /puoli",
-      "sv": "Vaihda etujalkaa; kehonpainolla nousujohteisesti /sida"
+      "en": "Vaihda etujalkaa; kehonpainolla nousujohteisesti",
+      "fi": "Vaihda etujalkaa; kehonpainolla nousujohteisesti",
+      "sv": "Vaihda etujalkaa; kehonpainolla nousujohteisesti"
     },
-    "group": "running"
+    "group": "running",
+    "reps_num": "3",
+    "reps_label": {
+      "en": "",
+      "fi": "",
+      "sv": ""
+    }
   },
   {
     "sets": 2,
     "gif": "",
     "local_video": "videos/bounds_b3124L0KK3Q.mp4",
-    "reps": {
-      "en": "5",
-      "fi": "5",
-      "sv": "5"
-    },
     "id": "bounds",
     "gif_start": 0,
     "video_url": "https:/youtu.be/b3124L0KK3Q",
@@ -217,21 +219,22 @@
       "sv": "Bounds"
     },
     "details": {
-      "en": "Suuria horisontaalisia ponnistuksia; keskity lonkan ojennukseen /side",
-      "fi": "Suuria horisontaalisia ponnistuksia; keskity lonkan ojennukseen /puoli",
-      "sv": "Suuria horisontaalisia ponnistuksia; keskity lonkan ojennukseen /sida"
+      "en": "Suuria horisontaalisia ponnistuksia; keskity lonkan ojennukseen",
+      "fi": "Suuria horisontaalisia ponnistuksia; keskity lonkan ojennukseen",
+      "sv": "Suuria horisontaalisia ponnistuksia; keskity lonkan ojennukseen"
     },
-    "group": "running"
+    "group": "running",
+    "reps_num": "5",
+    "reps_label": {
+      "en": "",
+      "fi": "",
+      "sv": ""
+    }
   },
   {
     "sets": 2,
     "gif": "",
     "local_video": "videos/straight-leg-runs_yRM9Ok4mkkM.mp4",
-    "reps": {
-      "en": "20-30",
-      "fi": "20-30",
-      "sv": "20-30"
-    },
     "id": "straight-leg-runs",
     "gif_start": 0,
     "video_url": "https:/youtu.be/yRM9Ok4mkkM",
@@ -249,17 +252,18 @@
       "fi": "Lyhyitä suoria vedon kaltaisia strideoja, 20–30 m",
       "sv": "Lyhyitä suoria vedon kaltaisia strideoja, 20–30 m"
     },
-    "group": "running"
+    "group": "running",
+    "reps_num": "20-30",
+    "reps_label": {
+      "en": "",
+      "fi": "",
+      "sv": ""
+    }
   },
   {
     "sets": 5,
     "gif": "",
     "local_video": "videos/hill-sprints_98Bt-bFM6Zg.mp4",
-    "reps": {
-      "en": "20",
-      "fi": "20",
-      "sv": "20"
-    },
     "id": "hill-sprints",
     "gif_start": 15,
     "video_url": "https:/www.youtube.com/watch?v=98Bt-bFM6Zg",
@@ -277,17 +281,18 @@
       "fi": "5 x 20 m, 3 min palautus välissä",
       "sv": "5 x 20 m, 3 min palautus välissä"
     },
-    "group": "running"
+    "group": "running",
+    "reps_num": "20",
+    "reps_label": {
+      "en": "",
+      "fi": "",
+      "sv": ""
+    }
   },
   {
     "sets": 1,
     "gif": "",
     "local_video": null,
-    "reps": {
-      "en": "100-400",
-      "fi": "100-400",
-      "sv": "100-400"
-    },
     "id": "walking-lunges",
     "gif_start": 0,
     "video_url": "https:/www.youtube.com/watch?v=tQNktxPkSeE",
@@ -305,17 +310,18 @@
       "fi": "100–400 m kävelyä askelkyykkyinä",
       "sv": "100–400 m kävelyä askelkyykkyinä"
     },
-    "group": "running"
+    "group": "running",
+    "reps_num": "100-400",
+    "reps_label": {
+      "en": "",
+      "fi": "",
+      "sv": ""
+    }
   },
   {
     "sets": 3,
     "gif": "",
     "local_video": "videos/reverse-lunge_xrPteyQLGAo.mp4",
-    "reps": {
-      "en": "8",
-      "fi": "8",
-      "sv": "8"
-    },
     "id": "reverse-lunge",
     "gif_start": 0,
     "video_url": "https:/www.youtube.com/watch?v=xrPteyQLGAo",
@@ -329,21 +335,22 @@
       "sv": "Reverse lunge"
     },
     "details": {
-      "en": "DB etukädessä; jos ei isompia DB saatavilla, tee kaksi DB sivuilla /side",
-      "fi": "DB etukädessä; jos ei isompia DB saatavilla, tee kaksi DB sivuilla /puoli",
-      "sv": "DB etukädessä; jos ei isompia DB saatavilla, tee kaksi DB sivuilla /sida"
+      "en": "DB etukädessä; jos ei isompia DB saatavilla, tee kaksi DB sivuilla",
+      "fi": "DB etukädessä; jos ei isompia DB saatavilla, tee kaksi DB sivuilla",
+      "sv": "DB etukädessä; jos ei isompia DB saatavilla, tee kaksi DB sivuilla"
     },
-    "group": "gym"
+    "group": "gym",
+    "reps_num": "8",
+    "reps_label": {
+      "en": "",
+      "fi": "",
+      "sv": ""
+    }
   },
   {
     "sets": 3,
     "gif": "",
     "local_video": "videos/renegade-row_YUMXGLL2IKE.mp4",
-    "reps": {
-      "en": "8",
-      "fi": "8",
-      "sv": "8"
-    },
     "id": "renegade-row",
     "gif_start": 7,
     "video_url": "https:/youtu.be/YUMXGLL2IKE",
@@ -357,21 +364,22 @@
       "sv": "Renegade row"
     },
     "details": {
-      "en": "Tee kuten videolla; core-stability ja veto /side",
-      "fi": "Tee kuten videolla; core-stability ja veto /puoli",
-      "sv": "Tee kuten videolla; core-stability ja veto /sida"
+      "en": "Tee kuten videolla; core-stability ja veto",
+      "fi": "Tee kuten videolla; core-stability ja veto",
+      "sv": "Tee kuten videolla; core-stability ja veto"
     },
-    "group": "gym"
+    "group": "gym",
+    "reps_num": "8",
+    "reps_label": {
+      "en": "",
+      "fi": "",
+      "sv": ""
+    }
   },
   {
     "sets": 3,
     "gif": "",
     "local_video": "videos/death-march_cmeMgDIH-Sc.mp4",
-    "reps": {
-      "en": "8",
-      "fi": "8",
-      "sv": "8"
-    },
     "id": "death-march",
     "gif_start": 1,
     "video_url": "https:/youtu.be/cmeMgDIH-Sc",
@@ -385,21 +393,22 @@
       "sv": "Death march / Maastaveto kävely"
     },
     "details": {
-      "en": "Tee staattisesti ja yksijalkaisesti (kävelymaastaveto) /side",
-      "fi": "Tee staattisesti ja yksijalkaisesti (kävelymaastaveto) /puoli",
-      "sv": "Tee staattisesti ja yksijalkaisesti (kävelymaastaveto) /sida"
+      "en": "Tee staattisesti ja yksijalkaisesti (kävelymaastaveto)",
+      "fi": "Tee staattisesti ja yksijalkaisesti (kävelymaastaveto)",
+      "sv": "Tee staattisesti ja yksijalkaisesti (kävelymaastaveto)"
     },
-    "group": "gym"
+    "group": "gym",
+    "reps_num": "8",
+    "reps_label": {
+      "en": "",
+      "fi": "",
+      "sv": ""
+    }
   },
   {
     "sets": 3,
     "gif": "",
     "local_video": "videos/z-press_mpSNhVtRe0U.mp4",
-    "reps": {
-      "en": "10",
-      "fi": "10",
-      "sv": "10"
-    },
     "id": "z-press",
     "gif_start": 1,
     "video_url": "https:/youtu.be/mpSNhVtRe0U",
@@ -417,17 +426,18 @@
       "fi": "Pystypunnerrus istuen lattialla; 3 x 10 DB",
       "sv": "Pystypunnerrus istuen lattialla; 3 x 10 DB"
     },
-    "group": "gym"
+    "group": "gym",
+    "reps_num": "10",
+    "reps_label": {
+      "en": "",
+      "fi": "",
+      "sv": ""
+    }
   },
   {
     "sets": 1,
     "gif": "",
     "local_video": "videos/lateral-step-lunge_KXoVm0WXcfE.mp4",
-    "reps": {
-      "en": "10-25",
-      "fi": "10-25",
-      "sv": "10-25"
-    },
     "id": "lateral-step-lunge",
     "gif_start": 1,
     "video_url": "https:/youtu.be/KXoVm0WXcfE",
@@ -441,21 +451,22 @@
       "sv": "Askelkyykky liutus sivulta sivulle"
     },
     "details": {
-      "en": "1 sarja; toistot 10,15,20,25 per puoli; kehonpainolla tai progressio /side",
-      "fi": "1 sarja; toistot 10,15,20,25 per puoli; kehonpainolla tai progressio /puoli",
-      "sv": "1 sarja; toistot 10,15,20,25 per puoli; kehonpainolla tai progressio /sida"
+      "en": "1 sarja; toistot 10,15,20,25; kehonpainolla tai progressio",
+      "fi": "1 sarja; toistot 10,15,20,25; kehonpainolla tai progressio",
+      "sv": "1 sarja; toistot 10,15,20,25; kehonpainolla tai progressio"
     },
-    "group": "gym"
+    "group": "gym",
+    "reps_num": "10-25",
+    "reps_label": {
+      "en": "",
+      "fi": "",
+      "sv": ""
+    }
   },
   {
     "sets": 3,
     "gif": "",
     "local_video": "videos/elephant-walk_yKcrskOi8o0.mp4",
-    "reps": {
-      "en": "10",
-      "fi": "10",
-      "sv": "10"
-    },
     "id": "elephant-walk",
     "gif_start": 0,
     "video_url": "https:/youtu.be/yKcrskOi8o0",
@@ -469,21 +480,22 @@
       "sv": "Elephant walk"
     },
     "details": {
-      "en": "Kehon liikkuvuutta ja lämmittelyä; 3 x 10/puoli /side",
-      "fi": "Kehon liikkuvuutta ja lämmittelyä; 3 x 10/puoli",
-      "sv": "Kehon liikkuvuutta ja lämmittelyä; 3 x 10/puoli /sida"
+      "en": "Kehon liikkuvuutta ja lämmittelyä; 3 x 10",
+      "fi": "Kehon liikkuvuutta ja lämmittelyä; 3 x 10",
+      "sv": "Kehon liikkuvuutta ja lämmittelyä; 3 x 10"
     },
-    "group": "bodyweight"
+    "group": "bodyweight",
+    "reps_num": "10",
+    "reps_label": {
+      "en": "",
+      "fi": "",
+      "sv": ""
+    }
   },
   {
     "sets": 3,
     "gif": "",
     "local_video": "videos/scorpion_CzMpXYOHibg.mp4",
-    "reps": {
-      "en": "10",
-      "fi": "10",
-      "sv": "10"
-    },
     "id": "scorpion",
     "gif_start": 0,
     "video_url": "https:/youtu.be/CzMpXYOHibg",
@@ -497,21 +509,22 @@
       "sv": "Scorpion"
     },
     "details": {
-      "en": "3 x 10/puoli; liikkuvuusharjoite /side",
-      "fi": "3 x 10/puoli; liikkuvuusharjoite",
-      "sv": "3 x 10/puoli; liikkuvuusharjoite /sida"
+      "en": "3 x 10; liikkuvuusharjoite",
+      "fi": "3 x 10; liikkuvuusharjoite",
+      "sv": "3 x 10; liikkuvuusharjoite"
     },
-    "group": "bodyweight"
+    "group": "bodyweight",
+    "reps_num": "10",
+    "reps_label": {
+      "en": "",
+      "fi": "",
+      "sv": ""
+    }
   },
   {
     "sets": 3,
     "gif": "",
     "local_video": "videos/situp-toe-touch_stCD5DwqVlc.mp4",
-    "reps": {
-      "en": "20",
-      "fi": "20",
-      "sv": "20"
-    },
     "id": "situp-toe-touch",
     "gif_start": 0,
     "video_url": "https:/youtu.be/stCD5DwqVlc",
@@ -529,17 +542,18 @@
       "fi": "3 x 20; vatsa- ja liikkuvuusharjoite",
       "sv": "3 x 20; vatsa- ja liikkuvuusharjoite"
     },
-    "group": "bodyweight"
+    "group": "bodyweight",
+    "reps_num": "20",
+    "reps_label": {
+      "en": "",
+      "fi": "",
+      "sv": ""
+    }
   },
   {
     "sets": 3,
     "gif": "",
     "local_video": "videos/90-90_dKiL3cHgWrc.mp4",
-    "reps": {
-      "en": "10",
-      "fi": "10",
-      "sv": "10"
-    },
     "id": "90-90",
     "gif_start": 0,
     "video_url": "https:/youtu.be/dKiL3cHgWrc",
@@ -553,21 +567,22 @@
       "sv": "90/90 lantionkierto"
     },
     "details": {
-      "en": "3 x 10/puoli; lantion liikkuvuus /side",
-      "fi": "3 x 10/puoli; lantion liikkuvuus",
-      "sv": "3 x 10/puoli; lantion liikkuvuus /sida"
+      "en": "3 x 10; lantion liikkuvuus",
+      "fi": "3 x 10; lantion liikkuvuus",
+      "sv": "3 x 10; lantion liikkuvuus"
     },
-    "group": "bodyweight"
+    "group": "bodyweight",
+    "reps_num": "10",
+    "reps_label": {
+      "en": "",
+      "fi": "",
+      "sv": ""
+    }
   },
   {
     "sets": 3,
     "gif": "",
     "local_video": "videos/windshield-wipers_4tWbq4PP2K0.mp4",
-    "reps": {
-      "en": "10",
-      "fi": "10",
-      "sv": "10"
-    },
     "id": "windshield-wipers",
     "gif_start": 0,
     "video_url": "https:/youtu.be/4tWbq4PP2K0",
@@ -581,21 +596,22 @@
       "sv": "Tuulilasin pyyhkijä"
     },
     "details": {
-      "en": "3 x 10/puoli; core-liike /side",
-      "fi": "3 x 10/puoli; core-liike",
-      "sv": "3 x 10/puoli; core-liike /sida"
+      "en": "3 x 10; core-liike",
+      "fi": "3 x 10; core-liike",
+      "sv": "3 x 10; core-liike"
     },
-    "group": "bodyweight"
+    "group": "bodyweight",
+    "reps_num": "10",
+    "reps_label": {
+      "en": "",
+      "fi": "",
+      "sv": ""
+    }
   },
   {
     "sets": 3,
     "gif": "",
     "local_video": "videos/worlds-best-stretch_-CiWQ2IvY34.mp4",
-    "reps": {
-      "en": "10",
-      "fi": "10",
-      "sv": "10"
-    },
     "id": "worlds-best-stretch",
     "gif_start": 0,
     "video_url": "https:/youtu.be/-CiWQ2IvY34",
@@ -609,21 +625,22 @@
       "sv": "World's best stretch"
     },
     "details": {
-      "en": "3 x 10/puoli; syvä lonkkan venytys /side",
-      "fi": "3 x 10/puoli; syvä lonkkan venytys",
-      "sv": "3 x 10/puoli; syvä lonkkan venytys /sida"
+      "en": "3 x 10; syvä lonkkan venytys",
+      "fi": "3 x 10; syvä lonkkan venytys",
+      "sv": "3 x 10; syvä lonkkan venytys"
     },
-    "group": "bodyweight"
+    "group": "bodyweight",
+    "reps_num": "10",
+    "reps_label": {
+      "en": "",
+      "fi": "",
+      "sv": ""
+    }
   },
   {
     "sets": 3,
     "gif": "",
     "local_video": "videos/shoulder-airplane_eTadmjmMjSY.mp4",
-    "reps": {
-      "en": "10",
-      "fi": "10",
-      "sv": "10"
-    },
     "id": "shoulder-airplane",
     "gif_start": 0,
     "video_url": "https:/youtu.be/eTadmjmMjSY",
@@ -637,21 +654,22 @@
       "sv": "Shoulder airplane"
     },
     "details": {
-      "en": "3 x 10/puoli; hartia- ja lapalihasten liikkuvuus /side",
-      "fi": "3 x 10/puoli; hartia- ja lapalihasten liikkuvuus",
-      "sv": "3 x 10/puoli; hartia- ja lapalihasten liikkuvuus /sida"
+      "en": "3 x 10; hartia- ja lapalihasten liikkuvuus",
+      "fi": "3 x 10; hartia- ja lapalihasten liikkuvuus",
+      "sv": "3 x 10; hartia- ja lapalihasten liikkuvuus"
     },
-    "group": "bodyweight"
+    "group": "bodyweight",
+    "reps_num": "10",
+    "reps_label": {
+      "en": "",
+      "fi": "",
+      "sv": ""
+    }
   },
   {
     "sets": 3,
     "gif": "",
     "local_video": "videos/pike-pushup_V6BtY3Lt0Ys.mp4",
-    "reps": {
-      "en": "10",
-      "fi": "10",
-      "sv": "10"
-    },
     "id": "pike-pushup",
     "gif_start": 3,
     "video_url": "https://www.youtube.com/shorts/V6BtY3Lt0Ys",
@@ -669,17 +687,18 @@
       "fi": "3 x 10; etenemisharjoite olkapäille",
       "sv": "3 x 10; etenemisharjoite olkapäille"
     },
-    "group": "bodyweight"
+    "group": "bodyweight",
+    "reps_num": "10",
+    "reps_label": {
+      "en": "",
+      "fi": "",
+      "sv": ""
+    }
   },
   {
     "sets": 3,
     "gif": "",
     "local_video": "videos/plank-rotations_mfz0aDW5uXc.mp4",
-    "reps": {
-      "en": "10",
-      "fi": "10",
-      "sv": "10"
-    },
     "id": "plank-rotations",
     "gif_start": 3,
     "video_url": "https:/youtu.be/mfz0aDW5uXc",
@@ -693,21 +712,22 @@
       "sv": "Plank rotations"
     },
     "details": {
-      "en": "3 x 10/puoli; anti-rotation core /side",
-      "fi": "3 x 10/puoli; anti-rotation core",
-      "sv": "3 x 10/puoli; anti-rotation core /sida"
+      "en": "3 x 10; anti-rotation core",
+      "fi": "3 x 10; anti-rotation core",
+      "sv": "3 x 10; anti-rotation core"
     },
-    "group": "bodyweight"
+    "group": "bodyweight",
+    "reps_num": "10",
+    "reps_label": {
+      "en": "",
+      "fi": "",
+      "sv": ""
+    }
   },
   {
     "sets": 3,
     "gif": "",
     "local_video": "videos/bear-crawl_BiEvYbtY42U.mp4",
-    "reps": {
-      "en": "10",
-      "fi": "10",
-      "sv": "10"
-    },
     "id": "bear-crawl",
     "gif_start": 2,
     "video_url": "https:/youtu.be/BiEvYbtY42U",
@@ -721,10 +741,16 @@
       "sv": "Bear crawl / Crab walk"
     },
     "details": {
-      "en": "Karhukävely lankusta rapu kävelyyn kurotuksella; 3 x 10/puoli /side",
-      "fi": "Karhukävely lankusta rapu kävelyyn kurotuksella; 3 x 10/puoli",
-      "sv": "Karhukävely lankusta rapu kävelyyn kurotuksella; 3 x 10/puoli /sida"
+      "en": "Karhukävely lankusta rapu kävelyyn kurotuksella; 3 x 10",
+      "fi": "Karhukävely lankusta rapu kävelyyn kurotuksella; 3 x 10",
+      "sv": "Karhukävely lankusta rapu kävelyyn kurotuksella; 3 x 10"
     },
-    "group": "bodyweight"
+    "group": "bodyweight",
+    "reps_num": "10",
+    "reps_label": {
+      "en": "",
+      "fi": "",
+      "sv": ""
+    }
   }
 ]

@@ -9,7 +9,9 @@ type Drill = {
   name?: any;
   details?: any;
   group?: any;
-  reps?: any; // can be string or localized object
+  reps?: any; // legacy
+  reps_num?: string; // numeric or range (non-localized)
+  reps_label?: any; // localized object {en,fi,sv}
   reps_unit?: string;
   sets?: number;
   preview_webp?: string;
@@ -579,8 +581,12 @@ export default function App() {
             ) : null}
             <span className={'reps-label'}>{t('reps_label', 'Reps:')}</span>
             <span className={'reps-display'}>
-              {localizedDrillField(it, 'reps') ||
-                (it.reps || '') + (it.reps && it.reps_unit ? ' ' + it.reps_unit : '')}
+              {(it.reps_num || localizedDrillField(it, 'reps') || '') +
+                (localizedDrillField(it, 'reps_label')
+                  ? ' ' + localizedDrillField(it, 'reps_label')
+                  : it.reps_unit
+                  ? ' ' + it.reps_unit
+                  : '')}
             </span>
           </div>
           <div className={'info-row'}>

@@ -16,6 +16,8 @@ type Drill = {
   details?: any;
   group?: any;
   reps?: any;
+  reps_num?: string;
+  reps_label?: any;
   reps_unit?: string;
   sets?: number;
   preview_webp?: string;
@@ -377,8 +379,12 @@ function render(data: Drill[]) {
       const sRepsVal = document.createElement('span');
       sRepsVal.className = 'reps-display';
       sRepsVal.textContent =
-        localizedDrillField(it, 'reps') ||
-        (it.reps || '') + (it.reps && it.reps_unit ? ' ' + it.reps_unit : '');
+        (it.reps_num || localizedDrillField(it, 'reps') || '') +
+        (localizedDrillField(it, 'reps_label')
+          ? ' ' + localizedDrillField(it, 'reps_label')
+          : it.reps_unit
+          ? ' ' + it.reps_unit
+          : '');
       details.appendChild(sRepsVal);
 
       const infoRow = document.createElement('div');
