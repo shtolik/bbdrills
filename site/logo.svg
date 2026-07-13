@@ -1,64 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg"
-     viewBox="0 0 340 170"
+     viewBox="0 0 360 170"
+     width="360"
+     height="170"
      role="img"
      aria-labelledby="title desc">
 
   <title id="title">Drills.my</title>
-  <desc id="desc">Drills.my basketball training logo.</desc>
+  <desc id="desc">Drills.my basketball logo.</desc>
 
   <defs>
-    <linearGradient id="ball" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FFBD59"/>
-      <stop offset="100%" stop-color="#F47C20"/>
+    <linearGradient id="g2" x1="0" x2="1">
+      <stop offset="0" stop-color="#f6a52b"/>
+      <stop offset="1" stop-color="#f08a24"/>
     </linearGradient>
   </defs>
 
-  <!-- top line -->
-  <g transform="translate(195,18)">
 
-    <!-- basketball -->
-    <g transform="rotate(8 12 12)">
+  <!-- Top .my line -->
+  <g transform="translate(170,12)">
+
+    <!-- Basketball replacing the dot -->
+    <g transform="scale(0.28) rotate(8 60 60)">
 
       <circle
-              cx="12"
-              cy="12"
-              r="11"
-              fill="url(#ball)"
-              stroke="#C96515"
-              stroke-width="1.8"/>
+              cx="60"
+              cy="60"
+              r="56"
+              fill="url(#g2)"
+              stroke="#d96412"
+              stroke-width="3"/>
 
       <path
-              d="M12 2
-               C10.8 7 10.8 17 12 22"
-              stroke="#6A3600"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              fill="none"/>
+              d="M25 24 C60 44,60 76,25 96"
+              stroke="#a84f10"
+              stroke-width="3"
+              fill="none"
+              stroke-linecap="round"/>
 
       <path
-              d="M5 3
-               C10 7 10 17 5 21"
-              stroke="#6A3600"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              fill="none"/>
+              d="M95 24 C60 44,60 76,95 96"
+              stroke="#a84f10"
+              stroke-width="3"
+              fill="none"
+              stroke-linecap="round"/>
 
       <path
-              d="M19 3
-               C14 7 14 17 19 21"
-              stroke="#6A3600"
-              stroke-width="1.8"
-              stroke-linecap="round"
-              fill="none"/>
+              d="M8 60 A52 52 0 0 0 112 60"
+              stroke="#a84f10"
+              stroke-width="3"
+              fill="none"
+              stroke-linecap="round"/>
+
+      <path
+              d="M8 60 A52 52 0 0 1 112 60"
+              stroke="#a84f10"
+              stroke-width="3"
+              fill="none"
+              stroke-linecap="round"/>
 
     </g>
 
+
+    <!-- my text -->
     <text
-            x="30"
-            y="22"
-            font-family="Inter, Poppins, Montserrat, Arial, sans-serif"
-            font-size="34"
+            x="34"
+            y="30"
+            font-family="Inter, Manrope, Montserrat, Arial, sans-serif"
+            font-size="36"
             font-weight="600"
             fill="#1565C0">
       my
@@ -66,14 +75,17 @@
 
   </g>
 
+
+  <!-- Main word -->
   <text
           x="20"
-          y="120"
-          font-family="Inter, Poppins, Montserrat, Arial, sans-serif"
-          font-size="60"
+          y="125"
+          font-family="Inter, Manrope, Montserrat, Arial, sans-serif"
+          font-size="62"
           font-weight="800"
           fill="#1565C0">
     Drills
   </text>
+
 
 </svg>
