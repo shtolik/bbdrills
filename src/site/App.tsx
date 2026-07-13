@@ -1,7 +1,7 @@
 import { h, Fragment } from 'preact';
 import { useEffect, useState, useRef } from 'preact/hooks';
 import { getDay, markSetComplete, migrateLegacyIfNeeded } from '../lib/progress';
-import { loadLocale, localizedField } from './i18n';
+import { loadLocale, localizedField, t } from './i18n';
 
 type Drill = {
   id: string;
