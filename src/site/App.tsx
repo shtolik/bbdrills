@@ -133,7 +133,10 @@ export default function App() {
         if (clearBtn) clearBtn.textContent = t('clear_progress', 'Clear progress');
         // remove any initial loading <p> placeholder if still present (avoid leaving static text at bottom)
         const contentEl = document.getElementById('content');
-        if (contentEl?.children.length === 1 && contentEl.firstElementChild?.tagName?.toLowerCase() === 'p') {
+        if (
+          contentEl?.children.length === 1 &&
+          contentEl.firstElementChild?.tagName?.toLowerCase() === 'p'
+        ) {
           contentEl.firstElementChild.remove();
         }
         setData(json);
