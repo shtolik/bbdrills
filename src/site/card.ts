@@ -25,6 +25,7 @@ export function createCard(item: Drill, helpers: Helpers) {
     openVideo,
     markSetComplete,
     updateCardById,
+    normalizeUrl,
   } = helpers;
 
   const day = getDay(item.id);
