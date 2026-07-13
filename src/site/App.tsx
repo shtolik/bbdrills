@@ -395,13 +395,14 @@ export default function App() {
                 msg.style.color = '#fff';
                 msg.style.padding = '16px';
                 msg.style.textAlign = 'center';
-                msg.innerHTML =
-                  '<p style="color:#fff;font-size:18px">' +
-                  t(
-                    'cannot_embed',
-                    'This video cannot be embedded (age-restricted or blocked). You can open it on YouTube instead.'
-                  ) +
-                  '</p>';
+                const p = document.createElement('p');
+                p.style.color = '#fff';
+                p.style.fontSize = '18px';
+                p.textContent = t(
+                  'cannot_embed',
+                  'This video cannot be embedded (age-restricted or blocked). You can open it on YouTube instead.'
+                );
+                msg.appendChild(p);
                 const a = document.createElement('a');
                 a.href = 'https://www.youtube.com/watch?v=' + id;
                 a.target = '_blank';
