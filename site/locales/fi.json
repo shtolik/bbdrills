@@ -17,5 +17,8 @@
   "failed_to_load_data": "Tietojen lataus epäonnistui",
   "group.running": "Juoksu",
   "group.gym": "Kuntosali treeni",
-  "group.bodyweight": "Kehonpain treeni"
+  "group.bodyweight": "Kehonpain treeni",
+  "share": "Jaa",
+  "copied": "Kopioitu!",
+  "copy_prompt": "Kopioi tämä linkki"
 }

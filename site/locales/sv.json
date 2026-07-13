@@ -17,5 +17,8 @@
   "confirm_clear": "Rensa lokala framsteg?",
   "group.running": "Löpning",
   "group.gym": "Gym",
-  "group.bodyweight": "Bodyweight"
+  "group.bodyweight": "Bodyweight",
+  "share": "Dela",
+  "copied": "Kopierat!",
+  "copy_prompt": "Kopiera den här länken"
 }

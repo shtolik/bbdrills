@@ -2,6 +2,7 @@ import { h, Fragment } from 'preact';
 import { useEffect, useState, useRef } from 'preact/hooks';
 import { getDay, markSetComplete, migrateLegacyIfNeeded } from '../lib/progress';
 import { loadLocale, localizedField, t } from './i18n';
+import { buildDeepLink } from './url';
 
 type Drill = {
   id: string;
@@ -637,7 +638,6 @@ export default function App() {
             <button
               style={{ marginLeft: '8px' }}
               onClick={() => {
-                import { buildDeepLink } from './url';
                 const deep = buildDeepLink(it.id);
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                   navigator.clipboard
