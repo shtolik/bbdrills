@@ -637,9 +637,8 @@ export default function App() {
             <button
               style={{ marginLeft: '8px' }}
               onClick={() => {
-                const deep = `${location.protocol}//${location.host}/?id=${encodeURIComponent(
-                  it.id
-                )}`;
+                import { buildDeepLink } from './url';
+                const deep = buildDeepLink(it.id);
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                   navigator.clipboard
                     .writeText(deep)
