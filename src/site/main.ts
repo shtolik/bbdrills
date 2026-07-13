@@ -79,7 +79,7 @@ function loadUI() {
     const raw = localStorage.getItem(UI_KEY);
     if (raw) {
       const s = JSON.parse(raw);
-      if (s.lang) langState.lang = s.lang;
+      if (s.lang === 'en' || s.lang === 'fi' || s.lang === 'sv') langState.lang = s.lang;
       if (s.filter === 'all' || s.filter === 'incomplete') filterState.mode = s.filter;
       if (s.theme === 'system' || s.theme === 'dark' || s.theme === 'light')
         themeState.mode = s.theme;
@@ -110,13 +110,21 @@ const themeBtn = document.getElementById('theme-btn');
 if (langSelect)
   langSelect.addEventListener('change', async () => {
     langState.lang = (langSelect.value || 'en') as string;
-    saveUI();
     await loadLocale(langState.lang);
-    const brand = document.getElementById('brand');
-    if (brand && (window as any)._bbdrills_loc && (window as any)._bbdrills_loc.brand)
-      brand.textContent = (window as any)._bbdrills_loc.brand;
-    updateFilterLabel();
     applyTheme();
+    if (filterBtn) updateFilterLabel();
+    saveUI();
+    const loc = await loadLocale(langState.lang);
+    const brand = document.getElementById('brand');
+    if (brand && (loc as any)?.brand) brand.textContent = (loc as any).brand;
+    if (clearProgressBtn) clearProgressBtn.textContent = t('clear_progress', 'Clear progress');
+    if (filterBtn)
+      filterBtn.textContent =
+        filterState.mode === 'all'
+          ? t('show_all', 'Show: All')
+          : t('show_incomplete', 'Show: Incomplete');
+    applyTheme();
+    if (clearProgressBtn) clearProgressBtn.textContent = t('clear_progress', 'Clear progress');
     render(currentData);
   });
 if (filterBtn) filterBtn.addEventListener('click', toggleFilter);
@@ -149,15 +157,16 @@ if (filterBtn) updateFilterLabel();
 async function load() {
   try {
     // load localization for UI
-    try {
-      const locRes = await fetch('./locales/' + langState.lang + '.json').catch(() =>
-        fetch('./locales/en.json')
-      );
-      const loc = await locRes.json();
-      (window as any)._bbdrills_loc = loc;
-    } catch (e) {
-      (window as any)._bbdrills_loc = {};
-    }
+    const loc = await loadLocale(langState.lang);
+    const brand = document.getElementById('brand');
+    if (brand && (loc as any)?.brand) brand.textContent = (loc as any).brand;
+    if (clearProgressBtn) clearProgressBtn.textContent = t('clear_progress', 'Clear progress');
+    if (filterBtn)
+      filterBtn.textContent =
+        filterState.mode === 'all'
+          ? t('show_all', 'Show: All')
+          : t('show_incomplete', 'Show: Incomplete');
+    applyTheme();
 
     const res = await fetch('./default_drills_with_meta.json');
     const data = await res.json();

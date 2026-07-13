@@ -1,6 +1,12 @@
 export async function loadLocale(lang: string) {
   try {
-    const res = await fetch('./locales/' + lang + '.json').catch(() => fetch('./locales/en.json'));
+    let res: Response;
+    try {
+      res = await fetch('./locales/' + lang + '.json');
+      if (!res.ok) res = await fetch('./locales/en.json');
+    } catch (_) {
+      res = await fetch('./locales/en.json');
+    }
     const loc = await res.json();
     (window as any)._bbdrills_loc = loc;
     return loc;

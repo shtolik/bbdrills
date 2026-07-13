@@ -1,7 +1,7 @@
 import { h, Fragment } from 'preact';
 import { useEffect, useState, useRef } from 'preact/hooks';
 import { getDay, markSetComplete, migrateLegacyIfNeeded } from '../lib/progress';
-import { loadLocale, t, localizedField } from './i18n';
+import { loadLocale, localizedField } from './i18n';
 
 type Drill = {
   id: string;
@@ -128,6 +128,11 @@ export default function App() {
         (window as any)._bbdrills_loc = locObj;
         const brandEl = document.getElementById('brand');
         if (brandEl && locObj && locObj.brand) brandEl.textContent = locObj.brand;
+        // now that locale is available, update header labels that call t()
+        applyTheme(initialTheme);
+        updateFilterLabel(initialFilter);
+        const clearBtn = document.getElementById('clear-progress');
+        if (clearBtn) clearBtn.textContent = t('clear_progress', 'Clear progress');
         setData(json);
       } catch (e) {
         const content = document.getElementById('content');
@@ -216,8 +221,15 @@ export default function App() {
       const brandEl = document.getElementById('brand');
       if (brandEl && loc && loc.brand) brandEl.textContent = loc.brand;
       // update header labels
-      updateFilterLabel(filter);
-      applyTheme(theme);
+      try {
+        const raw = localStorage.getItem(UI_KEY);
+        const cur = raw ? JSON.parse(raw) : {};
+        updateFilterLabel(cur.filter === 'incomplete' ? 'incomplete' : 'all');
+        applyTheme(cur.theme === 'dark' || cur.theme === 'light' ? cur.theme : 'system');
+      } catch (e) {
+        updateFilterLabel(filter);
+        applyTheme(theme);
+      }
       const clearBtn = document.getElementById('clear-progress');
       if (clearBtn) clearBtn.textContent = t('clear_progress', 'Clear progress');
       // re-render cards so t() calls pick up new locale
@@ -307,15 +319,7 @@ export default function App() {
     } catch (e) {}
   }
 
-  // helper to read localized UI strings loaded into window._bbdrills_loc
-  function t(key: string, fallback?: string) {
-    try {
-      const loc = (window as any)._bbdrills_loc || {};
-      return (loc[key] as string) || fallback || key;
-    } catch (e) {
-      return fallback || key;
-    }
-  }
+  // helper to read localized UI strings loaded into window._bbdrills_loc (see src/site/i18n.ts)
 
   function localizedDrillField(item: any, field: string) {
     return localizedField(item, field, lang);
