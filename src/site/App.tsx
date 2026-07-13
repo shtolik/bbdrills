@@ -132,14 +132,10 @@ export default function App() {
         const clearBtn = document.getElementById('clear-progress');
         if (clearBtn) clearBtn.textContent = t('clear_progress', 'Clear progress');
         // remove any initial loading <p> placeholder if still present (avoid leaving static text at bottom)
-        try {
-          const contentEl = document.getElementById('content');
-          if (contentEl) {
-            Array.from(contentEl.children).forEach(ch => {
-              if (ch.tagName && ch.tagName.toLowerCase() === 'p') ch.remove();
-            });
-          }
-        } catch (e) {}
+        const contentEl = document.getElementById('content');
+        if (contentEl?.children.length === 1 && contentEl.firstElementChild?.tagName?.toLowerCase() === 'p') {
+          contentEl.firstElementChild.remove();
+        }
         setData(json);
       } catch (e) {
         const content = document.getElementById('content');
