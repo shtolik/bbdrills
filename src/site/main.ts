@@ -535,7 +535,8 @@ function render(data: Drill[]) {
       shareBtn.textContent = t('share', 'Share');
       shareBtn.addEventListener('click', async ev => {
         ev.stopPropagation();
-        const deep = `${location.protocol}//${location.host}/?id=${encodeURIComponent(it.id)}`;
+        import { buildDeepLink } from './url';
+        const deep = buildDeepLink(it.id);
         try {
           if (navigator.clipboard && navigator.clipboard.writeText) {
             await navigator.clipboard.writeText(deep);
