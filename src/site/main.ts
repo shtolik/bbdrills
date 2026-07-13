@@ -91,7 +91,7 @@ import { loadLocale, t, localizedField } from './i18n';
 import { buildDeepLink } from './url';
 import { createCard } from './card';
 
-function localizedDrillField(item: Drill, field: keyof Drill) {
+function localizedDrillField(item: Drill, field: string) {
   return localizedField(item, String(field), langState.lang);
 }
 function saveUI() {
@@ -622,6 +622,7 @@ function render(data: Drill[]) {
         openVideo,
         markSetComplete,
         updateCardById,
+        normalizeUrl,
       });
 
       grid.appendChild(card);

@@ -10,6 +10,8 @@ export type Helpers = {
   openVideo: (item: Drill) => void;
   markSetComplete: (id: string) => void;
   updateCardById: (id: string, item: Drill) => void;
+  // normalize urls to absolute https forms when needed
+  normalizeUrl: (u?: string) => string;
 };
 
 export function createCard(item: Drill, helpers: Helpers) {
