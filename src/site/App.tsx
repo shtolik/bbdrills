@@ -98,10 +98,14 @@ function saveNonEmbeddable() {
 }
 
 export default function App() {
-  // initialize persisted non-embeddable set
-  try {
-    loadNonEmbeddable();
-  } catch (e) {}
+  // initialize persisted non-embeddable set (avoid localStorage access on every render)
+  const didLoadNonEmbeddable = useRef(false);
+  if (!didLoadNonEmbeddable.current) {
+    didLoadNonEmbeddable.current = true;
+    try {
+      loadNonEmbeddable();
+    } catch (e) {}
+  }
   const [data, setData] = useState<Drill[]>([]);
   const lazyObserver = useRef<IntersectionObserver | null>(null);
   const didSyncUI = useRef(false);
@@ -655,7 +659,9 @@ export default function App() {
               /drill\.html$/i.test(location.pathname) || /\/drill\./i.test(location.pathname);
             if (!isDrillPage) {
               // navigate to dedicated drill page for full-screen view
-              window.location.href = buildDeepLink(it.id);
+              const u = new URL('drill.html', location.href);
+              u.searchParams.set('id', it.id);
+              window.location.href = u.toString();
             } else {
               // keep modal behavior on drill.html
               openVideo(it);
@@ -871,7 +877,7 @@ export default function App() {
     return (
       <div>
         <a className={'single-back'} href={'index.html'} aria-label={'Back to list'}>
-          <button>{'←'}</button>
+          {'←'}
         </a>
         <div className={'single-media'}>
           {item.preview_mp4 ? (

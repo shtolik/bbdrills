@@ -23,7 +23,9 @@ export function buildDeepLink(id: string): string {
     // This preserves IDE server paths like /user/project/site/index.html → /user/project/site/
     let basePath = '/';
     try {
-      if (/\/index\.html$/i.test(pathname)) {
+      if (/\/drill\.html$/i.test(pathname)) {
+        basePath = pathname;
+      } else if (/\/index\.html$/i.test(pathname)) {
         basePath = pathname.replace(/\/index\.html$/i, '/');
       } else if (/\/site\//i.test(pathname)) {
         // If path contains /site/:

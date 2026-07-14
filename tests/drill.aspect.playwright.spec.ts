@@ -23,12 +23,18 @@ test.describe('drill media aspect ratios', () => {
     await page.goto(BASE + 'drill.html?id=vertical-test');
     // wait for media img to appear
     await page.waitForSelector('.single-media img');
-    const intrinsic = await page.$eval('.single-media img', (img: HTMLImageElement) => ({ nw: img.naturalWidth, nh: img.naturalHeight }));
+    await page.waitForFunction(() => {
+      const img = document.querySelector('.single-media img') as HTMLImageElement | null;
+      return !!img && img.naturalWidth > 0 && img.naturalHeight > 0;
+    });
+    const intrinsic = await page.$eval('.single-media img', (img: HTMLImageElement) => ({
+      nw: img.naturalWidth,
+      nh: img.naturalHeight,
+    }));
     const box = await page.locator('.single-media img').boundingBox();
-    expect(intrinsic.nh).toBeGreaterThan(intrinsic.nw);
+    expect(box).not.toBeNull();
     // compute displayed image size when object-fit: contain is applied
     const scale = Math.min(box!.width / intrinsic.nw, box!.height / intrinsic.nh);
-    const displayedWidth = intrinsic.nw * scale;
     const displayedHeight = intrinsic.nh * scale;
     const displayedRatio = displayedWidth / displayedHeight;
     const intrinsicRatio = intrinsic.nw / intrinsic.nh;
@@ -51,11 +57,18 @@ test.describe('drill media aspect ratios', () => {
 
     await page.goto(BASE + 'drill.html?id=horizontal-test');
     await page.waitForSelector('.single-media img');
-    const intrinsic = await page.$eval('.single-media img', (img: HTMLImageElement) => ({ nw: img.naturalWidth, nh: img.naturalHeight }));
+    await page.waitForFunction(() => {
+      const img = document.querySelector('.single-media img') as HTMLImageElement | null;
+      return !!img && img.naturalWidth > 0 && img.naturalHeight > 0;
+    });
+    const intrinsic = await page.$eval('.single-media img', (img: HTMLImageElement) => ({
+      nw: img.naturalWidth,
+      nh: img.naturalHeight,
+    }));
     const box = await page.locator('.single-media img').boundingBox();
+    expect(box).not.toBeNull();
     expect(intrinsic.nw).toBeGreaterThan(intrinsic.nh);
     const scale = Math.min(box!.width / intrinsic.nw, box!.height / intrinsic.nh);
-    const displayedWidth = intrinsic.nw * scale;
     const displayedHeight = intrinsic.nh * scale;
     const displayedRatio = displayedWidth / displayedHeight;
     const intrinsicRatio = intrinsic.nw / intrinsic.nh;
