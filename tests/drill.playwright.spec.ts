@@ -24,8 +24,8 @@ test('drill page shows single drill view with navigation', async ({ page }) => {
   // check prev/next buttons exist and navigation works
   const prev = page.locator('#drill-prev');
   const next = page.locator('#drill-next');
-  expect(await prev.count()).toBeGreaterThanOrEqual(0);
-  expect(await next.count()).toBeGreaterThanOrEqual(0);
+  expect(await prev.count()).toBeGreaterThan(0);
+  expect(await next.count()).toBeGreaterThan(0);
 
   if ((await next.count()) > 0) {
     const originalTitle = await page.locator('.single-title').textContent();

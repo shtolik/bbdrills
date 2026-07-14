@@ -26,15 +26,19 @@ export function buildDeepLink(id: string): string {
       if (/\/index\.html$/i.test(pathname)) {
         basePath = pathname.replace(/\/index\.html$/i, '/');
       } else if (/\/site\//i.test(pathname)) {
-        // If path contains /site/ keep up to and including /site/ so links resolve on servers
+        // If path contains /site/:
+        // - When served from repo root (pathname starts with "/site/"), strip it so links match production "/".
+        // - When "/site/" appears deeper (IDE/server prefix), preserve the prefix so links still resolve.
         const idx = pathname.toLowerCase().indexOf('/site/');
-        if (idx >= 0) {
+        if (idx === 0) {
+          basePath = '/';
+        } else if (idx > 0) {
           basePath = pathname.substring(0, idx + '/site/'.length);
           if (!basePath.endsWith('/')) basePath += '/';
         } else {
           basePath = '/';
         }
-      } else if (pathname && pathname !== '/') {
+
         // Use the current directory to be conservative on weird server setups
         basePath = pathname;
         if (!basePath.endsWith('/')) basePath += '/';
