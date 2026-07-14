@@ -23,10 +23,16 @@ describe('buildDeepLink', () => {
     document.head.innerHTML = '';
   });
   afterEach(() => {
-    // restore location
-    try {
-      Object.defineProperty(global, 'location', { value: origLocation, writable: true });
-    } catch (e) {}
+    // restore location (make it re-definable between tests)
+    if (origLocation === undefined) {
+      delete (global as any).location;
+    } else {
+      Object.defineProperty(global, 'location', {
+        value: origLocation,
+        writable: true,
+        configurable: true,
+      });
+    }
     // cleanup DOM if created
     if (dom) {
       dom.window.close();
@@ -54,6 +60,7 @@ describe('buildDeepLink', () => {
         pathname: '/site/',
       },
       writable: true,
+      configurable: true,
     });
     const url = buildDeepLink('a-skip');
     expect(url).toBe('http://localhost:8000/?id=a-skip');
@@ -66,6 +73,7 @@ describe('buildDeepLink', () => {
         pathname: '/whatever',
       },
       writable: true,
+      configurable: true,
     });
     const url = buildDeepLink('pogo-jumps');
     expect(url).toBe('http://localhost/?id=pogo-jumps');

@@ -4,7 +4,7 @@ const BASE = 'http://127.0.0.1:8000/site/';
 
 // Create simple SVG data URLs to act as vertical/horizontal media with known intrinsic sizes
 const svg = (w: number, h: number, text: string) =>
-  `data:image/svg+xml;utf8,${encodeURIComponent(`<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns='http://www.w3.org/2000/svg' width='${w}' height='${h}'>\n  <rect width='100%' height='100%' fill='gray'/>\n  <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='20'>${text}</text>\n</svg>`)} `;
+  `data:image/svg+xml;utf8,${encodeURIComponent(`<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns='http://www.w3.org/2000/svg' width='${w}' height='${h}'>\n  <rect width='100%' height='100%' fill='gray'/>\n  <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='20'>${text}</text>\n</svg>`)}`;
 
 test.describe('drill media aspect ratios', () => {
   test('vertical media keeps intrinsic aspect ratio', async ({ page }) => {
