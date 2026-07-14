@@ -809,26 +809,82 @@ export default function App() {
           ) : null}
         </div>
         <div className={'single-overlay'}>
-          <h1 className={'single-title'}>
-            {localizedDrillField(item, 'name') || item.name_en || 'Drill'}
-          </h1>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <h1 className={'single-title'} style={{ margin: 0 }}>
+              {localizedDrillField(item, 'name') || item.name_en || 'Drill'}
+            </h1>
+            <button
+              className={'share-btn'}
+              aria-label={t('share', 'Share')}
+              title={t('share', 'Share')}
+              onClick={() => {
+                try {
+                  const deep = buildDeepLink(item.id);
+                  if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard
+                      .writeText(deep)
+                      .then(() => {
+                        const id = 'bbdrills-toast';
+                        let tEl = document.getElementById(id) as HTMLDivElement | null;
+                        if (!tEl) {
+                          tEl = document.createElement('div');
+                          tEl.id = id;
+                          tEl.style.position = 'fixed';
+                          tEl.style.right = '16px';
+                          tEl.style.bottom = '24px';
+                          tEl.style.padding = '8px 12px';
+                          tEl.style.borderRadius = '8px';
+                          tEl.style.background = 'rgba(0,0,0,0.8)';
+                          tEl.style.color = '#fff';
+                          tEl.style.zIndex = '10000';
+                          tEl.style.fontSize = '14px';
+                          document.body.appendChild(tEl);
+                        }
+                        tEl!.textContent = t('copied', 'Copied!');
+                        setTimeout(() => tEl && tEl.remove(), 1200);
+                      })
+                      .catch(() => prompt(t('copy_prompt', 'Copy this link'), deep));
+                  } else {
+                    prompt(t('copy_prompt', 'Copy this link'), deep);
+                  }
+                } catch (e) {}
+              }}
+            >
+              <svg viewBox={'0 0 24 24'} width={'18'} height={'18'} aria-hidden={true}>
+                <path
+                  fill={'currentColor'}
+                  d={
+                    'M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7a3.5 3.5 0 000-1.39l7.05-4.11A2.99 2.99 0 0018 7.92 3 3 0 109 4a3 3 0 103 3.92l7.05 4.11c.52-.47 1.2-.77 1.96-.77A3 3 0 1021 16.08z'
+                  }
+                />
+              </svg>
+            </button>
+          </div>
           <div className={'single-desc'}>
             {localizedDrillField(item, 'details') ? (
               <p>{localizedDrillField(item, 'details')}</p>
             ) : null}
             <div className={'single-meta'}>
               <div>
+                {t('reps_label', 'Reps:')}{' '}
+                {item.reps_num || localizedDrillField(item, 'reps') || ''}
+                <button
+                  className={'btn-mark'}
+                  onClick={() => mark(item.id)}
+                  style={{ marginLeft: 8 }}
+                >
+                  {t('mark_done', '+1 done')}
+                </button>
+              </div>
+              <div>
                 {t('sets_label', 'Sets:')} {getDay(item.id).setsCompleted || 0}/
                 {getDay(item.id).targetSets && getDay(item.id).targetSets > 0
                   ? getDay(item.id).targetSets
                   : item.sets || '-'}
               </div>
-              <div>
-                {t('reps_label', 'Reps:')}{' '}
-                {item.reps_num || localizedDrillField(item, 'reps') || ''}
-              </div>
             </div>
           </div>
+
           <div className={'single-actions'}>
             <a href={'index.html'} style={{ marginRight: 8 }} aria-label={'Back to list'}>
               <button>{t('back', 'Back')}</button>

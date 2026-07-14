@@ -29,7 +29,7 @@ test('drill page respects persisted theme and back button returns to index', asy
   const back = page.locator('a[aria-label="Back to list"]');
   await expect(back).toHaveCount(1);
   await back.first().click();
-  await page.waitForURL(url => url && /index\.html/.test(url));
+  await page.waitForURL(url => url && /index\.html/.test(String(url)));
   await page.waitForSelector('.card');
   const cards = await page.$$('.card');
   expect(cards.length).toBeGreaterThan(0);
