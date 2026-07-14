@@ -1,18 +1,41 @@
 /** @vitest-environment jsdom */
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { buildDeepLink } from '../../src/site/url';
+import { JSDOM } from 'jsdom';
 
 describe('buildDeepLink', () => {
   let origLocation: any;
+  let dom: JSDOM | null = null;
   beforeEach(() => {
-    // preserve real location
-    origLocation = global.location;
+    // ensure a DOM is present (Vitest may run in node env)
+    if (typeof document === 'undefined' || typeof window === 'undefined') {
+      dom = new JSDOM('<!doctype html><html><head></head><body></body></html>', {
+        url: 'http://localhost/',
+      });
+      // @ts-ignore - attach to global for tests
+      global.window = dom.window;
+      // @ts-ignore
+      global.document = dom.window.document;
+    }
+    // preserve real location if present
+    origLocation = (global as any).location;
     // ensure clean head
     document.head.innerHTML = '';
   });
   afterEach(() => {
-    // restore
-    Object.defineProperty(global, 'location', { value: origLocation, writable: true });
+    // restore location
+    try {
+      Object.defineProperty(global, 'location', { value: origLocation, writable: true });
+    } catch (e) {}
+    // cleanup DOM if created
+    if (dom) {
+      dom.window.close();
+      dom = null;
+      // @ts-ignore
+      delete (global as any).window;
+      // @ts-ignore
+      delete (global as any).document;
+    }
   });
 
   it('uses canonical link when present', () => {
@@ -40,7 +63,7 @@ describe('buildDeepLink', () => {
     Object.defineProperty(global, 'location', {
       value: {
         origin: 'null',
-        pathname: '/whatever'
+        pathname: '/whatever',
       },
       writable: true,
     });

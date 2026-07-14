@@ -18,31 +18,127 @@
         background: var(--bg);
         color: var(--text);
       }
+      /* Full-bleed media with bottom overlay panel (no scrolling) */
       .container {
         max-width: 900px;
-        margin: 12px auto;
+        margin: 0 auto;
+        position: relative;
+        padding: 12px;
+        box-sizing: border-box;
       }
-      .single-title {
-        font-size: 28px;
-        margin-bottom: 12px;
+      main#content {
+        position: relative;
+        height: calc(100vh - 24px);
       }
-      .single-media img {
+      .single-media {
+        position: absolute;
+        inset: 0 0 0 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #000;
+        z-index: 0;
+      }
+      .single-media img,
+      .single-media video {
         width: 100%;
-        max-width: 720px;
+        height: 100%;
+        object-fit: cover;
         display: block;
-        margin-bottom: 12px;
       }
-      .single-desc {
-        background: #fff;
+      /* Overlay panel at bottom with subtle shadow to ensure readability */
+      .single-overlay {
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+        z-index: 2;
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.6));
         padding: 12px;
         border-radius: 8px;
-        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+        color: #fff;
+        backdrop-filter: blur(4px);
+      }
+      .single-title {
+        font-size: 22px;
+        margin: 0 0 8px 0;
+        color: #fff;
+      }
+      .single-desc {
+        color: #fff;
+        margin-bottom: 8px;
+      }
+      .single-meta {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        color: #fff;
       }
       .single-actions {
-        margin-top: 12px;
         display: flex;
         gap: 8px;
-        align-items: center;
+        margin-top: 8px;
+        justify-content: flex-end;
+      }
+      @media (max-width: 720px) {
+        .single-overlay {
+          left: 8px;
+          right: 8px;
+          bottom: 8px;
+          padding: 10px;
+        }
+        .single-title {
+          font-size: 18px;
+        }
+        .single-actions {
+          justify-content: center;
+        }
+      }
+      /* On small screens make actions fixed and ensure content reserves space */
+      @media (max-width: 720px) {
+        .single-title {
+          font-size: 20px;
+          margin-bottom: 8px;
+        }
+        .single-media img,
+        .single-media video {
+          max-height: calc(100vh - 140px);
+        }
+        .single-actions {
+          position: fixed !important;
+          left: 12px;
+          right: 12px;
+          bottom: 12px;
+          z-index: 1000;
+          justify-content: center;
+          background: rgba(255, 255, 255, 0.98);
+          padding: 10px 12px;
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+        main#content {
+          padding-bottom: 80px;
+        }
+      }
+      /* On medium/desktop viewports ensure the combined content fits via stricter caps */
+      @media (min-width: 721px) {
+        .single-media img,
+        .single-media video {
+          max-height: calc(100vh - 160px);
+        }
+        main#content {
+          max-height: calc(100vh - 80px);
+          overflow: auto;
+        }
+      }
+      /* modal box and media sizing for drill page */
+      .modal .box {
+        max-height: 90vh;
+      }
+      .modal iframe,
+      .modal video {
+        max-height: calc(100vh - 40px);
+        width: auto;
       }
       button {
         background: #0b74de;
@@ -58,9 +154,7 @@
   </head>
   <body>
     <div class="container">
-      <main id="content">
-        <p>Loading drill…</p>
-      </main>
+      <main id="content"></main>
       <div id="modal" class="modal" aria-hidden="true"><div id="modal-box"></div></div>
     </div>
 

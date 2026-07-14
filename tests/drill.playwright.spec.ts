@@ -17,9 +17,13 @@ test('drill page shows single drill view with navigation', async ({ page }) => {
   const cards = await page.$$('.card');
   expect(cards.length).toBe(0);
 
-  // verify title matches manifest
+  // verify title matches manifest (handle localized name objects)
   const title = await page.locator('.single-title').textContent();
-  expect(title).toContain(first.name_en || first.name || '');
+  const expectedName =
+    first.name_en ||
+    (first.name && typeof first.name === 'object' ? first.name.en || first.name_en || Object.values(first.name)[0] : first.name) ||
+    '';
+  expect(title).toContain(expectedName);
 
   // check prev/next buttons exist and navigation works
   const prev = page.locator('#drill-prev');
@@ -33,5 +37,15 @@ test('drill page shows single drill view with navigation', async ({ page }) => {
     await page.waitForTimeout(300);
     const newTitle = await page.locator('.single-title').textContent();
     if (manifest.length > 1) expect(newTitle).not.toEqual(originalTitle);
+  }
+
+  // Ensure title and actions are visible and actions fit within viewport
+  const titleVisible = await page.locator('.single-title').isVisible();
+  const actionsBox = await page.locator('.single-actions').boundingBox();
+  const vp = await page.viewportSize();
+  expect(titleVisible).toBeTruthy();
+  if (actionsBox && vp) {
+    // actions bottom should be <= viewport height
+    expect(actionsBox.y + actionsBox.height).toBeLessThanOrEqual(vp.height + 2);
   }
 });

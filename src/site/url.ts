@@ -50,7 +50,19 @@ export function buildDeepLink(id: string): string {
     }
 
     if (!origin || origin === 'null') {
-      return `http://localhost${basePath}?id=${encodeURIComponent(id)}`;
+      // fallback to plain localhost root for non-browser or null origins
+      return `http://localhost/?id=${encodeURIComponent(id)}`;
+    }
+
+    // If basePath is root, prefer homepage deep-link (origin/?id=...)
+    if (basePath === '/') {
+      try {
+        const u = new URL(origin + '/');
+        u.searchParams.set('id', id);
+        return u.toString();
+      } catch (e) {
+        return `${origin}/?id=${encodeURIComponent(id)}`;
+      }
     }
 
     // Prefer a dedicated drill page under the same directory (drill.html)
