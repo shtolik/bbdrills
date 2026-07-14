@@ -833,6 +833,9 @@ export default function App() {
       (item.video_url ? youtubeThumbnail(item.video_url) : '');
     return (
       <div>
+        <a className={'single-back'} href={'index.html'} aria-label={'Back to list'}>
+          <button>{'←'}</button>
+        </a>
         <div className={'single-media'}>
           {item.preview_mp4 ? (
             <video
@@ -916,6 +919,12 @@ export default function App() {
               <div>
                 {t('reps_label', 'Reps:')}{' '}
                 {item.reps_num || localizedDrillField(item, 'reps') || ''}
+              </div>
+              <div>
+                {t('sets_label', 'Sets:')} {getDay(item.id).setsCompleted || 0}/
+                {getDay(item.id).targetSets && getDay(item.id).targetSets > 0
+                  ? getDay(item.id).targetSets
+                  : item.sets || '-'}
                 <button
                   className={'btn-mark'}
                   onClick={() => mark(item.id)}
@@ -924,23 +933,16 @@ export default function App() {
                   {t('mark_done', '+1 done')}
                 </button>
               </div>
-              <div>
-                {t('sets_label', 'Sets:')} {getDay(item.id).setsCompleted || 0}/
-                {getDay(item.id).targetSets && getDay(item.id).targetSets > 0
-                  ? getDay(item.id).targetSets
-                  : item.sets || '-'}
-              </div>
             </div>
           </div>
 
           <div className={'single-actions'}>
-            <a href={'index.html'} style={{ marginRight: 8 }} aria-label={'Back to list'}>
-              <button>{t('back', 'Back')}</button>
-            </a>
             <button id={'drill-prev'} onClick={() => showIndex(singleIndex - 1)}>
               {'<'}
             </button>
-            <button onClick={() => openVideo(item)}>{t('open_video', 'Open video')}</button>
+            <button onClick={() => openVideo(item)}>
+              {t('watch_full_video', 'Watch Full Video')}
+            </button>
             {item.video_url && nonEmbeddable.has(item.id) && (
               <a
                 href={normalizeUrl(item.video_url)}
