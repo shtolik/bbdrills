@@ -568,16 +568,34 @@ function renderSingle(item: Drill) {
   viewBtn.addEventListener('click', () => openVideo(item));
   actions.appendChild(viewBtn);
   if (item.video_url) {
-    const a = document.createElement('a');
-    a.href = normalizeUrl(item.video_url);
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    a.textContent = t('open_on_youtube', 'Open on YouTube');
-    a.style.marginLeft = '8px';
-    actions.appendChild(a);
+    // show external "Open on YouTube" only when this id is known to be non-embeddable
+    try {
+      const raw = localStorage.getItem('bbdrills_non_embeddable_v1');
+      const arr = raw ? JSON.parse(raw) : [];
+      if (Array.isArray(arr) && arr.indexOf(item.id) !== -1) {
+        const a = document.createElement('a');
+        a.href = normalizeUrl(item.video_url);
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.textContent = t('open_on_youtube', 'Open on YouTube');
+        a.style.marginLeft = '8px';
+        actions.appendChild(a);
+      }
+    } catch (e) {
+      // ignore and rely on modal/watch button
+    }
   }
   const shareBtn = document.createElement('button');
-  shareBtn.textContent = t('share', 'Share');
+  shareBtn.setAttribute('aria-label', String(t('share', 'Share')));
+  shareBtn.title = String(t('share', 'Share'));
+  // inline feather-style share icon (keeps color from current text)
+  shareBtn.innerHTML = `
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+      <path fill="none" stroke="currentColor" stroke-width="1.8" d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"></path>
+      <polyline fill="none" stroke="currentColor" stroke-width="1.8" points="16 6 12 2 8 6"></polyline>
+      <line fill="none" stroke="currentColor" stroke-width="1.8" x1="12" y1="2" x2="12" y2="15"></line>
+    </svg>
+  `;
   shareBtn.addEventListener('click', async () => {
     const deep = buildDeepLink(item.id);
     try {
@@ -593,9 +611,9 @@ function renderSingle(item: Drill) {
         document.execCommand('copy');
         ta.remove();
       }
-      const prev = shareBtn.textContent;
-      shareBtn.textContent = t('copied', 'Copied!');
-      setTimeout(() => (shareBtn.textContent = prev), 1400);
+      const prev = shareBtn.title;
+      shareBtn.title = String(t('copied', 'Copied!'));
+      setTimeout(() => (shareBtn.title = prev), 1400);
     } catch (e) {
       prompt(t('copy_prompt', 'Copy this link'), deep);
     }
