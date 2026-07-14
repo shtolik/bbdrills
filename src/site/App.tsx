@@ -80,9 +80,28 @@ function groupBy(data: Drill[], key: keyof Drill) {
   return map;
 }
 
+const NON_EMBED_KEY = 'bbdrills_non_embeddable_v1';
 const nonEmbeddable = new Set<string>();
+function loadNonEmbeddable() {
+  try {
+    const raw = localStorage.getItem(NON_EMBED_KEY);
+    if (raw) {
+      const arr = JSON.parse(raw) as string[];
+      if (Array.isArray(arr)) arr.forEach(a => nonEmbeddable.add(a));
+    }
+  } catch (e) {}
+}
+function saveNonEmbeddable() {
+  try {
+    localStorage.setItem(NON_EMBED_KEY, JSON.stringify(Array.from(nonEmbeddable)));
+  } catch (e) {}
+}
 
 export default function App() {
+  // initialize persisted non-embeddable set
+  try {
+    loadNonEmbeddable();
+  } catch (e) {}
   const [data, setData] = useState<Drill[]>([]);
   const lazyObserver = useRef<IntersectionObserver | null>(null);
   const didSyncUI = useRef(false);
@@ -476,6 +495,7 @@ export default function App() {
                 // mark this id as non-embeddable so overlay can show Open on YouTube next time
                 try {
                   nonEmbeddable.add(item.id);
+                  saveNonEmbeddable();
                 } catch (_) {}
                 box.innerHTML = '';
                 const msg = document.createElement('div');
@@ -521,6 +541,7 @@ export default function App() {
           iframe.addEventListener('error', () => {
             try {
               nonEmbeddable.add(item.id);
+              saveNonEmbeddable();
             } catch (_) {}
           });
           box.appendChild(iframe);
@@ -540,6 +561,7 @@ export default function App() {
         iframe.addEventListener('error', () => {
           try {
             nonEmbeddable.add(item.id);
+            saveNonEmbeddable();
           } catch (_) {}
         });
         box.appendChild(iframe);
