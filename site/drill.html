@@ -41,9 +41,12 @@
       }
       .single-media img,
       .single-media video {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+        /* keep intrinsic aspect ratio and fit within viewport */
+        max-height: 100%;
+        max-width: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
         display: block;
       }
       /* Overlay panel at bottom with subtle shadow to ensure readability */
