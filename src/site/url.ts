@@ -38,10 +38,6 @@ export function buildDeepLink(id: string): string {
         } else {
           basePath = '/';
         }
-
-        // Use the current directory to be conservative on weird server setups
-        basePath = pathname;
-        if (!basePath.endsWith('/')) basePath += '/';
       } else {
         basePath = '/';
       }

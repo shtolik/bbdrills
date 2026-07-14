@@ -10,8 +10,62 @@
     <link rel="icon" href="logo-ball.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180" />
     <meta name="theme-color" content="#0b74de" />
+    <script>
+      // Apply persisted theme before CSS loads so the page respects user choice (dark/light/system)
+      (function () {
+        try {
+          const raw = localStorage.getItem('bbdrills_ui_v1');
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && (parsed.theme === 'dark' || parsed.theme === 'light')) {
+              document.documentElement.setAttribute('data-theme', parsed.theme);
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
     <style>
       /* keep a minimal subset of index styles for single drill page */
+      :root {
+        --gap: 12px;
+        --bg: #f6f7f9;
+        --text: #111;
+        --card-bg: #fff;
+        --muted: #666;
+        --accent: #0b74de;
+        --success: #0bda6e;
+        --card-shadow: 0 1px 4px rgba(10, 10, 10, 0.06);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0b0f14;
+          --text: #e6eef8;
+          --card-bg: #0f1720;
+          --muted: #9fb0c8;
+          --accent: #1d9bf0;
+          --success: #39d98a;
+          --card-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+        }
+      }
+      /* manual overrides */
+      [data-theme='dark'] {
+        --bg: #0b0f14;
+        --text: #e6eef8;
+        --card-bg: #0f1720;
+        --muted: #9fb0c8;
+        --accent: #1d9bf0;
+        --success: #39d98a;
+        --card-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+      }
+      [data-theme='light'] {
+        --bg: #f6f7f9;
+        --text: #111;
+        --card-bg: #fff;
+        --muted: #666;
+        --accent: #0b74de;
+        --success: #0bda6e;
+        --card-shadow: 0 1px 4px rgba(10, 10, 10, 0.06);
+      }
       body {
         font-family: Segoe UI, Arial, sans-serif;
         margin: 12px;

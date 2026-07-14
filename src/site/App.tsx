@@ -789,6 +789,7 @@ export default function App() {
           {item.preview_mp4 ? (
             <video
               src={resolveAsset(item.preview_mp4) || ''}
+              poster={poster || undefined}
               playsInline
               muted
               loop
@@ -829,6 +830,9 @@ export default function App() {
             </div>
           </div>
           <div className={'single-actions'}>
+            <a href={'index.html'} style={{ marginRight: 8 }} aria-label={'Back to list'}>
+              <button>{t('back', 'Back')}</button>
+            </a>
             <button id={'drill-prev'} onClick={() => showIndex(singleIndex - 1)}>
               {'<'}
             </button>
