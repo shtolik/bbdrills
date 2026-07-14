@@ -379,7 +379,7 @@ async function load() {
           setMetaProp('og:url', canonicalUrl);
           const img =
             (item.preview_webp as string) ||
-            (item.preview_mp4 as string) ||
+            // (item.preview_mp4 as string) ||
             (item.video_url ? youtubeThumbnail(item.video_url) : '') ||
             '';
           if (img) setMetaProp('og:image', normalizeUrl(img));

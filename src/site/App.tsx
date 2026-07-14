@@ -776,10 +776,25 @@ export default function App() {
             >
               <svg viewBox={'0 0 24 24'} width={'18'} height={'18'} aria-hidden={true}>
                 <path
-                  fill={'currentColor'}
-                  d={
-                    'M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7a3.5 3.5 0 000-1.39l7.05-4.11A2.99 2.99 0 0018 7.92 3 3 0 109 4a3 3 0 103 3.92l7.05 4.11c.52-.47 1.2-.77 1.96-.77A3 3 0 1021 16.08z'
-                  }
+                  fill={'none'}
+                  stroke={'currentColor'}
+                  strokeWidth={'1.8'}
+                  d={'M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7'}
+                />
+                <polyline
+                  fill={'none'}
+                  stroke={'currentColor'}
+                  strokeWidth={'1.8'}
+                  points={'16 6 12 2 8 6'}
+                />
+                <line
+                  fill={'none'}
+                  stroke={'currentColor'}
+                  strokeWidth={'1.8'}
+                  x1={'12'}
+                  y1={'2'}
+                  x2={'12'}
+                  y2={'15'}
                 />
               </svg>
             </button>
@@ -925,10 +940,25 @@ export default function App() {
             >
               <svg viewBox={'0 0 24 24'} width={'18'} height={'18'} aria-hidden={true}>
                 <path
-                  fill={'currentColor'}
-                  d={
-                    'M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7a3.5 3.5 0 000-1.39l7.05-4.11A2.99 2.99 0 0018 7.92 3 3 0 109 4a3 3 0 103 3.92l7.05 4.11c.52-.47 1.2-.77 1.96-.77A3 3 0 1021 16.08z'
-                  }
+                  fill={'none'}
+                  stroke={'currentColor'}
+                  strokeWidth={'1.8'}
+                  d={'M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7'}
+                />
+                <polyline
+                  fill={'none'}
+                  stroke={'currentColor'}
+                  strokeWidth={'1.8'}
+                  points={'16 6 12 2 8 6'}
+                />
+                <line
+                  fill={'none'}
+                  stroke={'currentColor'}
+                  strokeWidth={'1.8'}
+                  x1={'12'}
+                  y1={'2'}
+                  x2={'12'}
+                  y2={'15'}
                 />
               </svg>
             </button>
