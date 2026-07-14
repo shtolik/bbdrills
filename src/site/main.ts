@@ -564,7 +564,7 @@ function renderSingle(item: Drill) {
   const actions = document.createElement('div');
   actions.className = 'single-actions';
   const viewBtn = document.createElement('button');
-  viewBtn.textContent = t('open_video', 'Open video');
+  viewBtn.textContent = t('watch_full_video', 'Watch Full Video');
   viewBtn.addEventListener('click', () => openVideo(item));
   actions.appendChild(viewBtn);
   if (item.video_url) {

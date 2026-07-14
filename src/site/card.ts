@@ -223,7 +223,7 @@ export function createCard(item: Drill, helpers: Helpers) {
   const link = document.createElement('div');
   link.style.marginTop = '6px';
   const viewBtn = document.createElement('button');
-  viewBtn.textContent = t('open_video', 'Open video');
+  viewBtn.textContent = t('watch_full_video', 'Watch Full Video');
   viewBtn.addEventListener('click', e => {
     e.stopPropagation();
     openVideo(item);

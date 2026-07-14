@@ -80,6 +80,8 @@ function groupBy(data: Drill[], key: keyof Drill) {
   return map;
 }
 
+const nonEmbeddable = new Set<string>();
+
 export default function App() {
   const [data, setData] = useState<Drill[]>([]);
   const lazyObserver = useRef<IntersectionObserver | null>(null);
@@ -460,8 +462,8 @@ export default function App() {
         box.appendChild(placeholder);
         try {
           new (window as any).YT.Player(placeholder.id, {
-            height: '450',
-            width: '800',
+            height: '100%',
+            width: '100%',
             videoId: id,
             playerVars: { autoplay: 1, origin: location.origin },
             events: {
@@ -471,6 +473,10 @@ export default function App() {
                 } catch (_) {}
               },
               onError: (e: any) => {
+                // mark this id as non-embeddable so overlay can show Open on YouTube next time
+                try {
+                  nonEmbeddable.add(item.id);
+                } catch (_) {}
                 box.innerHTML = '';
                 const msg = document.createElement('div');
                 msg.style.color = '#fff';
@@ -503,8 +509,8 @@ export default function App() {
         } catch (_) {
           const iframe = document.createElement('iframe');
           iframe.src = 'https://www.youtube.com/embed/' + id + '?autoplay=1';
-          iframe.width = '800';
-          iframe.height = '450';
+          iframe.style.width = '100%';
+          iframe.style.height = '100%';
           iframe.title = 'YouTube video';
           iframe.allowFullscreen = true;
           iframe.setAttribute(
@@ -512,13 +518,18 @@ export default function App() {
             'accelerometer; autoplay; encrypted-media; picture-in-picture; fullscreen'
           );
           iframe.setAttribute('referrerpolicy', 'no-referrer');
+          iframe.addEventListener('error', () => {
+            try {
+              nonEmbeddable.add(item.id);
+            } catch (_) {}
+          });
           box.appendChild(iframe);
         }
       } else if (id) {
         const iframe = document.createElement('iframe');
         iframe.src = 'https://www.youtube.com/embed/' + id + '?autoplay=1';
-        iframe.width = '800';
-        iframe.height = '450';
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
         iframe.title = 'YouTube video';
         iframe.allowFullscreen = true;
         iframe.setAttribute(
@@ -526,6 +537,11 @@ export default function App() {
           'accelerometer; autoplay; encrypted-media; picture-in-picture; fullscreen'
         );
         iframe.setAttribute('referrerpolicy', 'no-referrer');
+        iframe.addEventListener('error', () => {
+          try {
+            nonEmbeddable.add(item.id);
+          } catch (_) {}
+        });
         box.appendChild(iframe);
       } else {
         window.open(normalizeUrl(item.video_url), '_blank', 'noopener,noreferrer');
@@ -539,7 +555,9 @@ export default function App() {
       video.playsInline = true;
       video.loop = false;
       video.src = resolveAsset(item.preview_mp4) as any;
-      video.style.maxWidth = '90vw';
+      video.style.width = '100%';
+      video.style.height = '100%';
+      video.style.objectFit = 'contain';
       box.appendChild(video);
     } else if (item.local_video) {
       window.open(
@@ -549,6 +567,34 @@ export default function App() {
       );
       return;
     }
+
+    // add a close button inside modal box for easy full-screen exit
+    try {
+      (box as HTMLElement).style.position = 'relative';
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'btn-close';
+      closeBtn.setAttribute('aria-label', 'Close');
+      closeBtn.textContent = '✕';
+      closeBtn.style.position = 'absolute';
+      closeBtn.style.top = '10px';
+      closeBtn.style.right = '10px';
+      closeBtn.style.zIndex = '1001';
+      closeBtn.style.background = 'rgba(0,0,0,0.6)';
+      closeBtn.style.color = '#fff';
+      closeBtn.style.border = 'none';
+      closeBtn.style.padding = '6px 8px';
+      closeBtn.style.borderRadius = '6px';
+      closeBtn.onclick = () => {
+        try {
+          const v = box.querySelector('video');
+          if (v) (v as HTMLVideoElement).pause();
+        } catch (e) {}
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden', 'true');
+        box.innerHTML = '';
+      };
+      box.appendChild(closeBtn);
+    } catch (e) {}
 
     modal.classList.add('open');
     modal.setAttribute('aria-hidden', 'false');
@@ -748,7 +794,9 @@ export default function App() {
             </div>
           </div>
           <div style={{ marginTop: '6px' }}>
-            <button onClick={() => openVideo(it)}>{t('open_video', 'Open video')}</button>
+            <button onClick={() => openVideo(it)}>
+              {t('watch_full_video', 'Watch Full Video')}
+            </button>
             {it.video_url && (
               <a
                 href={normalizeUrl(it.video_url)}
@@ -893,7 +941,7 @@ export default function App() {
               {'<'}
             </button>
             <button onClick={() => openVideo(item)}>{t('open_video', 'Open video')}</button>
-            {item.video_url && (
+            {item.video_url && nonEmbeddable.has(item.id) && (
               <a
                 href={normalizeUrl(item.video_url)}
                 target={'_blank'}

@@ -187,8 +187,8 @@ test('buttons: card buttons present and mark done persists after reload (separat
   const btnCount = await firstCard.locator('button').count();
   expect(btnCount).toBeGreaterThanOrEqual(1);
 
-  // if Open video exists, ensure it's enabled but do not open modal here
-  const openBtn = firstCard.locator('button', { hasText: 'Open video' });
+  // if Watch Full Video exists, ensure it's enabled but do not open modal here
+  const openBtn = firstCard.locator('button', { hasText: 'Watch Full Video' });
   if ((await openBtn.count()) > 0) {
     expect(await openBtn.isEnabled()).toBeTruthy();
   }
@@ -217,15 +217,15 @@ test('buttons: card buttons present and mark done persists after reload (separat
   expect(afterDone).toBeGreaterThan(initialDone);
 });
 
-test('modal opens and closes when Open video clicked (if present)', async ({ page }: { page: Page }) => {
+test('modal opens and closes when Watch Full Video clicked (if present)', async ({ page }: { page: Page }) => {
   await page.goto(URL);
   await page.waitForSelector('.card');
 
   const firstCard = page.locator('.card').first();
-  const viewBtn = firstCard.locator('button', { hasText: 'Open video' });
+  const viewBtn = firstCard.locator('button', { hasText: 'Watch Full Video' });
   if ((await viewBtn.count()) === 0) {
-    // no Open video button in this environment; mark test as skipped so it's visible in test reports
-    test.info().skip(true, 'Open video button not present in this environment');
+    // no Watch Full Video button in this environment; mark test as skipped so it's visible in test reports
+    test.info().skip(true, 'Watch Full Video button not present in this environment');
     return;
   }
 
