@@ -787,7 +787,19 @@ export default function App() {
       <div>
         <div className={'single-media'}>
           {item.preview_mp4 ? (
-            <video src={resolveAsset(item.preview_mp4) || ''} playsInline muted loop />
+            <video
+              src={resolveAsset(item.preview_mp4) || ''}
+              playsInline
+              muted
+              loop
+              autoPlay
+              preload={'metadata'}
+              onLoadedMetadata={(e: Event) => {
+                try {
+                  (e.currentTarget as HTMLVideoElement).play().catch(() => {});
+                } catch (e) {}
+              }}
+            />
           ) : poster ? (
             <img
               src={poster}
