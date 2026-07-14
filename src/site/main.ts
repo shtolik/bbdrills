@@ -276,14 +276,14 @@ async function load() {
       actions.prepend(prevBtn);
       actions.appendChild(nextBtn);
 
-      // keyboard navigation
-      function onKey(e: KeyboardEvent) {
+      // keyboard navigation (ensure we remove the previous handler reference)
+      const w = window as any;
+      if (w.__bbdrills_onKey) window.removeEventListener('keydown', w.__bbdrills_onKey);
+      w.__bbdrills_onKey = (e: KeyboardEvent) => {
         if (e.key === 'ArrowLeft') showDrillByIndex(currentIndex - 1);
         if (e.key === 'ArrowRight') showDrillByIndex(currentIndex + 1);
-      }
-      window.removeEventListener('keydown', onKey);
-      window.addEventListener('keydown', onKey);
-
+      };
+      window.addEventListener('keydown', w.__bbdrills_onKey);
       // touch swipe navigation
       let startX = 0;
       let isTouch = false;

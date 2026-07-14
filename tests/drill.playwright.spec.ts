@@ -31,12 +31,10 @@ test('drill page shows single drill view with navigation', async ({ page }) => {
   expect(await prev.count()).toBeGreaterThan(0);
   expect(await next.count()).toBeGreaterThan(0);
 
-  if ((await next.count()) > 0) {
+  if ((await next.count()) > 0 && manifest.length > 1) {
     const originalTitle = await page.locator('.single-title').textContent();
     await next.first().click();
-    await page.waitForTimeout(300);
-    const newTitle = await page.locator('.single-title').textContent();
-    if (manifest.length > 1) expect(newTitle).not.toEqual(originalTitle);
+    await expect(page.locator('.single-title')).not.toHaveText(originalTitle ?? '');
   }
 
   // Ensure title and actions are visible and actions fit within viewport
