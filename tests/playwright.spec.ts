@@ -111,8 +111,19 @@ test('Open on YouTube links are normalized to absolute URLs', async ({
     const fallback = page.locator(`.card[data-id="${m.id}"]`).first();
     const used = (await card.count()) ? card : fallback;
     await expect(used).toBeVisible();
-    const link = used.getByRole('link', { name: 'Open on YouTube' });
-    await expect(link).toHaveAttribute('href', normalizeUrl(m.video_url));
+    // find any anchor in the card that points to YouTube (robust against locale changes)
+    const anchors = used.locator('a');
+    const count = await anchors.count();
+    let found = false;
+    for (let i = 0; i < count; i++) {
+      const href = await anchors.nth(i).getAttribute('href');
+      if (href && href.includes('youtu')) {
+        expect(href).toBe(normalizeUrl(m.video_url));
+        found = true;
+        break;
+      }
+    }
+    expect(found, 'Expected a YouTube anchor in card ' + m.id).toBeTruthy();
   }
 });
 
