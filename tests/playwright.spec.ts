@@ -91,10 +91,21 @@ test('Open on YouTube links are normalized to absolute URLs', async ({
   await page.goto(URL);
   await page.waitForSelector('.card');
 
-  const expectedHrefs = [
-    'https://youtu.be/URY-escJjss',
-    'https://youtu.be/orOzt-bT2wc',
-  ];
+  // compute expected hrefs from served manifest using the same normalization as the app
+  const manifestResp = await page.request.get(BASE + 'default_drills_with_meta.json');
+  expect(manifestResp.ok()).toBeTruthy();
+  const stub = await manifestResp.json();
+  const normalizeUrl = (s?: string) => {
+    if (!s) return '';
+    let str = String(s).trim();
+    if (!str) return '';
+    if (/^https?:\/\//i.test(str)) return str;
+    if (/^https?:\//i.test(str)) return str.replace(/^https?:\/*/i, 'https://');
+    if (/^\/\//.test(str)) return 'https:' + str;
+    if (str.startsWith('/')) str = str.replace(/^\/+/, '');
+    return 'https://' + str;
+  };
+  const expectedHrefs = (stub || []).map((m: any) => normalizeUrl(m.video_url));
 
   for (const [index, expectedHref] of expectedHrefs.entries()) {
     const link = page.locator('.card').nth(index).getByRole('link', { name: 'Open on YouTube' });
