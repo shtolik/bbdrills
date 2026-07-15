@@ -157,8 +157,7 @@ High-level architecture
 
 - Key code files introduced or relevant to UI and tests:
   - src/site/App.tsx — Preact application component rendering drills and handling UI state (theme/lang/filter), modal, and lazy loading
-  - src/site/main.tsx — Preact mount and YouTube API loader
-  - src/site/main.ts — legacy TS module (kept for reference until full migration)
+  - src/site/main.tsx — Preact mount and YouTube API loader (SPA entry)
   - site/site.bundle.js — generated bundle (gitignored); produced by `npm run build:site`
   - site/default_drills_with_meta.json — canonical manifest used by site and tests
   - src/lib/progress.ts — progress persistence helpers used by site and unit tests

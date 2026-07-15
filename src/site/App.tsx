@@ -2,6 +2,7 @@ import { h, Fragment } from 'preact';
 import { useEffect, useState, useRef } from 'preact/hooks';
 import { getDay, markSetComplete, migrateLegacyIfNeeded } from '../lib/progress';
 import { loadLocale, localizedField, t } from './i18n';
+import { buildDeepLink } from './url';
 
 type Drill = {
   id: string;
@@ -79,16 +80,45 @@ function groupBy(data: Drill[], key: keyof Drill) {
   return map;
 }
 
+const NON_EMBED_KEY = 'bbdrills_non_embeddable_v1';
+const nonEmbeddable = new Set<string>();
+function loadNonEmbeddable() {
+  try {
+    const raw = localStorage.getItem(NON_EMBED_KEY);
+    if (raw) {
+      const arr = JSON.parse(raw) as string[];
+      if (Array.isArray(arr)) arr.forEach(a => nonEmbeddable.add(a));
+    }
+  } catch (e) {}
+}
+function saveNonEmbeddable() {
+  try {
+    localStorage.setItem(NON_EMBED_KEY, JSON.stringify(Array.from(nonEmbeddable)));
+  } catch (e) {}
+}
+
 export default function App() {
   const [data, setData] = useState<Drill[]>([]);
   const lazyObserver = useRef<IntersectionObserver | null>(null);
   const didSyncUI = useRef(false);
+  const touchStartRef = useRef<number | null>(null);
+
+  // initialize persisted non-embeddable set (once on mount)
+  useEffect(() => {
+    try {
+      loadNonEmbeddable();
+      // force a re-render so conditional "Open on YouTube" links can appear immediately
+      setData(prev => prev.slice());
+    } catch (e) {}
+  }, []);
   // UI state (persisted)
   const UI_KEY = 'bbdrills_ui_v1';
   const STORAGE_KEY = 'bbdrills_progress_v3';
   const [lang, setLang] = useState<string>('en');
   const [filter, setFilter] = useState<'all' | 'incomplete'>('all');
   const [theme, setTheme] = useState<'system' | 'dark' | 'light'>('system');
+  // when drill.html?id=... is opened, show a focused single-drill view
+  const [singleIndex, setSingleIndex] = useState<number | null>(null);
 
   useEffect(() => {
     migrateLegacyIfNeeded();
@@ -326,6 +356,68 @@ export default function App() {
     saveUI();
   }, [lang, filter, theme]);
 
+  // If on drill.html with an id query param, open focused single-drill view
+  useEffect(() => {
+    if (!data || data.length === 0) return;
+    try {
+      const params = new URLSearchParams(location.search);
+      const idParam = params.get('id');
+      const isDrillPage =
+        /drill\.html$/i.test(location.pathname) || /\/drill\./i.test(location.pathname);
+      if (isDrillPage && idParam) {
+        const idx = data.findIndex((d: any) => d.id === idParam);
+        if (idx >= 0) {
+          setSingleIndex(idx);
+          try {
+            const newUrl = new URL(location.href);
+            newUrl.searchParams.set('id', data[idx].id);
+            history.replaceState({}, '', newUrl.toString());
+          } catch (e) {}
+        } else {
+          setSingleIndex(null);
+        }
+      } else {
+        setSingleIndex(null);
+      }
+    } catch (e) {}
+  }, [data]);
+
+  // keyboard navigation and touch swipe for single drill view
+  useEffect(() => {
+    if (singleIndex === null || !data || data.length === 0) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft')
+        setSingleIndex(s => (s === null ? s : (s - 1 + data.length) % data.length));
+      if (e.key === 'ArrowRight') setSingleIndex(s => (s === null ? s : (s + 1) % data.length));
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [singleIndex, data]);
+
+  useEffect(() => {
+    if (singleIndex === null || !data || data.length === 0) return;
+    const el = document.getElementById('content');
+    if (!el) return;
+    function onStart(e: TouchEvent) {
+      touchStartRef.current = e.touches[0].clientX;
+    }
+    function onEnd(e: TouchEvent) {
+      if (touchStartRef.current == null) return;
+      const dx = e.changedTouches[0].clientX - touchStartRef.current;
+      touchStartRef.current = null;
+      if (Math.abs(dx) > 60) {
+        if (dx < 0) setSingleIndex(s => (s === null ? s : (s + 1) % data.length));
+        else setSingleIndex(s => (s === null ? s : (s - 1 + data.length) % data.length));
+      }
+    }
+    el.addEventListener('touchstart', onStart);
+    el.addEventListener('touchend', onEnd);
+    return () => {
+      el.removeEventListener('touchstart', onStart);
+      el.removeEventListener('touchend', onEnd);
+    };
+  }, [singleIndex, data]);
+
   function saveUI() {
     try {
       localStorage.setItem(UI_KEY, JSON.stringify({ lang, filter, theme }));
@@ -394,8 +486,8 @@ export default function App() {
         box.appendChild(placeholder);
         try {
           new (window as any).YT.Player(placeholder.id, {
-            height: '450',
-            width: '800',
+            height: '100%',
+            width: '100%',
             videoId: id,
             playerVars: { autoplay: 1, origin: location.origin },
             events: {
@@ -405,6 +497,12 @@ export default function App() {
                 } catch (_) {}
               },
               onError: (e: any) => {
+                // mark this id as non-embeddable so overlay can show Open on YouTube next time
+                try {
+                  nonEmbeddable.add(item.id);
+                  saveNonEmbeddable();
+                  setData(prev => prev.slice());
+                } catch (_) {}
                 box.innerHTML = '';
                 const msg = document.createElement('div');
                 msg.style.color = '#fff';
@@ -437,8 +535,8 @@ export default function App() {
         } catch (_) {
           const iframe = document.createElement('iframe');
           iframe.src = 'https://www.youtube.com/embed/' + id + '?autoplay=1';
-          iframe.width = '800';
-          iframe.height = '450';
+          iframe.style.width = '100%';
+          iframe.style.height = '100%';
           iframe.title = 'YouTube video';
           iframe.allowFullscreen = true;
           iframe.setAttribute(
@@ -446,13 +544,20 @@ export default function App() {
             'accelerometer; autoplay; encrypted-media; picture-in-picture; fullscreen'
           );
           iframe.setAttribute('referrerpolicy', 'no-referrer');
+          iframe.addEventListener('error', () => {
+            try {
+              nonEmbeddable.add(item.id);
+              saveNonEmbeddable();
+              setData(prev => prev.slice());
+            } catch (_) {}
+          });
           box.appendChild(iframe);
         }
       } else if (id) {
         const iframe = document.createElement('iframe');
         iframe.src = 'https://www.youtube.com/embed/' + id + '?autoplay=1';
-        iframe.width = '800';
-        iframe.height = '450';
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
         iframe.title = 'YouTube video';
         iframe.allowFullscreen = true;
         iframe.setAttribute(
@@ -460,6 +565,13 @@ export default function App() {
           'accelerometer; autoplay; encrypted-media; picture-in-picture; fullscreen'
         );
         iframe.setAttribute('referrerpolicy', 'no-referrer');
+        iframe.addEventListener('error', () => {
+          try {
+            nonEmbeddable.add(item.id);
+            saveNonEmbeddable();
+            setData(prev => prev.slice());
+          } catch (_) {}
+        });
         box.appendChild(iframe);
       } else {
         window.open(normalizeUrl(item.video_url), '_blank', 'noopener,noreferrer');
@@ -473,7 +585,9 @@ export default function App() {
       video.playsInline = true;
       video.loop = false;
       video.src = resolveAsset(item.preview_mp4) as any;
-      video.style.maxWidth = '90vw';
+      video.style.width = '100%';
+      video.style.height = '100%';
+      video.style.objectFit = 'contain';
       box.appendChild(video);
     } else if (item.local_video) {
       window.open(
@@ -483,6 +597,34 @@ export default function App() {
       );
       return;
     }
+
+    // add a close button inside modal box for easy full-screen exit
+    try {
+      (box as HTMLElement).style.position = 'relative';
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'btn-close';
+      closeBtn.setAttribute('aria-label', 'Close');
+      closeBtn.textContent = '✕';
+      closeBtn.style.position = 'absolute';
+      closeBtn.style.top = '10px';
+      closeBtn.style.right = '10px';
+      closeBtn.style.zIndex = '1001';
+      closeBtn.style.background = 'rgba(0,0,0,0.6)';
+      closeBtn.style.color = '#fff';
+      closeBtn.style.border = 'none';
+      closeBtn.style.padding = '6px 8px';
+      closeBtn.style.borderRadius = '6px';
+      closeBtn.onclick = () => {
+        try {
+          const v = box.querySelector('video');
+          if (v) (v as HTMLVideoElement).pause();
+        } catch (e) {}
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden', 'true');
+        box.innerHTML = '';
+      };
+      box.appendChild(closeBtn);
+    } catch (e) {}
 
     modal.classList.add('open');
     modal.setAttribute('aria-hidden', 'false');
@@ -513,7 +655,23 @@ export default function App() {
     // produce DOM nodes similar to original markup but using JSX
     return (
       <article key={it.id} className={'card' + (completed ? ' done' : '')} data-id={it.id}>
-        <div className={'thumb'}>
+        <div
+          className={'thumb'}
+          style={{ cursor: 'pointer' }}
+          onClick={() => {
+            const isDrillPage =
+              /drill\.html$/i.test(location.pathname) || /\/drill\./i.test(location.pathname);
+            if (!isDrillPage) {
+              // navigate to dedicated drill page for full-screen view
+              const u = new URL('drill.html', location.href);
+              u.searchParams.set('id', it.id);
+              window.location.href = u.toString();
+            } else {
+              // keep modal behavior on drill.html
+              openVideo(it);
+            }
+          }}
+        >
           {completed ? (
             poster ? (
               <img
@@ -587,8 +745,69 @@ export default function App() {
           )}
         </div>
         <div className={'meta'}>
-          <div className={'title'}>
-            {localizedDrillField(it, 'name') || localizedDrillField(it, 'name_en')}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div className={'title'}>
+              {localizedDrillField(it, 'name') || localizedDrillField(it, 'name_en')}
+            </div>
+            <button
+              className={'share-btn'}
+              aria-label={t('share', 'Share')}
+              title={t('share', 'Share')}
+              onClick={() => {
+                const deep = buildDeepLink(it.id);
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                  navigator.clipboard
+                    .writeText(deep)
+                    .then(() => {
+                      const id = 'bbdrills-toast';
+                      let tEl = document.getElementById(id) as HTMLDivElement | null;
+                      if (!tEl) {
+                        tEl = document.createElement('div');
+                        tEl.id = id;
+                        tEl.style.position = 'fixed';
+                        tEl.style.right = '16px';
+                        tEl.style.bottom = '24px';
+                        tEl.style.padding = '8px 12px';
+                        tEl.style.borderRadius = '8px';
+                        tEl.style.background = 'rgba(0,0,0,0.8)';
+                        tEl.style.color = '#fff';
+                        tEl.style.zIndex = '10000';
+                        tEl.style.fontSize = '14px';
+                        document.body.appendChild(tEl);
+                      }
+                      tEl!.textContent = t('copied', 'Copied!');
+                      setTimeout(() => tEl && tEl.remove(), 1200);
+                    })
+                    .catch(() => prompt(t('copy_prompt', 'Copy this link'), deep));
+                } else {
+                  prompt(t('copy_prompt', 'Copy this link'), deep);
+                }
+              }}
+            >
+              <svg viewBox={'0 0 24 24'} width={'18'} height={'18'} aria-hidden={true}>
+                <path
+                  fill={'none'}
+                  stroke={'currentColor'}
+                  strokeWidth={'1.8'}
+                  d={'M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7'}
+                />
+                <polyline
+                  fill={'none'}
+                  stroke={'currentColor'}
+                  strokeWidth={'1.8'}
+                  points={'16 6 12 2 8 6'}
+                />
+                <line
+                  fill={'none'}
+                  stroke={'currentColor'}
+                  strokeWidth={'1.8'}
+                  x1={'12'}
+                  y1={'2'}
+                  x2={'12'}
+                  y2={'15'}
+                />
+              </svg>
+            </button>
           </div>
           <div className={'details'}>
             {localizedDrillField(it, 'details') ? (
@@ -622,8 +841,10 @@ export default function App() {
             </div>
           </div>
           <div style={{ marginTop: '6px' }}>
-            <button onClick={() => openVideo(it)}>{t('open_video', 'Open video')}</button>
-            {it.video_url && (
+            <button onClick={() => openVideo(it)}>
+              {t('watch_full_video', 'Watch Full Video')}
+            </button>
+            {it.video_url && nonEmbeddable.has(it.id) && (
               <a
                 href={normalizeUrl(it.video_url)}
                 target={'_blank'}
@@ -639,6 +860,184 @@ export default function App() {
       </article>
     );
   };
+
+  // if singleIndex is set, render focused single drill page
+  if (singleIndex !== null && data && data[singleIndex]) {
+    const item = data[singleIndex];
+    const showIndex = (idx: number) => {
+      const n = data.length;
+      const wrapped = ((idx % n) + n) % n;
+      setSingleIndex(wrapped);
+      try {
+        const newUrl = new URL(location.href);
+        newUrl.searchParams.set('id', data[wrapped].id);
+        history.replaceState({}, '', newUrl.toString());
+      } catch (e) {}
+    };
+    const poster =
+      resolveAsset(item.preview_webp) ||
+      resolveAsset(item.gif) ||
+      (item.video_url ? youtubeThumbnail(item.video_url) : '');
+    return (
+      <div>
+        <a className={'single-back'} href={'index.html'} aria-label={'Back to list'}>
+          {'←'}
+        </a>
+        <div className={'single-media'}>
+          {item.preview_mp4 ? (
+            <video
+              src={resolveAsset(item.preview_mp4) || ''}
+              poster={poster || undefined}
+              playsInline
+              muted
+              loop
+              autoPlay
+              preload={'metadata'}
+              onLoadedMetadata={(e: Event) => {
+                try {
+                  (e.currentTarget as HTMLVideoElement).play().catch(() => {});
+                } catch (e) {}
+              }}
+            />
+          ) : poster ? (
+            <img
+              src={poster}
+              alt={(localizedDrillField(item, 'name') || item.name_en) + ' preview'}
+            />
+          ) : null}
+        </div>
+        <div className={'single-overlay'}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <h1 className={'single-title'} style={{ margin: 0 }}>
+              {localizedDrillField(item, 'name') || item.name_en || 'Drill'}
+            </h1>
+            <button
+              className={'share-btn'}
+              aria-label={t('share', 'Share')}
+              title={t('share', 'Share')}
+              onClick={() => {
+                try {
+                  const deep = buildDeepLink(item.id);
+                  if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard
+                      .writeText(deep)
+                      .then(() => {
+                        const id = 'bbdrills-toast';
+                        let tEl = document.getElementById(id) as HTMLDivElement | null;
+                        if (!tEl) {
+                          tEl = document.createElement('div');
+                          tEl.id = id;
+                          tEl.style.position = 'fixed';
+                          tEl.style.right = '16px';
+                          tEl.style.bottom = '24px';
+                          tEl.style.padding = '8px 12px';
+                          tEl.style.borderRadius = '8px';
+                          tEl.style.background = 'rgba(0,0,0,0.8)';
+                          tEl.style.color = '#fff';
+                          tEl.style.zIndex = '10000';
+                          tEl.style.fontSize = '14px';
+                          document.body.appendChild(tEl);
+                        }
+                        tEl!.textContent = t('copied', 'Copied!');
+                        setTimeout(() => tEl && tEl.remove(), 1200);
+                      })
+                      .catch(() => prompt(t('copy_prompt', 'Copy this link'), deep));
+                  } else {
+                    prompt(t('copy_prompt', 'Copy this link'), deep);
+                  }
+                } catch (e) {}
+              }}
+            >
+              <svg viewBox={'0 0 24 24'} width={'18'} height={'18'} aria-hidden={true}>
+                <path
+                  fill={'none'}
+                  stroke={'currentColor'}
+                  strokeWidth={'1.8'}
+                  d={'M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7'}
+                />
+                <polyline
+                  fill={'none'}
+                  stroke={'currentColor'}
+                  strokeWidth={'1.8'}
+                  points={'16 6 12 2 8 6'}
+                />
+                <line
+                  fill={'none'}
+                  stroke={'currentColor'}
+                  strokeWidth={'1.8'}
+                  x1={'12'}
+                  y1={'2'}
+                  x2={'12'}
+                  y2={'15'}
+                />
+              </svg>
+            </button>
+          </div>
+          <div className={'single-desc'}>
+            {localizedDrillField(item, 'details') ? (
+              <p>{localizedDrillField(item, 'details')}</p>
+            ) : null}
+            <div className={'single-meta'}>
+              <div>
+                {t('reps_label', 'Reps:')}{' '}
+                {item.reps_num || localizedDrillField(item, 'reps') || ''}
+              </div>
+              <div>
+                {(() => {
+                  const day = getDay(item.id);
+                  const target =
+                    day.targetSets && day.targetSets > 0 ? day.targetSets : item.sets || '-';
+                  return (
+                    <>
+                      {t('sets_label', 'Sets:')} {day.setsCompleted || 0}/{target}
+                      <button
+                        className={'btn-mark'}
+                        onClick={() => mark(item.id)}
+                        style={{ marginLeft: 8 }}
+                      >
+                        {t('mark_done', '+1 done')}
+                      </button>
+                    </>
+                  );
+                })()}
+              </div>
+            </div>
+          </div>
+
+          <div className={'single-actions'}>
+            <button
+              id={'drill-prev'}
+              aria-label={'Previous drill'}
+              onClick={() => showIndex(singleIndex - 1)}
+            >
+              {'<'}
+            </button>
+            <button onClick={() => openVideo(item)}>
+              {t('watch_full_video', 'Watch Full Video')}
+            </button>
+            {item.video_url && nonEmbeddable.has(item.id) && (
+              <a
+                href={normalizeUrl(item.video_url)}
+                target={'_blank'}
+                rel={'noopener noreferrer'}
+                style={{ marginLeft: 8 }}
+              >
+                {t('open_on_youtube', 'Open on YouTube')}
+              </a>
+            )}
+            <button
+              id={'drill-next'}
+              aria-label={'Next drill'}
+              onClick={() => showIndex(singleIndex + 1)}
+              style={{ marginLeft: 8 }}
+            >
+              {'>'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // group by localized group label (fallback to legacy group_en)
   const groupsMap = new Map<string, Drill[]>();

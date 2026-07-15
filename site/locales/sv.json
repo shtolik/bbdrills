@@ -10,6 +10,7 @@
   "sets_label": "Set:",
   "open_on_youtube": "Öppna på YouTube",
   "open_video": "Öppna video",
+  "watch_full_video": "Titta på hela videon",
   "failed_to_load_data": "Kunde inte ladda data",
   "cannot_embed": "Denna video kan inte bäddas in (åldersbegränsad eller blockerad). Du kan öppna den på YouTube istället.",
   "mark_done": "+1 gjort",
@@ -17,5 +18,8 @@
   "confirm_clear": "Rensa lokala framsteg?",
   "group.running": "Löpning",
   "group.gym": "Gym",
-  "group.bodyweight": "Bodyweight"
+  "group.bodyweight": "Bodyweight",
+  "share": "Dela",
+  "copied": "Kopierat!",
+  "copy_prompt": "Kopiera den här länken"
 }

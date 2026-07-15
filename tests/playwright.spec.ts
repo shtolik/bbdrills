@@ -66,39 +66,70 @@ test('Open on YouTube links are normalized to absolute URLs', async ({
 }: {
   page: Page;
 }) => {
+  const stub = [
+    {
+      id: 'single-slash-url',
+      name_en: 'Single slash URL',
+      video_url: 'https:/youtu.be/URY-escJjss',
+      sets: 1,
+      reps: 1,
+    },
+    {
+      id: 'bare-youtu-be-url',
+      name_en: 'Bare youtu.be URL',
+      video_url: 'youtu.be/orOzt-bT2wc',
+      sets: 1,
+      reps: 1,
+    },
+  ];
+
   await page.route('**/default_drills_with_meta.json', async route => {
     await route.fulfill({
       contentType: 'application/json',
-      body: JSON.stringify([
-        {
-          id: 'single-slash-url',
-          name_en: 'Single slash URL',
-          video_url: 'https:/youtu.be/URY-escJjss',
-          sets: 1,
-          reps: 1,
-        },
-        {
-          id: 'bare-youtu-be-url',
-          name_en: 'Bare youtu.be URL',
-          video_url: 'youtu.be/orOzt-bT2wc',
-          sets: 1,
-          reps: 1,
-        },
-      ]),
+      body: JSON.stringify(stub),
     });
   });
+
+  await page.addInitScript((ids: string[]) => {
+    try {
+      localStorage.setItem('bbdrills_non_embeddable_v1', JSON.stringify(ids));
+    } catch {}
+  }, stub.map(m => m.id));
 
   await page.goto(URL);
   await page.waitForSelector('.card');
 
-  const expectedHrefs = [
-    'https://youtu.be/URY-escJjss',
-    'https://youtu.be/orOzt-bT2wc',
-  ];
+  const normalizeUrl = (s?: string) => {
+    if (!s) return '';
+    let str = String(s).trim();
+    if (!str) return '';
+    if (/^https?:\/\//i.test(str)) return str;
+    if (/^https?:\//i.test(str)) return str.replace(/^https?:\/*/i, 'https://');
+    if (/^\/\//.test(str)) return 'https:' + str;
+    if (str.startsWith('/')) str = str.replace(/^\/+/, '');
+    return 'https://' + str;
+  };
 
-  for (const [index, expectedHref] of expectedHrefs.entries()) {
-    const link = page.locator('.card').nth(index).getByRole('link', { name: 'Open on YouTube' });
-    await expect(link).toHaveAttribute('href', expectedHref);
+  // locate cards by data-id so test is robust even if other cards exist in DOM
+  for (const m of stub) {
+    const card = page.locator('.card').filter({ has: page.locator(`[data-id="${m.id}"]`) }).first();
+    // fallback: try direct attribute selector
+    const fallback = page.locator(`.card[data-id="${m.id}"]`).first();
+    const used = (await card.count()) ? card : fallback;
+    await expect(used).toBeVisible();
+    // find any anchor in the card that points to YouTube (robust against locale changes)
+    const anchors = used.locator('a');
+    const count = await anchors.count();
+    let found = false;
+    for (let i = 0; i < count; i++) {
+      const href = await anchors.nth(i).getAttribute('href');
+      if (href && href.includes('youtu')) {
+        expect(href).toBe(normalizeUrl(m.video_url));
+        found = true;
+        break;
+      }
+    }
+    expect(found, 'Expected a YouTube anchor in card ' + m.id).toBeTruthy();
   }
 });
 
@@ -187,8 +218,8 @@ test('buttons: card buttons present and mark done persists after reload (separat
   const btnCount = await firstCard.locator('button').count();
   expect(btnCount).toBeGreaterThanOrEqual(1);
 
-  // if Open video exists, ensure it's enabled but do not open modal here
-  const openBtn = firstCard.locator('button', { hasText: 'Open video' });
+  // if Watch Full Video exists, ensure it's enabled but do not open modal here
+  const openBtn = firstCard.locator('button', { hasText: 'Watch Full Video' });
   if ((await openBtn.count()) > 0) {
     expect(await openBtn.isEnabled()).toBeTruthy();
   }
@@ -217,15 +248,15 @@ test('buttons: card buttons present and mark done persists after reload (separat
   expect(afterDone).toBeGreaterThan(initialDone);
 });
 
-test('modal opens and closes when Open video clicked (if present)', async ({ page }: { page: Page }) => {
+test('modal opens and closes when Watch Full Video clicked (if present)', async ({ page }: { page: Page }) => {
   await page.goto(URL);
   await page.waitForSelector('.card');
 
   const firstCard = page.locator('.card').first();
-  const viewBtn = firstCard.locator('button', { hasText: 'Open video' });
+  const viewBtn = firstCard.locator('button', { hasText: 'Watch Full Video' });
   if ((await viewBtn.count()) === 0) {
-    // no Open video button in this environment; mark test as skipped so it's visible in test reports
-    test.info().skip(true, 'Open video button not present in this environment');
+    // no Watch Full Video button in this environment; mark test as skipped so it's visible in test reports
+    test.info().skip(true, 'Watch Full Video button not present in this environment');
     return;
   }
 

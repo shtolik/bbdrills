@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Drill — Drills</title>
+    <link rel="icon" href="favicon.ico" />
+    <link rel="icon" href="favicon-32x32.png" type="image/png" sizes="32x32" />
+    <link rel="icon" href="favicon-16x16.png" type="image/png" sizes="16x16" />
+    <link rel="icon" href="logo-ball.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180" />
+    <meta name="theme-color" content="#0b74de" />
+    <script>
+      // Apply persisted theme before CSS loads so the page respects user choice (dark/light/system)
+      (function () {
+        try {
+          const raw = localStorage.getItem('bbdrills_ui_v1');
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && (parsed.theme === 'dark' || parsed.theme === 'light')) {
+              document.documentElement.setAttribute('data-theme', parsed.theme);
+            }
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <style>
+      /* keep a minimal subset of index styles for single drill page */
+      :root {
+        --gap: 12px;
+        --bg: #f6f7f9;
+        --text: #111;
+        --card-bg: #fff;
+        --muted: #666;
+        --accent: #0b74de;
+        --success: #0bda6e;
+        --card-shadow: 0 1px 4px rgba(10, 10, 10, 0.06);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0b0f14;
+          --text: #e6eef8;
+          --card-bg: #0f1720;
+          --muted: #9fb0c8;
+          --accent: #1d9bf0;
+          --success: #39d98a;
+          --card-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+        }
+      }
+      /* manual overrides */
+      [data-theme='dark'] {
+        --bg: #0b0f14;
+        --text: #e6eef8;
+        --card-bg: #0f1720;
+        --muted: #9fb0c8;
+        --accent: #1d9bf0;
+        --success: #39d98a;
+        --card-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+      }
+      [data-theme='light'] {
+        --bg: #f6f7f9;
+        --text: #111;
+        --card-bg: #fff;
+        --muted: #666;
+        --accent: #0b74de;
+        --success: #0bda6e;
+        --card-shadow: 0 1px 4px rgba(10, 10, 10, 0.06);
+      }
+      body {
+        font-family: Segoe UI, Arial, sans-serif;
+        margin: 12px;
+        background: var(--bg);
+        color: var(--text);
+      }
+      /* Full-bleed media with bottom overlay panel (no scrolling) */
+      .container {
+        max-width: 900px;
+        margin: 0 auto;
+        position: relative;
+        padding: 12px;
+        box-sizing: border-box;
+      }
+      main#content {
+        position: relative;
+        height: calc(100vh - 24px);
+      }
+      .single-media {
+        position: absolute;
+        inset: 0 0 0 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        /* match site background when available, fallback to white */
+        background: var(--bg, #fff);
+        z-index: 0;
+      }
+      .single-media img,
+      .single-media video {
+        /* fill the media area but preserve aspect ratio */
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+      }
+      /* Overlay panel centered and matching media width */
+      .single-overlay {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 12px;
+        z-index: 2;
+        background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.6));
+        padding: 12px;
+        border-radius: 8px;
+        color: #fff;
+        backdrop-filter: blur(4px);
+        width: calc(100% - 24px);
+        max-width: 900px;
+      }
+      .single-back {
+        position: fixed;
+        top: 12px;
+        left: 12px;
+        z-index: 1100;
+        background: rgba(0, 0, 0, 0.6);
+        color: #fff;
+        border-radius: 8px;
+        padding: 6px 8px;
+        text-decoration: none;
+        font-size: 18px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .single-title {
+        font-size: 22px;
+        margin: 0 0 8px 0;
+        color: #fff;
+      }
+      .single-desc {
+        color: #fff;
+        margin-bottom: 8px;
+      }
+      .single-meta {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        color: #fff;
+      }
+      .single-controls {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-top: 8px;
+      }
+      .single-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+        justify-content: flex-end;
+      }
+      .single-actions button,
+      .single-controls button,
+      .single-actions a button {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        border: none;
+        padding: 8px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      .single-actions a {
+        text-decoration: none;
+      }
+      @media (max-width: 720px) {
+        .single-overlay {
+          bottom: 8px;
+          padding: 10px;
+          width: calc(100% - 16px);
+        }
+        .single-title {
+          font-size: 18px;
+        }
+        .single-media img,
+        .single-media video {
+          max-height: calc(100vh - 160px);
+        }
+        main#content {
+          padding-bottom: 20px;
+        }
+        .single-actions {
+          justify-content: center;
+        }
+      }
+      /* On medium/desktop viewports ensure the combined content fits via stricter caps */
+      @media (min-width: 721px) {
+        .single-media img,
+        .single-media video {
+          max-height: calc(100vh - 160px);
+        }
+        main#content {
+          max-height: calc(100vh - 80px);
+          overflow: auto;
+        }
+      }
+      /* modal: center overlay like index.html */
+      .modal {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 50;
+      }
+      .modal.open {
+        display: flex;
+      }
+      /* modal box and media sizing for drill page */
+      .modal .box {
+        /* respect theme and site background instead of forcing black */
+        background: var(--card-bg, #000);
+        color: var(--text, #fff);
+        max-width: 95vw;
+        border-radius: 6px;
+        overflow: hidden;
+        width: 95vw;
+        height: 95vh;
+        /* ensure modal is never taller than viewport */
+        max-height: 95vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+      .modal iframe,
+      .modal video {
+        display: block;
+        width: 100%;
+        height: 100%;
+        border: 0;
+      }
+      button {
+        background: #0b74de;
+        color: #fff;
+        border: none;
+        padding: 8px 10px;
+        border-radius: 6px;
+      }
+      /* Match index.html share icon styling (icon-only button) */
+      .share-btn {
+        background: transparent;
+        border: none;
+        padding: 4px;
+        color: inherit;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+      }
+      .share-btn:hover {
+        color: var(--accent);
+      }
+      a {
+        color: #0b74de;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <main id="content"></main>
+      <div id="modal" class="modal" aria-hidden="true"><div class="box" id="modal-box"></div></div>
+    </div>
+
+    <script
+      src="./site.bundle.js"
+      defer
+      onerror="(function(){try{const c=document.getElementById('content'); if(c){c.textContent='site.bundle.js not found — the site JavaScript is missing. Run npm install && npm run build:site before serving/publishing.';} console.warn('site.bundle.js not found — run npm run build:site.');}catch(e){} })()"
+    ></script>
+  </body>
+</html>
