@@ -255,9 +255,9 @@
     "group": "running",
     "reps_num": "20-30",
     "reps_label": {
-      "en": "",
-      "fi": "",
-      "sv": ""
+      "en": "m",
+      "fi": "m",
+      "sv": "m"
     }
   },
   {
@@ -284,9 +284,9 @@
     "group": "running",
     "reps_num": "20",
     "reps_label": {
-      "en": "",
-      "fi": "",
-      "sv": ""
+      "en": "m",
+      "fi": "m",
+      "sv": "m"
     }
   },
   {
@@ -313,9 +313,9 @@
     "group": "running",
     "reps_num": "100-400",
     "reps_label": {
-      "en": "",
-      "fi": "",
-      "sv": ""
+      "en": "m",
+      "fi": "m",
+      "sv": "m"
     }
   },
   {
@@ -453,7 +453,7 @@
     "details": {
       "en": "1 set; reps 10,15,20,25; bodyweight or progression",
       "fi": "1 sarja; toistot 10,15,20,25 per puoli; kehonpainolla tai progressio",
-      "sv": "1 sarja; toistot 10,15,20,25; kehonpainolla tai progressio"
+      "sv": "1 set; repetitioner 10, 15, 20, 25; kroppsvikt eller progression"
     },
     "group": "gym",
     "reps_num": "10-25",
