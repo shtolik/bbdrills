@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- homepage -->
   <url><loc>https://drills.my/</loc></url>
-  <!-- prefer explicit drill pages (drill.html?id=...) for deep links and better SEO */ -->
+  <!-- prefer explicit drill pages (drill.html?id=...) for deep links and better SEO -->
   <url><loc>https://drills.my/drill.html?id=hip-airplane</loc></url>
   <url><loc>https://drills.my/drill.html?id=a-skip</loc></url>
   <url><loc>https://drills.my/drill.html?id=standing-hip-flexor</loc></url>

@@ -49,17 +49,17 @@ export function buildDeepLink(id: string): string {
 
     if (!origin || origin === 'null') {
       // fallback to plain localhost root for non-browser or null origins
-      return `http://localhost/?id=${encodeURIComponent(id)}`;
+      return `http://localhost/drill.html?id=${encodeURIComponent(id)}`;
     }
 
-    // If basePath is root, prefer homepage deep-link (origin/?id=...)
+    // If basePath is root, prefer dedicated drill page deep-link (origin/drill.html?id=...)
     if (basePath === '/') {
       try {
-        const u = new URL(origin + '/');
+        const u = new URL(origin + '/drill.html');
         u.searchParams.set('id', id);
         return u.toString();
       } catch (e) {
-        return `${origin}/?id=${encodeURIComponent(id)}`;
+        return `${origin}/drill.html?id=${encodeURIComponent(id)}`;
       }
     }
 
@@ -83,6 +83,6 @@ export function buildDeepLink(id: string): string {
       return `${origin}${pathWithDrill}?id=${encodeURIComponent(id)}`;
     }
   } catch (e) {
-    return `http://localhost/?id=${encodeURIComponent(id)}`;
+    return `http://localhost/drill.html?id=${encodeURIComponent(id)}`;
   }
 }
