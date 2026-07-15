@@ -34,18 +34,28 @@ export function localizedField(item: any, field: string, lang: string) {
   }
   // handle reps_label specially: it's a nested localized label
   if (field === 'reps_label' && nested && typeof nested === 'object') {
-    if (nested[lang]) return nested[lang];
-    if (nested['en']) return nested['en'];
+    const v = nested[lang] ?? nested['en'];
+    if (typeof v === 'string') return v;
+    if (typeof v === 'number') return String(v);
+    return '';
   }
   // nested object e.g. name: { en: '', fi: '' }
   if (nested && typeof nested === 'object') {
-    if (nested[lang]) return nested[lang];
-    if (nested['en']) return nested['en'];
+    const v = nested[lang] ?? nested['en'];
+    if (typeof v === 'string') return v;
+    if (typeof v === 'number') return String(v);
+    return '';
   }
   // flat fields: name_en / name_fi
   const flat = item[field + '_' + lang];
-  if (flat) return flat;
+  if (typeof flat === 'string') return flat;
+  if (typeof flat === 'number') return String(flat);
   const flatEn = item[field + '_en'];
-  if (flatEn) return flatEn;
-  return item[field] || '';
+  if (typeof flatEn === 'string') return flatEn;
+  if (typeof flatEn === 'number') return String(flatEn);
+  // final fallback: ensure we don't return an object
+  const final = item[field];
+  if (typeof final === 'string') return final;
+  if (typeof final === 'number') return String(final);
+  return '';
 }
