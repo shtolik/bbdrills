@@ -995,7 +995,11 @@ export default function App() {
           </div>
 
           <div className={'single-actions'}>
-            <button id={'drill-prev'} onClick={() => showIndex(singleIndex - 1)}>
+            <button
+              id={'drill-prev'}
+              aria-label={'Previous drill'}
+              onClick={() => showIndex(singleIndex - 1)}
+            >
               {'<'}
             </button>
             <button onClick={() => openVideo(item)}>
@@ -1013,6 +1017,7 @@ export default function App() {
             )}
             <button
               id={'drill-next'}
+              aria-label={'Next drill'}
               onClick={() => showIndex(singleIndex + 1)}
               style={{ marginLeft: 8 }}
             >

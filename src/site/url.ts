@@ -4,7 +4,7 @@ export function buildDeepLink(id: string): string {
     const link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
     if (link && link.href) {
       try {
-        const u = new URL(link.href);
+        const u = new URL('drill.html', link.href);
         u.searchParams.set('id', id);
         return u.toString();
       } catch (e) {

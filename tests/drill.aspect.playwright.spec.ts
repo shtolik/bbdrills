@@ -39,6 +39,7 @@ test.describe('drill media aspect ratios', () => {
     const displayedHeight = intrinsic.nh * scale;
     const displayedRatio = displayedWidth / displayedHeight;
     // displayed aspect should match intrinsic aspect closely
+    const intrinsicRatio = intrinsic.nw / intrinsic.nh;
     expect(Math.abs(displayedRatio - intrinsicRatio)).toBeLessThan(0.01);
   });
 
@@ -72,6 +73,7 @@ test.describe('drill media aspect ratios', () => {
     const displayedWidth = intrinsic.nw * scale;
     const displayedHeight = intrinsic.nh * scale;
     const displayedRatio = displayedWidth / displayedHeight;
+    const intrinsicRatio = intrinsic.nw / intrinsic.nh;
     expect(Math.abs(displayedRatio - intrinsicRatio)).toBeLessThan(0.01);
   });
 });
