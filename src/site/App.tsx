@@ -98,18 +98,19 @@ function saveNonEmbeddable() {
 }
 
 export default function App() {
-  // initialize persisted non-embeddable set (avoid localStorage access on every render)
-  const didLoadNonEmbeddable = useRef(false);
-  if (!didLoadNonEmbeddable.current) {
-    didLoadNonEmbeddable.current = true;
-    try {
-      loadNonEmbeddable();
-    } catch (e) {}
-  }
   const [data, setData] = useState<Drill[]>([]);
   const lazyObserver = useRef<IntersectionObserver | null>(null);
   const didSyncUI = useRef(false);
   const touchStartRef = useRef<number | null>(null);
+
+  // initialize persisted non-embeddable set (once on mount)
+  useEffect(() => {
+    try {
+      loadNonEmbeddable();
+      // force a re-render so conditional "Open on YouTube" links can appear immediately
+      setData(prev => prev.slice());
+    } catch (e) {}
+  }, []);
   // UI state (persisted)
   const UI_KEY = 'bbdrills_ui_v1';
   const STORAGE_KEY = 'bbdrills_progress_v3';

@@ -1,27 +1,16 @@
 /** @vitest-environment jsdom */
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { buildDeepLink } from '../../src/site/url';
 
 describe('buildDeepLink', () => {
-  let origLocation: any;
-
   beforeEach(() => {
-    // preserve real location if present
-    origLocation = (global as any).location;
+    vi.unstubAllGlobals();
     // ensure clean head
     document.head.innerHTML = '';
   });
+
   afterEach(() => {
-    // restore location (make it re-definable between tests)
-    if (origLocation === undefined) {
-      delete (global as any).location;
-    } else {
-      Object.defineProperty(global, 'location', {
-        value: origLocation,
-        writable: true,
-        configurable: true,
-      });
-    }
+    vi.unstubAllGlobals();
   });
 
   it('uses canonical link when present', () => {

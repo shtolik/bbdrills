@@ -90,6 +90,12 @@ test('Open on YouTube links are normalized to absolute URLs', async ({
     });
   });
 
+  await page.addInitScript((ids: string[]) => {
+    try {
+      localStorage.setItem('bbdrills_non_embeddable_v1', JSON.stringify(ids));
+    } catch {}
+  }, stub.map(m => m.id));
+
   await page.goto(URL);
   await page.waitForSelector('.card');
 
