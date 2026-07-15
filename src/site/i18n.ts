@@ -34,18 +34,47 @@ export function localizedField(item: any, field: string, lang: string) {
   }
   // handle reps_label specially: it's a nested localized label
   if (field === 'reps_label' && nested && typeof nested === 'object') {
-    if (nested[lang]) return nested[lang];
-    if (nested['en']) return nested['en'];
+    // prefer lang if it's a primitive, otherwise fall back to en, then any primitive value
+    const tryKeys = [lang, 'en'];
+    for (const k of tryKeys) {
+      const cand = nested[k];
+      if (typeof cand === 'string') return cand;
+      if (typeof cand === 'number') return String(cand);
+    }
+    // fallback: pick first primitive value found in the object
+    for (const k of Object.keys(nested)) {
+      const cand = nested[k];
+      if (typeof cand === 'string') return cand;
+      if (typeof cand === 'number') return String(cand);
+    }
+    return '';
   }
   // nested object e.g. name: { en: '', fi: '' }
   if (nested && typeof nested === 'object') {
-    if (nested[lang]) return nested[lang];
-    if (nested['en']) return nested['en'];
+    // prefer lang then en, but only accept primitive values; otherwise pick any primitive
+    const tryKeys = [lang, 'en'];
+    for (const k of tryKeys) {
+      const cand = (nested as any)[k];
+      if (typeof cand === 'string') return cand;
+      if (typeof cand === 'number') return String(cand);
+    }
+    for (const k of Object.keys(nested)) {
+      const cand = (nested as any)[k];
+      if (typeof cand === 'string') return cand;
+      if (typeof cand === 'number') return String(cand);
+    }
+    return '';
   }
   // flat fields: name_en / name_fi
   const flat = item[field + '_' + lang];
-  if (flat) return flat;
+  if (typeof flat === 'string') return flat;
+  if (typeof flat === 'number') return String(flat);
   const flatEn = item[field + '_en'];
-  if (flatEn) return flatEn;
-  return item[field] || '';
+  if (typeof flatEn === 'string') return flatEn;
+  if (typeof flatEn === 'number') return String(flatEn);
+  // final fallback: ensure we don't return an object
+  const final = item[field];
+  if (typeof final === 'string') return final;
+  if (typeof final === 'number') return String(final);
+  return '';
 }
