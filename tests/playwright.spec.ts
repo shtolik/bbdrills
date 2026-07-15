@@ -107,9 +107,15 @@ test('Open on YouTube links are normalized to absolute URLs', async ({
   };
   const expectedHrefs = (stub || []).map((m: any) => normalizeUrl(m.video_url));
 
-  for (const [index, expectedHref] of expectedHrefs.entries()) {
-    const link = page.locator('.card').nth(index).getByRole('link', { name: 'Open on YouTube' });
-    await expect(link).toHaveAttribute('href', expectedHref);
+  // locate cards by data-id so test is robust even if other cards exist in DOM
+  for (const m of (stub || [])) {
+    const card = page.locator('.card').filter({ has: page.locator(`[data-id="${m.id}"]`) }).first();
+    // fallback: try direct attribute selector
+    const fallback = page.locator(`.card[data-id="${m.id}"]`).first();
+    const used = (await card.count()) ? card : fallback;
+    await expect(used).toBeVisible();
+    const link = used.getByRole('link', { name: 'Open on YouTube' });
+    await expect(link).toHaveAttribute('href', normalizeUrl(m.video_url));
   }
 });
 
