@@ -66,35 +66,33 @@ test('Open on YouTube links are normalized to absolute URLs', async ({
 }: {
   page: Page;
 }) => {
+  const stub = [
+    {
+      id: 'single-slash-url',
+      name_en: 'Single slash URL',
+      video_url: 'https:/youtu.be/URY-escJjss',
+      sets: 1,
+      reps: 1,
+    },
+    {
+      id: 'bare-youtu-be-url',
+      name_en: 'Bare youtu.be URL',
+      video_url: 'youtu.be/orOzt-bT2wc',
+      sets: 1,
+      reps: 1,
+    },
+  ];
+
   await page.route('**/default_drills_with_meta.json', async route => {
     await route.fulfill({
       contentType: 'application/json',
-      body: JSON.stringify([
-        {
-          id: 'single-slash-url',
-          name_en: 'Single slash URL',
-          video_url: 'https:/youtu.be/URY-escJjss',
-          sets: 1,
-          reps: 1,
-        },
-        {
-          id: 'bare-youtu-be-url',
-          name_en: 'Bare youtu.be URL',
-          video_url: 'youtu.be/orOzt-bT2wc',
-          sets: 1,
-          reps: 1,
-        },
-      ]),
+      body: JSON.stringify(stub),
     });
   });
 
   await page.goto(URL);
   await page.waitForSelector('.card');
 
-  // compute expected hrefs from served manifest using the same normalization as the app
-  const manifestResp = await page.request.get(BASE + 'default_drills_with_meta.json');
-  expect(manifestResp.ok()).toBeTruthy();
-  const stub = await manifestResp.json();
   const normalizeUrl = (s?: string) => {
     if (!s) return '';
     let str = String(s).trim();
@@ -105,10 +103,9 @@ test('Open on YouTube links are normalized to absolute URLs', async ({
     if (str.startsWith('/')) str = str.replace(/^\/+/, '');
     return 'https://' + str;
   };
-  const expectedHrefs = (stub || []).map((m: any) => normalizeUrl(m.video_url));
 
   // locate cards by data-id so test is robust even if other cards exist in DOM
-  for (const m of (stub || [])) {
+  for (const m of stub) {
     const card = page.locator('.card').filter({ has: page.locator(`[data-id="${m.id}"]`) }).first();
     // fallback: try direct attribute selector
     const fallback = page.locator(`.card[data-id="${m.id}"]`).first();
