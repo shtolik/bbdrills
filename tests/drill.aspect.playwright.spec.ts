@@ -33,14 +33,8 @@ test.describe('drill media aspect ratios', () => {
     }));
     const box = await page.locator('.single-media img').boundingBox();
     expect(box).not.toBeNull();
-    // compute displayed image size when object-fit: contain is applied
-    const scale = Math.min(box!.width / intrinsic.nw, box!.height / intrinsic.nh);
-    const displayedWidth = intrinsic.nw * scale;
-    const displayedHeight = intrinsic.nh * scale;
-    const displayedRatio = displayedWidth / displayedHeight;
-    // displayed aspect should match intrinsic aspect closely
-    const intrinsicRatio = intrinsic.nw / intrinsic.nh;
-    expect(Math.abs(displayedRatio - intrinsicRatio)).toBeLessThan(0.01);
+    expect(intrinsic.nh).toBeGreaterThan(intrinsic.nw);
+    await expect(page.locator('.single-media img')).toHaveCSS('object-fit', 'contain');
   });
 
   test('horizontal media keeps intrinsic aspect ratio', async ({ page }) => {
@@ -69,11 +63,6 @@ test.describe('drill media aspect ratios', () => {
     const box = await page.locator('.single-media img').boundingBox();
     expect(box).not.toBeNull();
     expect(intrinsic.nw).toBeGreaterThan(intrinsic.nh);
-    const scale = Math.min(box!.width / intrinsic.nw, box!.height / intrinsic.nh);
-    const displayedWidth = intrinsic.nw * scale;
-    const displayedHeight = intrinsic.nh * scale;
-    const displayedRatio = displayedWidth / displayedHeight;
-    const intrinsicRatio = intrinsic.nw / intrinsic.nh;
-    expect(Math.abs(displayedRatio - intrinsicRatio)).toBeLessThan(0.01);
+    await expect(page.locator('.single-media img')).toHaveCSS('object-fit', 'contain');
   });
 });

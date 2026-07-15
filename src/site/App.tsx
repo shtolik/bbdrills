@@ -840,7 +840,7 @@ export default function App() {
             <button onClick={() => openVideo(it)}>
               {t('watch_full_video', 'Watch Full Video')}
             </button>
-            {it.video_url && (
+            {it.video_url && nonEmbeddable.has(it.id) && (
               <a
                 href={normalizeUrl(it.video_url)}
                 target={'_blank'}
@@ -979,17 +979,23 @@ export default function App() {
                 {item.reps_num || localizedDrillField(item, 'reps') || ''}
               </div>
               <div>
-                {t('sets_label', 'Sets:')} {getDay(item.id).setsCompleted || 0}/
-                {getDay(item.id).targetSets && getDay(item.id).targetSets > 0
-                  ? getDay(item.id).targetSets
-                  : item.sets || '-'}
-                <button
-                  className={'btn-mark'}
-                  onClick={() => mark(item.id)}
-                  style={{ marginLeft: 8 }}
-                >
-                  {t('mark_done', '+1 done')}
-                </button>
+                {(() => {
+                  const day = getDay(item.id);
+                  const target =
+                    day.targetSets && day.targetSets > 0 ? day.targetSets : item.sets || '-';
+                  return (
+                    <>
+                      {t('sets_label', 'Sets:')} {day.setsCompleted || 0}/{target}
+                      <button
+                        className={'btn-mark'}
+                        onClick={() => mark(item.id)}
+                        style={{ marginLeft: 8 }}
+                      >
+                        {t('mark_done', '+1 done')}
+                      </button>
+                    </>
+                  );
+                })()}
               </div>
             </div>
           </div>
