@@ -34,16 +34,35 @@ export function localizedField(item: any, field: string, lang: string) {
   }
   // handle reps_label specially: it's a nested localized label
   if (field === 'reps_label' && nested && typeof nested === 'object') {
-    const v = nested[lang] ?? nested['en'];
-    if (typeof v === 'string') return v;
-    if (typeof v === 'number') return String(v);
+    // prefer lang if it's a primitive, otherwise fall back to en, then any primitive value
+    const tryKeys = [lang, 'en'];
+    for (const k of tryKeys) {
+      const cand = nested[k];
+      if (typeof cand === 'string') return cand;
+      if (typeof cand === 'number') return String(cand);
+    }
+    // fallback: pick first primitive value found in the object
+    for (const k of Object.keys(nested)) {
+      const cand = nested[k];
+      if (typeof cand === 'string') return cand;
+      if (typeof cand === 'number') return String(cand);
+    }
     return '';
   }
   // nested object e.g. name: { en: '', fi: '' }
   if (nested && typeof nested === 'object') {
-    const v = nested[lang] ?? nested['en'];
-    if (typeof v === 'string') return v;
-    if (typeof v === 'number') return String(v);
+    // prefer lang then en, but only accept primitive values; otherwise pick any primitive
+    const tryKeys = [lang, 'en'];
+    for (const k of tryKeys) {
+      const cand = (nested as any)[k];
+      if (typeof cand === 'string') return cand;
+      if (typeof cand === 'number') return String(cand);
+    }
+    for (const k of Object.keys(nested)) {
+      const cand = (nested as any)[k];
+      if (typeof cand === 'string') return cand;
+      if (typeof cand === 'number') return String(cand);
+    }
     return '';
   }
   // flat fields: name_en / name_fi
