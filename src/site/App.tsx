@@ -500,6 +500,7 @@ export default function App() {
                 try {
                   nonEmbeddable.add(item.id);
                   saveNonEmbeddable();
+                  setData(prev => prev.slice());
                 } catch (_) {}
                 box.innerHTML = '';
                 const msg = document.createElement('div');
@@ -546,6 +547,7 @@ export default function App() {
             try {
               nonEmbeddable.add(item.id);
               saveNonEmbeddable();
+              setData(prev => prev.slice());
             } catch (_) {}
           });
           box.appendChild(iframe);
@@ -566,6 +568,7 @@ export default function App() {
           try {
             nonEmbeddable.add(item.id);
             saveNonEmbeddable();
+            setData(prev => prev.slice());
           } catch (_) {}
         });
         box.appendChild(iframe);
