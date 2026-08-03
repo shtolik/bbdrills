@@ -11,6 +11,32 @@
     <link rel="icon" href="logo-ball.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180" />
     <meta name="theme-color" content="#0b74de" />
+    <!-- Preferred canonical for the site root -->
+    <link rel="canonical" href="https://drills.my/" />
+    <!-- Analytics placeholder: set meta[name=ga-measurement-id] content to your GA4 ID; CI will replace G-XXXXXXXXXX -->
+    <meta name="ga-measurement-id" content="G-XXXXXXXXXX" />
+    <script>
+      (function () {
+        try {
+          var meta = document.querySelector('meta[name="ga-measurement-id"]');
+          var id = meta && meta.content ? meta.content.trim() : '';
+          // Guard: do not run when placeholder or empty — prevents loading gtag during dev/CI
+          if (id && id.indexOf('G-') === 0 && id !== 'G-XXXXXXXXXX') {
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+              window.dataLayer.push(arguments);
+            }
+            window.gtag = gtag;
+            gtag('js', new Date());
+            gtag('config', id);
+            var s = document.createElement('script');
+            s.async = true;
+            s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
+            document.head.appendChild(s);
+          }
+        } catch (e) {}
+      })();
+    </script>
     <style>
       :root {
         --gap: 12px;
