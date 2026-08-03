@@ -31,6 +31,18 @@ jobs:
       - name: Build site
         run: npm run build
 
+      - name: Replace GA Measurement ID
+        run: |
+          if [ -n "${{ secrets.GA_MEASUREMENT_ID }}" ]; then
+            echo "Replacing GA placeholder with secret in site HTML files"
+            # show a short preview of files that contain the placeholder (for logs)
+            grep -R --line-number "G-XXXXXXXXXX" site || true
+            # replace placeholder in all HTML files under site/
+            find site -type f -name '*.html' -print0 | xargs -0 sed -i "s/G-XXXXXXXXXX/${{ secrets.GA_MEASUREMENT_ID }}/g"
+          else
+            echo "GA_MEASUREMENT_ID secret not set; skipping replacement"
+          fi
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
