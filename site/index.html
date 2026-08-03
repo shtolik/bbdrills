@@ -15,14 +15,18 @@
     <link rel="canonical" href="https://drills.my/" />
     <!-- Analytics placeholder: replace G-XXXXXXXXXX with your GA4 Measurement ID -->
     <script>
-      (function(){
+      (function () {
         var id = 'G-XXXXXXXXXX'; // TODO: replace with your GA4 Measurement ID
-        if(id && id.indexOf('G-')===0){
+        if (id && id.indexOf('G-') === 0) {
           window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);} window.gtag = gtag;
+          function gtag() {
+            dataLayer.push(arguments);
+          }
+          window.gtag = gtag;
           gtag('js', new Date());
           gtag('config', id);
-          var s = document.createElement('script'); s.async = true;
+          var s = document.createElement('script');
+          s.async = true;
           s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
           document.head.appendChild(s);
         }
