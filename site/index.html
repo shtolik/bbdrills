@@ -19,8 +19,9 @@
       (function () {
         try {
           var meta = document.querySelector('meta[name="ga-measurement-id"]');
-          var id = meta && meta.content ? meta.content.trim() : 'G-XXXXXXXXXX';
-          if (id && id.indexOf('G-') === 0) {
+          var id = meta && meta.content ? meta.content.trim() : '';
+          // Guard: do not run when placeholder or empty — prevents loading gtag during dev/CI
+          if (id && id.indexOf('G-') === 0 && id !== 'G-XXXXXXXXXX') {
             window.dataLayer = window.dataLayer || [];
             function gtag() {
               dataLayer.push(arguments);

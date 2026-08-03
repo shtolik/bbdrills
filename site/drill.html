@@ -10,21 +10,26 @@
     <link rel="icon" href="logo-ball.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180" />
     <meta name="theme-color" content="#0b74de" />
-    <!-- Dynamic canonical: set to https://drills.my/drill.html?id=... when id present -->
+    <!-- Static canonical fallback for crawlers that do not execute JS -->
+    <link rel="canonical" href="https://drills.my/drill.html" />
+    <!-- Dynamic canonical: update canonical when id query param is present -->
     <script>
       (function () {
         try {
           var params = new URLSearchParams(location.search);
           var id = params.get('id');
-          var link = document.createElement('link');
-          link.rel = 'canonical';
+          var link = document.querySelector('link[rel="canonical"]');
+          if (!link) {
+            link = document.createElement('link');
+            link.rel = 'canonical';
+            document.head.appendChild(link);
+          }
           if (id) {
             // canonical must be the full preferred URL
             link.href = 'https://drills.my/drill.html?id=' + encodeURIComponent(id);
           } else {
-            link.href = 'https://drills.my/';
+            link.href = 'https://drills.my/drill.html';
           }
-          document.head.appendChild(link);
         } catch (e) {}
       })();
     </script>
@@ -34,8 +39,9 @@
       (function () {
         try {
           var meta = document.querySelector('meta[name="ga-measurement-id"]');
-          var id = meta && meta.content ? meta.content.trim() : 'G-XXXXXXXXXX';
-          if (id && id.indexOf('G-') === 0) {
+          var id = meta && meta.content ? meta.content.trim() : '';
+          // Guard: do not run when placeholder or empty — prevents loading gtag during dev/CI
+          if (id && id.indexOf('G-') === 0 && id !== 'G-XXXXXXXXXX') {
             window.dataLayer = window.dataLayer || [];
             function gtag() {
               dataLayer.push(arguments);
