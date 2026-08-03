@@ -11,6 +11,23 @@
     <link rel="icon" href="logo-ball.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180" />
     <meta name="theme-color" content="#0b74de" />
+    <!-- Preferred canonical for the site root -->
+    <link rel="canonical" href="https://drills.my/" />
+    <!-- Analytics placeholder: replace G-XXXXXXXXXX with your GA4 Measurement ID -->
+    <script>
+      (function(){
+        var id = 'G-XXXXXXXXXX'; // TODO: replace with your GA4 Measurement ID
+        if(id && id.indexOf('G-')===0){
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);} window.gtag = gtag;
+          gtag('js', new Date());
+          gtag('config', id);
+          var s = document.createElement('script'); s.async = true;
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
+          document.head.appendChild(s);
+        }
+      })();
+    </script>
     <style>
       :root {
         --gap: 12px;
