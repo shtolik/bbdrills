@@ -23,7 +23,10 @@
           // Guard: do not run when placeholder or empty — prevents loading gtag during dev/CI
           if (id && id.indexOf('G-') === 0 && id !== 'G-XXXXXXXXXX') {
             window.dataLayer = window.dataLayer || [];
-            function gtag() { window.dataLayer.push(arguments); } window.gtag = gtag;
+            function gtag() {
+              window.dataLayer.push(arguments);
+            }
+            window.gtag = gtag;
             gtag('js', new Date());
             gtag('config', id);
             var s = document.createElement('script');
