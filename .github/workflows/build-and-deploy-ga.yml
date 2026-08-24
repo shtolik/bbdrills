@@ -31,7 +31,7 @@ jobs:
           echo "Injecting GA_MEASUREMENT_ID: ${GA_MEASUREMENT_ID:+(set)}"
           if [ -n "$GA_MEASUREMENT_ID" ]; then
             # POSIX-safe replace; index.html is expected under site/
-            perl -0777 -pe "s/__GA_MEASUREMENT_ID__/$GA_MEASUREMENT_ID/g" -i site/index.html
+            perl -0777 -pe "s/__GA_MEASUREMENT_ID__/$GA_MEASUREMENT_ID/g" -i site/*.html
           else
             echo "GA_MEASUREMENT_ID not set; leaving placeholder unchanged"
           fi
