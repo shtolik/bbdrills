@@ -387,6 +387,26 @@
         color: var(--accent);
       }
     </style>
+
+    <!-- GA4 placeholder: CI will replace __GA_MEASUREMENT_ID__ with the secret value.
+         If left unchanged (local dev), analytics will not be loaded. -->
+    <script id="ga-placeholder">
+      (function () {
+        var id = 'G-8FLSMCDRWD';
+        if (!id || id === '__GA_MEASUREMENT_ID__') return;
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
+        document.head.appendChild(s);
+        window.dataLayer = window.dataLayer || [];
+        function gtag() {
+          dataLayer.push(arguments);
+        }
+        window.gtag = window.gtag || gtag;
+        gtag('js', new Date());
+        gtag('config', id);
+      })();
+    </script>
   </head>
   <body>
     <div class="container">
