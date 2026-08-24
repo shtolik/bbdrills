@@ -388,23 +388,28 @@
       }
     </style>
 
-    <!-- GA4 placeholder: CI will replace __GA_MEASUREMENT_ID__ with the secret value.
-         If left unchanged (local dev), analytics will not be loaded. -->
-    <script id="ga-placeholder">
+    <!-- Analytics placeholder: meta[name=ga-measurement-id] will be replaced by CI with the real GA4 ID -->
+    <meta name="ga-measurement-id" content="__GA_MEASUREMENT_ID__" />
+    <script>
       (function () {
-        var id = 'G-8FLSMCDRWD';
-        if (!id || id === '__GA_MEASUREMENT_ID__') return;
-        var s = document.createElement('script');
-        s.async = true;
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
-        document.head.appendChild(s);
-        window.dataLayer = window.dataLayer || [];
-        function gtag() {
-          dataLayer.push(arguments);
-        }
-        window.gtag = window.gtag || gtag;
-        gtag('js', new Date());
-        gtag('config', id);
+        try {
+          var meta = document.querySelector('meta[name="ga-measurement-id"]');
+          var id = meta && meta.content ? meta.content.trim() : '__GA_MEASUREMENT_ID__';
+          // Guard: load only when id looks like a GA4 Measurement ID and not the placeholder
+          if (id && /^G-[A-Za-z0-9_-]+$/.test(id) && id !== '__GA_MEASUREMENT_ID__') {
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+              window.dataLayer.push(arguments);
+            }
+            window.gtag = window.gtag || gtag;
+            gtag('js', new Date());
+            gtag('config', id);
+            var s = document.createElement('script');
+            s.async = true;
+            s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
+            document.head.appendChild(s);
+          }
+        } catch (e) {}
       })();
     </script>
   </head>

@@ -40,8 +40,8 @@
         try {
           var meta = document.querySelector('meta[name="ga-measurement-id"]');
           var id = meta && meta.content ? meta.content.trim() : '';
-          // Guard: do not run when placeholder or empty — prevents loading gtag during dev/CI
-          if (id && id.indexOf('G-') === 0 && id !== '__GA_MEASUREMENT_ID__') {
+          // Guard: load only when id looks like a GA4 Measurement ID and not the placeholder
+          if (id && /^G-[A-Za-z0-9_-]+$/.test(id) && id !== '__GA_MEASUREMENT_ID__') {
             window.dataLayer = window.dataLayer || [];
             function gtag() {
               window.dataLayer.push(arguments);
