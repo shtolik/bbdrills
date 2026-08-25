@@ -1,4 +1,5 @@
 import { h, Fragment } from 'preact';
+import analytics from './analytics';
 import { useEffect, useState, useRef } from 'preact/hooks';
 import { getDay, markSetComplete, migrateLegacyIfNeeded } from '../lib/progress';
 import { loadLocale, localizedField, t } from './i18n';
@@ -122,6 +123,7 @@ export default function App() {
 
   useEffect(() => {
     migrateLegacyIfNeeded();
+    analytics.init();
     // load UI from localStorage
     let initialLang = 'en';
     let initialFilter: 'all' | 'incomplete' = 'all';
@@ -235,6 +237,40 @@ export default function App() {
       });
     }, options);
 
+    // setup impression observer (track when a card is visible)
+    const impressionObserver = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+            const el = entry.target as HTMLElement;
+            const did = el.dataset.id;
+            if (did) analytics.trackDrillImpression(did);
+            try {
+              impressionObserver.unobserve(el);
+            } catch (e) {}
+          }
+        });
+      },
+      { root: null, threshold: [0.5] }
+    );
+
+    // observe existing cards and also re-observe when data changes via a MutationObserver
+    const observeCards = () => {
+      Array.from(document.querySelectorAll('.card')).forEach(c => {
+        try {
+          impressionObserver.observe(c);
+        } catch (e) {}
+      });
+    };
+    observeCards();
+    const mo = new MutationObserver(obs => {
+      observeCards();
+    });
+    mo.observe(document.getElementById('content') || document.body, {
+      childList: true,
+      subtree: true,
+    });
+
     // wire header controls
     const langSelect = document.getElementById('lang-select') as HTMLSelectElement | null;
     const filterBtn = document.getElementById('filter-btn');
@@ -329,6 +365,12 @@ export default function App() {
 
     return () => {
       if (lazyObserver.current) lazyObserver.current.disconnect();
+      try {
+        impressionObserver && impressionObserver.disconnect();
+      } catch (e) {}
+      try {
+        mo && mo.disconnect();
+      } catch (e) {}
       if (langSelect) langSelect.removeEventListener('change', langChangeHandler);
       if (filterBtn) filterBtn.removeEventListener('click', onFilter);
       if (clearProgressBtn) clearProgressBtn.removeEventListener('click', onClear);
@@ -496,6 +538,30 @@ export default function App() {
                   e.target.playVideo();
                 } catch (_) {}
               },
+              onStateChange: (ev: any) => {
+                try {
+                  // 1 === playing
+                  if (ev.data === 1) {
+                    analytics.trackDrillPlayStart(item.id, 'youtube');
+                    // poll progress for milestones
+                    const check = () => {
+                      try {
+                        const t = ev.target.getCurrentTime();
+                        analytics.trackDrillPlayProgress(item.id, Math.floor(t));
+                      } catch (e) {}
+                    };
+                    const iid = setInterval(check, 2000);
+                    // stop polling when video ends or modal closed
+                    ev.target.__analyticsInterval = iid;
+                  } else if (ev.data === 0) {
+                    // ended
+                    try {
+                      if (ev.target.__analyticsInterval)
+                        clearInterval(ev.target.__analyticsInterval);
+                    } catch (_) {}
+                  }
+                } catch (e) {}
+              },
               onError: (e: any) => {
                 // mark this id as non-embeddable so overlay can show Open on YouTube next time
                 try {
@@ -588,6 +654,18 @@ export default function App() {
       video.style.width = '100%';
       video.style.height = '100%';
       video.style.objectFit = 'contain';
+      // analytics for html5 video
+      try {
+        video.addEventListener('play', () => analytics.trackDrillPlayStart(item.id, 'html5'));
+        video.addEventListener('timeupdate', () => {
+          try {
+            analytics.trackDrillPlayProgress(
+              item.id,
+              Math.floor((video as HTMLVideoElement).currentTime)
+            );
+          } catch (e) {}
+        });
+      } catch (e) {}
       box.appendChild(video);
     } else if (item.local_video) {
       window.open(
@@ -628,6 +706,11 @@ export default function App() {
 
     modal.classList.add('open');
     modal.setAttribute('aria-hidden', 'false');
+
+    try {
+      // analytics: modal open
+      analytics.trackDrillOpen(item.id, 'modal');
+    } catch (e) {}
   };
 
   const showModalForItem = (item: Drill) => showModalForIndex([item], 0);
