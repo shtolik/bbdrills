@@ -13,15 +13,15 @@
     <meta name="theme-color" content="#0b74de" />
     <!-- Preferred canonical for the site root -->
     <link rel="canonical" href="https://drills.my/" />
-    <!-- Analytics placeholder: set meta[name=ga-measurement-id] content to your GA4 ID; CI will replace G-XXXXXXXXXX -->
-    <meta name="ga-measurement-id" content="G-XXXXXXXXXX" />
+    <!-- Analytics: deploy-pages.yml fills this meta with the GA_MEASUREMENT_ID secret -->
+    <meta name="ga-measurement-id" content="__GA_MEASUREMENT_ID__" />
     <script>
       (function () {
         try {
           var meta = document.querySelector('meta[name="ga-measurement-id"]');
           var id = meta && meta.content ? meta.content.trim() : '';
           // Guard: do not run when placeholder or empty — prevents loading gtag during dev/CI
-          if (id && id.indexOf('G-') === 0 && id !== 'G-XXXXXXXXXX') {
+          if (id && /^G-[A-Za-z0-9_-]+$/.test(id)) {
             window.dataLayer = window.dataLayer || [];
             function gtag() {
               window.dataLayer.push(arguments);
@@ -387,31 +387,6 @@
         color: var(--accent);
       }
     </style>
-
-    <!-- Analytics placeholder: meta[name=ga-measurement-id] will be replaced by CI with the real GA4 ID -->
-    <meta name="ga-measurement-id" content="__GA_MEASUREMENT_ID__" />
-    <script>
-      (function () {
-        try {
-          var meta = document.querySelector('meta[name="ga-measurement-id"]');
-          var id = meta && meta.content ? meta.content.trim() : '__GA_MEASUREMENT_ID__';
-          // Guard: load only when id looks like a GA4 Measurement ID and not the placeholder
-          if (id && /^G-[A-Za-z0-9_-]+$/.test(id) && id !== '__GA_MEASUREMENT_ID__') {
-            window.dataLayer = window.dataLayer || [];
-            function gtag() {
-              window.dataLayer.push(arguments);
-            }
-            window.gtag = window.gtag || gtag;
-            gtag('js', new Date());
-            gtag('config', id);
-            var s = document.createElement('script');
-            s.async = true;
-            s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
-            document.head.appendChild(s);
-          }
-        } catch (e) {}
-      })();
-    </script>
   </head>
   <body>
     <div class="container">
