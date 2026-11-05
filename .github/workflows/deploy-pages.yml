@@ -32,23 +32,21 @@ jobs:
         run: npm run build
 
       - name: Replace GA Measurement ID
+        env:
+          GA_MEASUREMENT_ID: ${{ secrets.GA_MEASUREMENT_ID }}
         run: |
-          if [ -n "${{ secrets.GA_MEASUREMENT_ID }}" ]; then
-            echo "Replacing GA placeholder with secret in site HTML files"
-            # show a short preview of files that contain the placeholder (for logs)
-            grep -R --line-number "G-XXXXXXXXXX" site || true
-            # collect HTML files and replace placeholder safely (avoid failing when none)
-            mapfile -t files < <(find site -type f -name '*.html' -print)
-            if [ ${#files[@]} -eq 0 ]; then
-              echo "No HTML files found under site/; skipping replacement"
-            else
-              for f in "${files[@]}"; do
-                echo "Replacing in: $f"
-                sed -i "s/G-XXXXXXXXXX/${{ secrets.GA_MEASUREMENT_ID }}/g" "$f"
-              done
-            fi
-          else
-            echo "GA_MEASUREMENT_ID secret not set; skipping replacement"
+          if [ -z "$GA_MEASUREMENT_ID" ]; then
+            echo "GA_MEASUREMENT_ID secret not set; pages keep the placeholder and load no analytics"
+            exit 0
+          fi
+          files=$(grep -rl "__GA_MEASUREMENT_ID__" site --include='*.html' || true)
+          for f in $files; do
+            echo "Replacing in: $f"
+            sed -i "s/__GA_MEASUREMENT_ID__/${GA_MEASUREMENT_ID}/g" "$f"
+          done
+          if grep -rn "__GA_MEASUREMENT_ID__\|G-XXXXXXXXXX" site --include='*.html'; then
+            echo "GA placeholder left in the site" >&2
+            exit 1
           fi
 
       - name: Upload artifact

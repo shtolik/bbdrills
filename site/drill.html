@@ -33,7 +33,7 @@
         } catch (e) {}
       })();
     </script>
-    <!-- Analytics placeholder: meta[name=ga-measurement-id] will be replaced by CI with the real GA4 ID -->
+    <!-- Analytics: deploy-pages.yml fills this meta with the GA_MEASUREMENT_ID secret -->
     <meta name="ga-measurement-id" content="__GA_MEASUREMENT_ID__" />
     <script>
       (function () {
@@ -41,7 +41,7 @@
           var meta = document.querySelector('meta[name="ga-measurement-id"]');
           var id = meta && meta.content ? meta.content.trim() : '';
           // Guard: load only when id looks like a GA4 Measurement ID and not the placeholder
-          if (id && /^G-[A-Za-z0-9_-]+$/.test(id) && id !== '__GA_MEASUREMENT_ID__') {
+          if (id && /^G-[A-Za-z0-9_-]+$/.test(id)) {
             window.dataLayer = window.dataLayer || [];
             function gtag() {
               window.dataLayer.push(arguments);
